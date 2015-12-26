@@ -1,13 +1,15 @@
-package org.wickedsource.docxstamper;
+package org.wickedsource.docxstamper.docx4j;
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.docx4j.jaxb.Context;
+import org.docx4j.wml.ObjectFactory;
+import org.docx4j.wml.R;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.poi.IndexedRun;
+import org.wickedsource.docxstamper.docx4j.util.RunUtil;
 
 public class IndexedRunTest {
+
+    private ObjectFactory factory = Context.getWmlObjectFactory();
 
     @Test
     public void isNotTouchedByRangeBeforeStart() {
@@ -52,18 +54,16 @@ public class IndexedRunTest {
     public void replaceWorksWithinRange() {
         IndexedRun run = new IndexedRun(5, 9, createRun("ipsum"));
         run.replace(5, 9, "lorem");
-        Assert.assertEquals("lorem", run.getRun().getText(0));
+        Assert.assertEquals("lorem", RunUtil.getText(run.getRun()));
         run.replace(8, 9, "el");
-        Assert.assertEquals("lorel", run.getRun().getText(0));
+        Assert.assertEquals("lorel", RunUtil.getText(run.getRun()));
         run.replace(8, 9, "em ipsum");
-        Assert.assertEquals("lorem ipsum", run.getRun().getText(0));
+        Assert.assertEquals("lorem ipsum", RunUtil.getText(run.getRun()));
     }
 
-    private XWPFRun createRun(String text) {
-        XWPFDocument d = new XWPFDocument();
-        XWPFParagraph p = d.createParagraph();
-        XWPFRun r = p.createRun();
-        r.setText(text);
-        return r;
+    private R createRun(String text) {
+        R run = factory.createR();
+        RunUtil.setText(run, text);
+        return run;
     }
 }

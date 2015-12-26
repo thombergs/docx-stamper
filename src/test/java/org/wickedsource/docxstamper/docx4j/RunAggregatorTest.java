@@ -1,11 +1,8 @@
-package org.wickedsource.docxstamper;
+package org.wickedsource.docxstamper.docx4j;
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFParagraph;
-import org.apache.poi.xwpf.usermodel.XWPFRun;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.poi.RunAggregator;
+import org.wickedsource.docxstamper.docx4j.util.RunUtil;
 
 import java.io.IOException;
 
@@ -21,9 +18,9 @@ public class RunAggregatorTest {
     public void getRunsReturnsAddedRuns() throws IOException {
         RunAggregator aggregator = createLoremIpsumAggregator();
         Assert.assertEquals(3, aggregator.getRuns().size());
-        Assert.assertEquals("lorem", aggregator.getRuns().get(0).getText(0));
-        Assert.assertEquals(" ", aggregator.getRuns().get(1).getText(0));
-        Assert.assertEquals("ipsum", aggregator.getRuns().get(2).getText(0));
+        Assert.assertEquals("lorem", RunUtil.getText(aggregator.getRuns().get(0)));
+        Assert.assertEquals(" ", RunUtil.getText(aggregator.getRuns().get(1)));
+        Assert.assertEquals("ipsum", RunUtil.getText(aggregator.getRuns().get(2)));
     }
 
     @Test
@@ -36,16 +33,8 @@ public class RunAggregatorTest {
     @Test
     public void replaceFirstReplacesWithinSingleRun() {
         RunAggregator aggregator = new RunAggregator();
-
-        XWPFDocument doc = new XWPFDocument();
-        XWPFParagraph p = doc.createParagraph();
-
-        XWPFRun run = p.createRun();
-        run.setText("My name is ${name}.");
-        aggregator.addRun(run);
-
+        aggregator.addRun(RunUtil.create("My name is ${name}."));
         aggregator.replaceFirst("${name}", "Bob");
-
         Assert.assertEquals("My name is Bob.", aggregator.getText());
     }
 
@@ -72,22 +61,9 @@ public class RunAggregatorTest {
 
     private RunAggregator createLoremIpsumAggregator() {
         RunAggregator aggregator = new RunAggregator();
-
-        XWPFDocument doc = new XWPFDocument();
-        XWPFParagraph p = doc.createParagraph();
-
-        XWPFRun run = p.createRun();
-        run.setText("lorem");
-        aggregator.addRun(run);
-
-        XWPFRun run2 = p.createRun();
-        run2.setText(" ");
-        aggregator.addRun(run2);
-
-        XWPFRun run3 = p.createRun();
-        run3.setText("ipsum");
-        aggregator.addRun(run3);
-
+        aggregator.addRun(RunUtil.create("lorem"));
+        aggregator.addRun(RunUtil.create(" "));
+        aggregator.addRun(RunUtil.create("ipsum"));
         return aggregator;
     }
 

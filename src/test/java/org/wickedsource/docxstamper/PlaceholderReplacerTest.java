@@ -5,9 +5,11 @@ import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFTable;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.expression.PlaceholderReplacer;
+import org.wickedsource.docxstamper.poi.PlaceholderReplacer;
+import org.wickedsource.docxstamper.poi.RunAggregator;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class PlaceholderReplacerTest {
@@ -35,8 +37,6 @@ public class PlaceholderReplacerTest {
         context.getLocations().add(washington);
 
         PlaceholderReplacer<PersonContext> resolver = new PlaceholderReplacer<>();
-        File outputFile = File.createTempFile("ExpressionResolverTest", ".docx");
-        outputFile.deleteOnExit();
         XWPFDocument document = new XWPFDocument(templateStream);
         resolver.resolveExpressions(document, context);
 

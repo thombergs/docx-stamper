@@ -2,6 +2,7 @@ package org.wickedsource.docxstamper;
 
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.junit.Test;
+import org.wickedsource.docxstamper.poi.CommentStrippingXWPFDocumentWriter;
 
 import java.io.FileOutputStream;
 import java.io.IOException;

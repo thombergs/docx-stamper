@@ -1,25 +1,24 @@
-package org.wickedsource.docxstamper.walk;
+package org.wickedsource.docxstamper.docx4j.walk;
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.poi.RunAggregator;
-import org.wickedsource.docxstamper.poi.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.poi.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.poi.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.poi.coordinates.TableRowCoordinates;
-import org.wickedsource.docxstamper.poi.walk.DocumentWalker;
+import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
+import org.wickedsource.docxstamper.docx4j.RunAggregator;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.walk.Counter;
 
 import java.io.IOException;
-import java.io.InputStream;
 
-public class DocumentWalkerTest {
+public class DocumentWalkerTest extends AbstractDocx4jTest {
 
     @Test
-    public void calculatesCorrectNestedCoordinates() throws IOException {
-
-        InputStream in = getClass().getResourceAsStream("walker.docx");
-        XWPFDocument document = new XWPFDocument(in);
+    public void calculatesCorrectNestedCoordinates() throws IOException, Docx4JException {
+        WordprocessingMLPackage document = loadDocument("walker.docx");
 
         final Counter paragraphCount = new Counter();
         final Counter tableCount = new Counter();
