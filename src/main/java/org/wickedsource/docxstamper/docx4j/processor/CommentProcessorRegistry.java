@@ -4,6 +4,7 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.expression.spel.SpelEvaluationException;
 import org.wickedsource.docxstamper.DocxStamperException;
 import org.wickedsource.docxstamper.docx4j.util.CommentUtil;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
@@ -65,6 +66,7 @@ public class CommentProcessorRegistry {
     }
 
     private <T> void runProcessor(final WordprocessingMLPackage document, final ICommentProcessor processor, final T contextRoot) {
+        logger.info(String.format("Starting run of comment processor %s", processor.getClass()));
         CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
@@ -74,8 +76,9 @@ public class CommentProcessorRegistry {
                     if (comment != null) {
                         try {
                             expressionResolver.resolveExpression(comment, contextRoot);
-                        } catch (Exception e) {
-                            logger.warn(String.format("Skipping comment '%s' because it is not a valid expression.", comment));
+                            logger.info(String.format("Comment '%s' has been successfully processed.", comment));
+                        } catch (SpelEvaluationException e) {
+                            logger.info(String.format("Skipping comment '%s' because it can not be resolved against current comment processor.", comment));
                         }
                     }
                     // TODO: remove comment once it was successfully processed.
@@ -86,6 +89,7 @@ public class CommentProcessorRegistry {
         };
         walker.walk();
         processor.commitChanges(document);
+        logger.info(String.format("Finished run of comment processor %s", processor.getClass()));
     }
 
 }

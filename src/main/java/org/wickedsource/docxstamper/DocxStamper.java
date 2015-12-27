@@ -10,8 +10,6 @@ import org.wickedsource.docxstamper.docx4j.processor.displayif.DisplayIfProcesso
 import org.wickedsource.docxstamper.docx4j.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.repeat.RepeatProcessor;
-import org.wickedsource.docxstamper.el.ExpressionResolver;
-import org.wickedsource.docxstamper.proxy.ContextFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,13 +19,9 @@ public class DocxStamper<T> {
 
     private Logger logger = LoggerFactory.getLogger(DocxStamper.class);
 
-    private ContextFactory<T> contextFactory = new ContextFactory<>();
-
     private PlaceholderReplacer<T> placeholderReplacer = new PlaceholderReplacer<>();
 
     private CommentProcessorRegistry commentProcessorRegistry = new CommentProcessorRegistry();
-
-    private ExpressionResolver expressionResolver = new ExpressionResolver();
 
     public DocxStamper() {
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor());
