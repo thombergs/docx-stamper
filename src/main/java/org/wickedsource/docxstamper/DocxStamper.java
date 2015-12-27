@@ -1,21 +1,17 @@
-package org.wickedsource.docxstamper.docx4j;
+package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wickedsource.docxstamper.DocxStamperException;
+import org.wickedsource.docxstamper.docx4j.PlaceholderReplacer;
 import org.wickedsource.docxstamper.docx4j.processor.CommentProcessorRegistry;
-import org.wickedsource.docxstamper.docx4j.processor.ContextFactory;
 import org.wickedsource.docxstamper.docx4j.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.repeat.RepeatProcessor;
-import org.wickedsource.docxstamper.docx4j.util.CommentUtil;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
+import org.wickedsource.docxstamper.proxy.ContextFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -45,9 +41,8 @@ public class DocxStamper<T> {
 
     public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) {
         try {
-            T contextRootProxy = contextFactory.createProxy(contextRoot, commentProcessorRegistry);
-            replaceExpressions(document, contextRootProxy);
-            processComments(document, contextRootProxy);
+            replaceExpressions(document, contextRoot);
+            processComments(document, contextRoot);
             document.save(out);
         } catch (Exception e) {
             throw new DocxStamperException(e);
@@ -59,27 +54,7 @@ public class DocxStamper<T> {
     }
 
     private void processComments(final WordprocessingMLPackage document, final T contextRoot) {
-        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
-            @Override
-            protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
-                try {
-                    commentProcessorRegistry.setCurrentParagraphCoordinates(paragraphCoordinates);
-                    String comment = CommentUtil.getCommentFor(paragraphCoordinates.getParagraph(), document);
-                    if (comment != null) {
-                        try {
-                            expressionResolver.resolveExpression(comment, contextRoot);
-                        } catch (Exception e) {
-                            logger.warn(String.format("Skipping comment '%s' because it is not a valid expression.", comment));
-                        }
-                    }
-                    // TODO: remove comment once it was successfully processed.
-                } catch (Docx4JException e) {
-                    logger.warn(String.format("Skipping comment because comment could not be loaded for paragraph at coordinates: %s", paragraphCoordinates.toString()), e);
-                }
-            }
-        };
-        walker.walk();
-        commentProcessorRegistry.commitChanges(document);
+        commentProcessorRegistry.runProcessors(document, contextRoot);
     }
 
     public CommentProcessorRegistry getCommentProcessorRegistry() {

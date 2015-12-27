@@ -42,6 +42,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
                 rCoords.getParentTableCoordinates().getTable().getContent().add(rowClone);
             }
             rCoords.getParentTableCoordinates().getTable().getContent().remove(rCoords.getRow());
+            // TODO: remove "repeatTableRow"-comment from cloned rows!
         }
     }
 

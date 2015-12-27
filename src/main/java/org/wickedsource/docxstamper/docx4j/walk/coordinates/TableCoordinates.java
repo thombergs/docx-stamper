@@ -2,7 +2,7 @@ package org.wickedsource.docxstamper.docx4j.walk.coordinates;
 
 import org.docx4j.wml.Tbl;
 
-public class TableCoordinates extends ObjectCoordinates {
+public class TableCoordinates extends AbstractCoordinates {
 
     private final Tbl table;
 

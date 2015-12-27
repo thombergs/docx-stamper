@@ -2,7 +2,7 @@ package org.wickedsource.docxstamper.docx4j.walk.coordinates;
 
 import org.docx4j.wml.Tc;
 
-public class TableCellCoordinates extends ObjectCoordinates {
+public class TableCellCoordinates extends AbstractCoordinates {
 
     private final Tc cell;
 

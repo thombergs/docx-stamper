@@ -1,6 +1,6 @@
 package org.wickedsource.docxstamper.docx4j.walk.coordinates;
 
-public abstract class ObjectCoordinates {
+public abstract class AbstractCoordinates {
 
     @Override
     public boolean equals(Object o) {

@@ -2,7 +2,7 @@ package org.wickedsource.docxstamper.docx4j.walk.coordinates;
 
 import org.docx4j.wml.P;
 
-public class ParagraphCoordinates extends ObjectCoordinates {
+public class ParagraphCoordinates extends AbstractCoordinates {
 
     private final P paragraph;
 

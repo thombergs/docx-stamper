@@ -4,6 +4,7 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wickedsource.docxstamper.DocxStamper;
 
 import java.io.*;
 
