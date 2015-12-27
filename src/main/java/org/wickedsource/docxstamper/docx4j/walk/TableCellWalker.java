@@ -1,14 +1,14 @@
 package org.wickedsource.docxstamper.docx4j.walk;
 
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.ContentAccessor;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
 
 public abstract class TableCellWalker extends DocumentWalker {
 
-    public TableCellWalker(WordprocessingMLPackage document) {
-        super(document);
+    public TableCellWalker(ContentAccessor parentObject) {
+        super(parentObject);
     }
 
     @Override

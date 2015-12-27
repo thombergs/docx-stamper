@@ -4,8 +4,8 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.TestContext;
 import org.wickedsource.docxstamper.docx4j.walk.TableRowWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
 
@@ -18,13 +18,13 @@ public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
-        TestContext context = new TestContext();
+        NameContext context = new NameContext();
         context.setName("Homer");
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
         final List<TableRowCoordinates> rowCoords = new ArrayList<>();
-        TableRowWalker walker = new TableRowWalker(document) {
+        TableRowWalker walker = new TableRowWalker(document.getMainDocumentPart()) {
             @Override
             protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
                 rowCoords.add(tableRowCoordinates);

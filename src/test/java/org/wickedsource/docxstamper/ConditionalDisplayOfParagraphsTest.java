@@ -8,9 +8,9 @@ import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.docx4j.RunAggregator;
-import org.wickedsource.docxstamper.docx4j.TestContext;
 import org.wickedsource.docxstamper.docx4j.walk.TableWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
 
@@ -24,7 +24,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
-        TestContext context = new TestContext();
+        NameContext context = new NameContext();
         context.setName("Homer");
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
@@ -54,7 +54,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     private void paragraphsInNestedTablesAreRemoved(WordprocessingMLPackage document) {
         final List<Tbl> tables = new ArrayList<>();
-        TableWalker walker = new TableWalker(document) {
+        TableWalker walker = new TableWalker(document.getMainDocumentPart()) {
             @Override
             protected void onTable(TableCoordinates tableCoordinates) {
                 tables.add(tableCoordinates.getTable());

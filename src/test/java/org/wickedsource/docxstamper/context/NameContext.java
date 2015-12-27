@@ -1,6 +1,6 @@
-package org.wickedsource.docxstamper.docx4j;
+package org.wickedsource.docxstamper.context;
 
-public class TestContext {
+public class NameContext {
 
     private String name;
 

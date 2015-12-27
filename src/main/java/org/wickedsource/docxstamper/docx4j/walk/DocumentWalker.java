@@ -1,10 +1,7 @@
 package org.wickedsource.docxstamper.docx4j.walk;
 
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.P;
-import org.docx4j.wml.Tbl;
-import org.docx4j.wml.Tc;
-import org.docx4j.wml.Tr;
+import org.docx4j.XmlUtils;
+import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
@@ -14,23 +11,36 @@ import javax.xml.bind.JAXBElement;
 
 public abstract class DocumentWalker {
 
-    private WordprocessingMLPackage document;
+    private ContentAccessor contentAccessor;
 
-    public DocumentWalker(WordprocessingMLPackage document) {
-        this.document = document;
+    private TableRowCoordinates parentTableRowCoordinates;
+
+    private TableCoordinates parentTableCoordinates;
+
+    public DocumentWalker(ContentAccessor contentAccessor) {
+        this.contentAccessor = contentAccessor;
     }
 
     public void walk() {
         int elementIndex = 0;
-        for (Object contentElement : document.getMainDocumentPart().getContent()) {
-            if (contentElement instanceof P) {
-                P p = (P) contentElement;
+        for (Object contentElement : contentAccessor.getContent()) {
+            Object unwrappedObject = XmlUtils.unwrap(contentElement);
+            if (unwrappedObject instanceof P) {
+                P p = (P) unwrappedObject;
                 ParagraphCoordinates coordinates = new ParagraphCoordinates(p, elementIndex);
                 onParagraph(coordinates);
-            } else if (contentElement instanceof JAXBElement && ((JAXBElement) contentElement).getValue() instanceof Tbl) {
-                Tbl table = (Tbl) ((JAXBElement) contentElement).getValue();
+            } else if (unwrappedObject instanceof Tbl) {
+                Tbl table = (Tbl) unwrappedObject;
                 TableCoordinates tableCoordinates = new TableCoordinates(table, elementIndex);
                 walkTable(tableCoordinates);
+            } else if (unwrappedObject instanceof Tr) {
+                Tr row = (Tr) unwrappedObject;
+                TableRowCoordinates rowCoordinates = new TableRowCoordinates(row, elementIndex, parentTableCoordinates);
+                walkTableRow(rowCoordinates);
+            } else if (unwrappedObject instanceof Tc) {
+                Tc cell = (Tc) unwrappedObject;
+                TableCellCoordinates cellCoordinates = new TableCellCoordinates(cell, elementIndex, parentTableRowCoordinates);
+                walkTableCell(cellCoordinates);
             }
             elementIndex++;
         }
@@ -40,34 +50,43 @@ public abstract class DocumentWalker {
         onTable(tableCoordinates);
         int rowIndex = 0;
         for (Object contentElement : tableCoordinates.getTable().getContent()) {
-            if (contentElement instanceof Tr) {
+            if (XmlUtils.unwrap(contentElement) instanceof Tr) {
                 Tr row = (Tr) contentElement;
                 TableRowCoordinates rowCoordinates = new TableRowCoordinates(row, rowIndex, tableCoordinates);
-                onTableRow(rowCoordinates);
-                int cellIndex = 0;
-                for (Object rowContentElement : row.getContent()) {
-                    if (rowContentElement instanceof JAXBElement && ((JAXBElement) rowContentElement).getValue() instanceof Tc) {
-                        Tc cell = (Tc) ((JAXBElement) rowContentElement).getValue();
-                        TableCellCoordinates cellCoordinates = new TableCellCoordinates(cell, cellIndex, rowCoordinates);
-                        onTableCell(cellCoordinates);
-                        int elementIndex = 0;
-                        for (Object cellContentElement : cell.getContent()) {
-                            if (cellContentElement instanceof P) {
-                                P p = (P) cellContentElement;
-                                ParagraphCoordinates paragraphCoordinates = new ParagraphCoordinates(p, elementIndex, cellCoordinates);
-                                onParagraph(paragraphCoordinates);
-                            } else if (cellContentElement instanceof JAXBElement && ((JAXBElement) cellContentElement).getValue() instanceof Tbl) {
-                                Tbl nestedTable = (Tbl) ((JAXBElement) cellContentElement).getValue();
-                                TableCoordinates innerTableCoordinates = new TableCoordinates(nestedTable, elementIndex, cellCoordinates);
-                                walkTable(innerTableCoordinates);
-                            }
-                            elementIndex++;
-                        }
-                    }
-                    cellIndex++;
-                }
-                rowIndex++;
+                walkTableRow(rowCoordinates);
             }
+            rowIndex++;
+        }
+    }
+
+
+    private void walkTableRow(TableRowCoordinates rowCoordinates) {
+        onTableRow(rowCoordinates);
+        int cellIndex = 0;
+        for (Object rowContentElement : rowCoordinates.getRow().getContent()) {
+            if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
+                Tc cell = (Tc) ((JAXBElement) rowContentElement).getValue();
+                TableCellCoordinates cellCoordinates = new TableCellCoordinates(cell, cellIndex, rowCoordinates);
+                walkTableCell(cellCoordinates);
+            }
+            cellIndex++;
+        }
+    }
+
+    private void walkTableCell(TableCellCoordinates cellCoordinates) {
+        onTableCell(cellCoordinates);
+        int elementIndex = 0;
+        for (Object cellContentElement : cellCoordinates.getCell().getContent()) {
+            if (XmlUtils.unwrap(cellContentElement) instanceof P) {
+                P p = (P) cellContentElement;
+                ParagraphCoordinates paragraphCoordinates = new ParagraphCoordinates(p, elementIndex, cellCoordinates);
+                onParagraph(paragraphCoordinates);
+            } else if (XmlUtils.unwrap(cellContentElement) instanceof Tbl) {
+                Tbl nestedTable = (Tbl) ((JAXBElement) cellContentElement).getValue();
+                TableCoordinates innerTableCoordinates = new TableCoordinates(nestedTable, elementIndex, cellCoordinates);
+                walkTable(innerTableCoordinates);
+            }
+            elementIndex++;
         }
     }
 

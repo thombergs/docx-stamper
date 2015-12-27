@@ -122,7 +122,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<ParagraphCoordinates> getParagraphCoordinates(WordprocessingMLPackage document) {
         final List<ParagraphCoordinates> resultList = new ArrayList<>();
-        ParagraphWalker walker = new ParagraphWalker(document) {
+        ParagraphWalker walker = new ParagraphWalker(document.getMainDocumentPart()) {
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 resultList.add(paragraphCoordinates);
@@ -134,7 +134,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<TableCellCoordinates> getTableCellCoordinats(WordprocessingMLPackage document) {
         final List<TableCellCoordinates> resultList = new ArrayList<>();
-        TableCellWalker walker = new TableCellWalker(document) {
+        TableCellWalker walker = new TableCellWalker(document.getMainDocumentPart()) {
             @Override
             protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
                 resultList.add(tableCellCoordinates);
@@ -146,7 +146,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<TableCoordinates> getTableCoordinats(WordprocessingMLPackage document) {
         final List<TableCoordinates> resultList = new ArrayList<>();
-        TableWalker walker = new TableWalker(document) {
+        TableWalker walker = new TableWalker(document.getMainDocumentPart()) {
             @Override
             protected void onTable(TableCoordinates tableCoordinates) {
                 resultList.add(tableCoordinates);
@@ -158,7 +158,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<TableRowCoordinates> getTableRowCoordinats(WordprocessingMLPackage document) {
         final List<TableRowCoordinates> resultList = new ArrayList<>();
-        TableRowWalker walker = new TableRowWalker(document) {
+        TableRowWalker walker = new TableRowWalker(document.getMainDocumentPart()) {
             @Override
             protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
                 resultList.add(tableRowCoordinates);

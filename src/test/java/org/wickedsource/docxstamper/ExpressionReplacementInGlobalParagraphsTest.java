@@ -5,9 +5,9 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.docx4j.RunAggregator;
-import org.wickedsource.docxstamper.docx4j.TestContext;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ public class ExpressionReplacementInGlobalParagraphsTest extends AbstractDocx4jT
 
     @Test
     public void test() throws Docx4JException, IOException {
-        TestContext context = new TestContext();
+        NameContext context = new NameContext();
         context.setName("Homer Simpson");
         InputStream template = getClass().getResourceAsStream("ExpressionReplacementInGlobalParagraphsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);

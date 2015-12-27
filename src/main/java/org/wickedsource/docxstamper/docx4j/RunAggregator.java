@@ -28,7 +28,7 @@ public class RunAggregator {
 
     public RunAggregator(P paragraph) {
         for (Object contentElement : paragraph.getContent()) {
-            if (contentElement instanceof R) {
+            if (contentElement instanceof R && !"".equals(RunUtil.getText((R) contentElement))) {
                 this.addRun((R) contentElement);
             }
         }

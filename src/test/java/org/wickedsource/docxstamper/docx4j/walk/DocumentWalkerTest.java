@@ -24,7 +24,7 @@ public class DocumentWalkerTest extends AbstractDocx4jTest {
         final Counter rowCount = new Counter();
         final Counter cellCount = new Counter();
 
-        DocumentWalker walker = new DocumentWalker(document) {
+        DocumentWalker walker = new DocumentWalker(document.getMainDocumentPart()) {
 
 
             @Override
