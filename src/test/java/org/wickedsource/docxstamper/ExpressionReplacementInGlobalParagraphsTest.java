@@ -1,10 +1,13 @@
-package org.wickedsource.docxstamper.docx4j;
+package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
+import org.wickedsource.docxstamper.docx4j.RunAggregator;
+import org.wickedsource.docxstamper.docx4j.TestContext;
 
 import java.io.IOException;
 import java.io.InputStream;
