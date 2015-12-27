@@ -1,11 +1,12 @@
 package org.wickedsource.docxstamper.docx4j;
 
-import org.docx4j.wml.ContentAccessor;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.wickedsource.docxstamper.docx4j.walk.ParagraphWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
@@ -24,11 +25,11 @@ public class PlaceholderReplacer<T> {
      * Finds expressions in a document and resolves them against the specified context object. The expressions in the
      * document are then replaced by the resolved values.
      *
-     * @param parentObject      subtree in which to resolve expressions in paragraphs and replace them with the result.
+     * @param document          the document in which to replace all expressions.
      * @param expressionContext the context to resolve the expressions against.
      */
-    public void resolveExpressions(ContentAccessor parentObject, final T expressionContext) {
-        ParagraphWalker walker = new ParagraphWalker(parentObject) {
+    public void resolveExpressions(WordprocessingMLPackage document, final T expressionContext) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 resolveExpressionsForParagraph(paragraphCoordinates.getParagraph(), expressionContext);

@@ -7,14 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.docx4j.RunAggregator;
-import org.wickedsource.docxstamper.docx4j.walk.ParagraphWalker;
-import org.wickedsource.docxstamper.docx4j.walk.TableCellWalker;
-import org.wickedsource.docxstamper.docx4j.walk.TableRowWalker;
-import org.wickedsource.docxstamper.docx4j.walk.TableWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -122,7 +115,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<ParagraphCoordinates> getParagraphCoordinates(WordprocessingMLPackage document) {
         final List<ParagraphCoordinates> resultList = new ArrayList<>();
-        ParagraphWalker walker = new ParagraphWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 resultList.add(paragraphCoordinates);
@@ -134,7 +127,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<TableCellCoordinates> getTableCellCoordinats(WordprocessingMLPackage document) {
         final List<TableCellCoordinates> resultList = new ArrayList<>();
-        TableCellWalker walker = new TableCellWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
                 resultList.add(tableCellCoordinates);
@@ -146,7 +139,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<TableCoordinates> getTableCoordinats(WordprocessingMLPackage document) {
         final List<TableCoordinates> resultList = new ArrayList<>();
-        TableWalker walker = new TableWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onTable(TableCoordinates tableCoordinates) {
                 resultList.add(tableCoordinates);
@@ -158,7 +151,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
     private List<TableRowCoordinates> getTableRowCoordinats(WordprocessingMLPackage document) {
         final List<TableRowCoordinates> resultList = new ArrayList<>();
-        TableRowWalker walker = new TableRowWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
                 resultList.add(tableRowCoordinates);

@@ -11,7 +11,8 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.docx4j.RunAggregator;
-import org.wickedsource.docxstamper.docx4j.walk.TableWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
 
 import javax.xml.bind.JAXBElement;
@@ -54,7 +55,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     private void paragraphsInNestedTablesAreRemoved(WordprocessingMLPackage document) {
         final List<Tbl> tables = new ArrayList<>();
-        TableWalker walker = new TableWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onTable(TableCoordinates tableCoordinates) {
                 tables.add(tableCoordinates.getTable());

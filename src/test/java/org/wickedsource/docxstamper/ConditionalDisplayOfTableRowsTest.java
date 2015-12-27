@@ -6,7 +6,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.walk.TableRowWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
 
 import java.io.IOException;
@@ -24,7 +25,7 @@ public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
         final List<TableRowCoordinates> rowCoords = new ArrayList<>();
-        TableRowWalker walker = new TableRowWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
                 rowCoords.add(tableRowCoordinates);

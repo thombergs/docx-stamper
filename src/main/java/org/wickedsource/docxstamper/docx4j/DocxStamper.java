@@ -12,7 +12,8 @@ import org.wickedsource.docxstamper.docx4j.processor.displayif.IDisplayIfProcess
 import org.wickedsource.docxstamper.docx4j.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.repeat.RepeatProcessor;
 import org.wickedsource.docxstamper.docx4j.util.CommentUtil;
-import org.wickedsource.docxstamper.docx4j.walk.ParagraphWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 
@@ -54,11 +55,11 @@ public class DocxStamper<T> {
     }
 
     private void replaceExpressions(WordprocessingMLPackage document, T contextRoot) {
-        placeholderReplacer.resolveExpressions(document.getMainDocumentPart(), contextRoot);
+        placeholderReplacer.resolveExpressions(document, contextRoot);
     }
 
     private void processComments(final WordprocessingMLPackage document, final T contextRoot) {
-        ParagraphWalker walker = new ParagraphWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 try {

@@ -6,14 +6,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.docx4j.RunAggregator;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.*;
 
 import java.io.IOException;
 
-public class DocumentWalkerTest extends AbstractDocx4jTest {
+public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 
     @Test
     public void calculatesCorrectNestedCoordinates() throws IOException, Docx4JException {
@@ -24,7 +21,7 @@ public class DocumentWalkerTest extends AbstractDocx4jTest {
         final Counter rowCount = new Counter();
         final Counter cellCount = new Counter();
 
-        DocumentWalker walker = new DocumentWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new CoordinatesWalker(document) {
 
 
             @Override

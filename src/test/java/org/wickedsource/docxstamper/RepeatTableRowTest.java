@@ -9,8 +9,8 @@ import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.docx4j.RunAggregator;
-import org.wickedsource.docxstamper.docx4j.walk.TableCellWalker;
-import org.wickedsource.docxstamper.docx4j.walk.TableRowWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
 
@@ -34,7 +34,7 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
         final List<TableRowCoordinates> rowCoords = new ArrayList<>();
-        TableRowWalker walker = new TableRowWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
                 rowCoords.add(tableRowCoordinates);
@@ -47,7 +47,7 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
 
 
         final List<TableCellCoordinates> cells = new ArrayList<>();
-        TableCellWalker cellWalker = new TableCellWalker(document.getMainDocumentPart()) {
+        CoordinatesWalker cellWalker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
                 cells.add(tableCellCoordinates);

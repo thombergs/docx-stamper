@@ -2,11 +2,13 @@ package org.wickedsource.docxstamper.docx4j.processor.repeat;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.P;
 import org.docx4j.wml.Tr;
 import org.wickedsource.docxstamper.docx4j.PlaceholderReplacer;
 import org.wickedsource.docxstamper.docx4j.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.CommentProcessingException;
-import org.wickedsource.docxstamper.docx4j.walk.ParagraphWalker;
+import org.wickedsource.docxstamper.docx4j.walk.BaseDocumentWalker;
+import org.wickedsource.docxstamper.docx4j.walk.DocumentWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
 
@@ -30,10 +32,10 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
             List<Object> expressionContexts = tableRowsToRepeat.get(rCoords);
             for (final Object expressionContext : expressionContexts) {
                 Tr rowClone = XmlUtils.deepCopy(rCoords.getRow());
-                ParagraphWalker walker = new ParagraphWalker(rowClone) {
+                DocumentWalker walker = new BaseDocumentWalker(rowClone) {
                     @Override
-                    protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
-                        placeholderReplacer.resolveExpressionsForParagraph(paragraphCoordinates.getParagraph(), expressionContext);
+                    protected void onParagraph(P paragraph) {
+                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext);
                     }
                 };
                 walker.walk();
