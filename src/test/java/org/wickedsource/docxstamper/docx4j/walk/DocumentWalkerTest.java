@@ -10,7 +10,6 @@ import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
-import org.wickedsource.docxstamper.walk.Counter;
 
 import java.io.IOException;
 
@@ -18,7 +17,7 @@ public class DocumentWalkerTest extends AbstractDocx4jTest {
 
     @Test
     public void calculatesCorrectNestedCoordinates() throws IOException, Docx4JException {
-        WordprocessingMLPackage document = loadDocument("walker.docx");
+        WordprocessingMLPackage document = loadDocument("DocumentWalkerTest.docx");
 
         final Counter paragraphCount = new Counter();
         final Counter tableCount = new Counter();

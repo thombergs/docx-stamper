@@ -1,6 +1,6 @@
 package org.wickedsource.docxstamper.docx4j.processor;
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
 
 import java.lang.reflect.Method;
@@ -68,7 +68,7 @@ public class CommentProcessorRegistry implements ICommentProcessor {
      *
      * @param document the document to be passed into the commit method of all ICommentProcessors.
      */
-    public void commitChanges(XWPFDocument document) {
+    public void commitChanges(WordprocessingMLPackage document) {
         for (ICommentProcessor processor : commentProcessors.values()) {
             processor.commitChanges(document);
         }

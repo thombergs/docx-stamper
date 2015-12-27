@@ -3,17 +3,19 @@ package org.wickedsource.docxstamper.docx4j;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.docx4j.walk.DocumentWalker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.expression.spel.SpelEvaluationException;
+import org.wickedsource.docxstamper.docx4j.walk.ParagraphWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
 
 import java.util.List;
 
 public class PlaceholderReplacer<T> {
+
+    private Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
 
     private ExpressionUtil expressionUtil = new ExpressionUtil();
 
@@ -27,25 +29,10 @@ public class PlaceholderReplacer<T> {
      * @param expressionContext the context to resolve the expressions against.
      */
     public void resolveExpressions(WordprocessingMLPackage document, final T expressionContext) {
-        DocumentWalker walker = new DocumentWalker(document) {
+        ParagraphWalker walker = new ParagraphWalker(document) {
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 resolveExpressionsForParagraph(paragraphCoordinates.getParagraph(), expressionContext);
-            }
-
-            @Override
-            protected void onTable(TableCoordinates tableCoordinates) {
-
-            }
-
-            @Override
-            protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
-
-            }
-
-            @Override
-            protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
-
             }
         };
         walker.walk();
@@ -60,9 +47,13 @@ public class PlaceholderReplacer<T> {
         }
         List<String> placeholders = expressionUtil.findExpressions(aggregator.getText());
         for (String placeholder : placeholders) {
-            Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
-            if (replacement != null) {
-                aggregator.replaceFirst(placeholder, String.valueOf(replacement)); //TODO: support images
+            try {
+                Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
+                if (replacement != null) {
+                    aggregator.replaceFirst(placeholder, String.valueOf(replacement)); //TODO: support images
+                }
+            } catch (SpelEvaluationException e) {
+                logger.warn(String.format("Expression %s could not be resolved against context root of type %s", placeholder, expressionContext.getClass()));
             }
         }
     }

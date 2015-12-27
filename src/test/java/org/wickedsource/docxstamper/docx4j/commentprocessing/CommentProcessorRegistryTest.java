@@ -1,10 +1,12 @@
-package org.wickedsource.docxstamper.poi.commentprocessing;
+package org.wickedsource.docxstamper.docx4j.commentprocessing;
 
-import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.poi.commentprocessing.displayif.DisplayIfProcessor;
-import org.wickedsource.docxstamper.poi.commentprocessing.displayif.IDisplayIfProcessor;
+import org.wickedsource.docxstamper.docx4j.processor.CommentProcessorRegistry;
+import org.wickedsource.docxstamper.docx4j.processor.ICommentProcessor;
+import org.wickedsource.docxstamper.docx4j.processor.displayif.DisplayIfProcessor;
+import org.wickedsource.docxstamper.docx4j.processor.displayif.IDisplayIfProcessor;
 
 import java.lang.reflect.Method;
 
@@ -40,7 +42,7 @@ public class CommentProcessorRegistryTest {
         Assert.assertNull(registry.getProcessorForMethod(CommentProcessorRegistry.class.getMethod("getProcessorForInterface", Class.class)));
 
         Method displayIf = IDisplayIfProcessor.class.getMethod("displayParagraphIf", new Class[]{Boolean.class});
-        Method commitChanges = ICommentProcessor.class.getMethod("commitChanges", XWPFDocument.class);
+        Method commitChanges = ICommentProcessor.class.getMethod("commitChanges", WordprocessingMLPackage.class);
         Assert.assertSame(processor2, registry.getProcessorForMethod(displayIf));
         Assert.assertSame(processor1, registry.getProcessorForMethod(commitChanges));
     }

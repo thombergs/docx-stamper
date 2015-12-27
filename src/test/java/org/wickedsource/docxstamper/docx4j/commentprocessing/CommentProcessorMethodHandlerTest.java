@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.poi.commentprocessing;
+package org.wickedsource.docxstamper.docx4j.commentprocessing;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -6,7 +6,9 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.wickedsource.docxstamper.PersonContext;
+import org.wickedsource.docxstamper.docx4j.TestContext;
+import org.wickedsource.docxstamper.docx4j.processor.CommentProcessorRegistry;
+import org.wickedsource.docxstamper.docx4j.processor.ContextFactory;
 
 public class CommentProcessorMethodHandlerTest {
 
@@ -18,9 +20,9 @@ public class CommentProcessorMethodHandlerTest {
         CommentProcessorRegistry processorRegistry = new CommentProcessorRegistry();
         processorRegistry.registerCommentProcessor(ITestInterface.class, new TestImpl());
 
-        PersonContext contextRoot = new PersonContext();
+        TestContext contextRoot = new TestContext();
         contextRoot.setName("Tom");
-        PersonContext context = (PersonContext) contextFactory.createProxy(contextRoot, processorRegistry);
+        TestContext context = (TestContext) contextFactory.createProxy(contextRoot, processorRegistry);
 
         ExpressionParser parser = new SpelExpressionParser();
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext(context);

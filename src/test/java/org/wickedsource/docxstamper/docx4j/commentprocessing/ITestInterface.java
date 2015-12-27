@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.poi.commentprocessing;
+package org.wickedsource.docxstamper.docx4j.commentprocessing;
 
 public interface ITestInterface {
 

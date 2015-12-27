@@ -9,13 +9,13 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class VariableReplacementInGlobalParagraphs extends AbstractDocx4jTest {
+public class ExpressionReplacementInGlobalParagraphsTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
         TestContext context = new TestContext();
         context.setName("Homer Simpson");
-        InputStream template = getClass().getResourceAsStream("VariableReplacementInGlobalParagraphs.docx");
+        InputStream template = getClass().getResourceAsStream("ExpressionReplacementInGlobalParagraphsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         resolvedExpressionsAreReplaced(document);
         unresolvedExpressionsAreNotReplaced(document);

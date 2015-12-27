@@ -13,13 +13,13 @@ import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class VariableReplacementInTables extends AbstractDocx4jTest {
+public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
         TestContext context = new TestContext();
         context.setName("Bart Simpson");
-        InputStream template = getClass().getResourceAsStream("VariableReplacementInTables.docx");
+        InputStream template = getClass().getResourceAsStream("ExpressionReplacementInTablesTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         resolvedExpressionsAreReplacedInFirstLevelTable(document);
         unresolvedExpressionsAreNotReplacedInFirstLevelTable(document);
