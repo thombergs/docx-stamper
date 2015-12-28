@@ -69,8 +69,9 @@ public class ParagraphWrapper {
                 // replace the last part of the match with empty string
                 run.replace(run.getStartIndex(), matchEndIndex, "");
             } else {
-                // the run is in the middle of the match...we simply remove its text
-                RunUtil.setText(run.getRun(), "");
+                // the run is in the middle of the match...we simply remove it
+                this.paragraph.getContent().remove(run.getRun());
+                this.runs.remove(run);
             }
 
             currentRun++;
