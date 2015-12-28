@@ -5,6 +5,7 @@ import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.wickedsource.docxstamper.docx4j.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
@@ -39,7 +40,7 @@ public class PlaceholderReplacer<T> {
     }
 
     public void resolveExpressionsForParagraph(P p, T expressionContext) {
-        RunAggregator aggregator = new RunAggregator(p);
+        ParagraphWrapper aggregator = new ParagraphWrapper(p);
         List<String> placeholders = expressionUtil.findExpressions(aggregator.getText());
         for (String placeholder : placeholders) {
             try {

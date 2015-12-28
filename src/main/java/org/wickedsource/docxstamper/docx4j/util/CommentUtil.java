@@ -12,7 +12,6 @@ import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wickedsource.docxstamper.docx4j.RunAggregator;
 
 import java.math.BigInteger;
 
@@ -42,7 +41,7 @@ public class CommentUtil {
                             String commentString = "";
                             for (Object commentChildObject : comment.getContent()) {
                                 if (commentChildObject instanceof P) {
-                                    commentString += new RunAggregator((P) commentChildObject).getText();
+                                    commentString += new ParagraphWrapper((P) commentChildObject).getText();
                                 }
                             }
                             return commentString;

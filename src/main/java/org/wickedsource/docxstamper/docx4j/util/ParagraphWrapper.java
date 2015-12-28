@@ -1,8 +1,8 @@
-package org.wickedsource.docxstamper.docx4j;
+package org.wickedsource.docxstamper.docx4j.util;
 
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.docx4j.util.RunUtil;
+import org.wickedsource.docxstamper.docx4j.IndexedRun;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,17 +16,16 @@ import java.util.List;
  * Call addRun() to add all runs that should be aggregated. Then, call methods to modify the aggregated text. Finally,
  * call getText() or getRuns() to get the modified text or the list of modified runs.
  */
-public class RunAggregator {
+public class ParagraphWrapper {
 
     private int currentPosition = 0;
 
     private List<IndexedRun> runs = new ArrayList<>();
 
-    public RunAggregator() {
+    private P paragraph;
 
-    }
-
-    public RunAggregator(P paragraph) {
+    public ParagraphWrapper(P paragraph) {
+        this.paragraph = paragraph;
         for (Object contentElement : paragraph.getContent()) {
             if (contentElement instanceof R && !"".equals(RunUtil.getText((R) contentElement))) {
                 this.addRun((R) contentElement);
@@ -39,7 +38,7 @@ public class RunAggregator {
      *
      * @param run the run to add.
      */
-    public void addRun(R run) {
+    private void addRun(R run) {
         int startIndex = currentPosition;
         int endIndex = currentPosition + RunUtil.getText(run).length() - 1;
         runs.add(new IndexedRun(startIndex, endIndex, run));

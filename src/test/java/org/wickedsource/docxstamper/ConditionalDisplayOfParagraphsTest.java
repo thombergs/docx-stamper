@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.RunAggregator;
+import org.wickedsource.docxstamper.docx4j.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
@@ -37,8 +37,8 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
     private void globalParagraphsAreRemoved(WordprocessingMLPackage document) {
         P p1 = (P) document.getMainDocumentPart().getContent().get(1);
         P p2 = (P) document.getMainDocumentPart().getContent().get(2);
-        Assert.assertEquals("This paragraph stays untouched.", new RunAggregator(p1).getText());
-        Assert.assertEquals("This paragraph stays untouched.", new RunAggregator(p2).getText());
+        Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p1).getText());
+        Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p2).getText());
     }
 
     private void paragraphsInTableAreRemoved(WordprocessingMLPackage document) {
@@ -48,9 +48,9 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
         P p1 = (P) ((Tc) ((JAXBElement) row.getContent().get(0)).getValue()).getContent().get(0);
         P p2 = (P) ((Tc) ((JAXBElement) row.getContent().get(1)).getValue()).getContent().get(0);
 
-        Assert.assertEquals("This paragraph stays untouched.", new RunAggregator(p1).getText());
+        Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p1).getText());
         // since the last paragraph was removed from the cell, an empty paragraph was inserted
-        Assert.assertEquals("", new RunAggregator(p2).getText());
+        Assert.assertEquals("", new ParagraphWrapper(p2).getText());
     }
 
     private void paragraphsInNestedTablesAreRemoved(WordprocessingMLPackage document) {
@@ -68,7 +68,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
         P p1 = (P) cell.getContent().get(0);
 
         Assert.assertEquals(1, cell.getContent().size());
-        Assert.assertEquals("This paragraph stays untouched.", new RunAggregator(p1).getText());
+        Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p1).getText());
     }
 
 }

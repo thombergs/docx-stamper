@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.RunAggregator;
+import org.wickedsource.docxstamper.docx4j.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
@@ -55,18 +55,18 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
         };
         cellWalker.walk();
 
-        Assert.assertEquals("Homer Simpson", new RunAggregator((P) cells.get(2).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Dan Castellaneta", new RunAggregator((P) cells.get(3).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Marge Simpson", new RunAggregator((P) cells.get(4).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Julie Kavner", new RunAggregator((P) cells.get(5).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Bart Simpson", new RunAggregator((P) cells.get(6).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Nancy Cartwright", new RunAggregator((P) cells.get(7).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Kent Brockman", new RunAggregator((P) cells.get(8).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Harry Shearer", new RunAggregator((P) cells.get(9).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Disco Stu", new RunAggregator((P) cells.get(10).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Hank Azaria", new RunAggregator((P) cells.get(11).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Krusty the Clown", new RunAggregator((P) cells.get(12).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Dan Castellaneta", new RunAggregator((P) cells.get(13).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Homer Simpson", new ParagraphWrapper((P) cells.get(2).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(3).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Marge Simpson", new ParagraphWrapper((P) cells.get(4).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Julie Kavner", new ParagraphWrapper((P) cells.get(5).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Bart Simpson", new ParagraphWrapper((P) cells.get(6).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Nancy Cartwright", new ParagraphWrapper((P) cells.get(7).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Kent Brockman", new ParagraphWrapper((P) cells.get(8).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Harry Shearer", new ParagraphWrapper((P) cells.get(9).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Disco Stu", new ParagraphWrapper((P) cells.get(10).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Hank Azaria", new ParagraphWrapper((P) cells.get(11).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Krusty the Clown", new ParagraphWrapper((P) cells.get(12).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(13).getCell().getContent().get(0)).getText());
     }
 
 

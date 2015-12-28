@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.RunAggregator;
+import org.wickedsource.docxstamper.docx4j.util.ParagraphWrapper;
 
 import javax.xml.bind.JAXBElement;
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
         Tr row = (Tr) table.getContent().get(0);
         Tc cell = (Tc) ((JAXBElement) row.getContent().get(1)).getValue();
         P nameParagraph = (P) cell.getContent().get(0);
-        Assert.assertEquals("Bart Simpson", new RunAggregator(nameParagraph).getText());
+        Assert.assertEquals("Bart Simpson", new ParagraphWrapper(nameParagraph).getText());
     }
 
     private void unresolvedExpressionsAreNotReplacedInFirstLevelTable(WordprocessingMLPackage document) {
@@ -43,7 +43,7 @@ public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
         Tr row = (Tr) table.getContent().get(1);
         Tc cell = (Tc) ((JAXBElement) row.getContent().get(1)).getValue();
         P nameParagraph = (P) cell.getContent().get(0);
-        Assert.assertEquals("${foo}", new RunAggregator(nameParagraph).getText());
+        Assert.assertEquals("${foo}", new ParagraphWrapper(nameParagraph).getText());
     }
 
     private void resolvedExpressionsAreReplacedInNestedTable(WordprocessingMLPackage document) {
@@ -55,7 +55,7 @@ public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
         Tc nestedCell = (Tc) ((JAXBElement) nestedRow.getContent().get(1)).getValue();
 
         P nameParagraph = (P) nestedCell.getContent().get(0);
-        Assert.assertEquals("Bart Simpson", new RunAggregator(nameParagraph).getText());
+        Assert.assertEquals("Bart Simpson", new ParagraphWrapper(nameParagraph).getText());
     }
 
     private void unresolvedExpressionsAreNotReplacedInNestedTable(WordprocessingMLPackage document) {
@@ -67,7 +67,7 @@ public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
         Tc nestedCell = (Tc) ((JAXBElement) nestedRow.getContent().get(1)).getValue();
 
         P nameParagraph = (P) nestedCell.getContent().get(0);
-        Assert.assertEquals("${foo}", new RunAggregator(nameParagraph).getText());
+        Assert.assertEquals("${foo}", new ParagraphWrapper(nameParagraph).getText());
     }
 
 

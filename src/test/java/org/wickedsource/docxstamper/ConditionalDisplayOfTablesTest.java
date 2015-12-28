@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.RunAggregator;
+import org.wickedsource.docxstamper.docx4j.util.ParagraphWrapper;
 
 import javax.xml.bind.JAXBElement;
 import java.io.IOException;
@@ -34,16 +34,16 @@ public class ConditionalDisplayOfTablesTest extends AbstractDocx4jTest {
         Tbl table3 = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(5)).getValue();
         P p4 = (P) document.getMainDocumentPart().getContent().get(7);
 
-        Assert.assertEquals("This paragraph stays untouched.", new RunAggregator(p1).getText());
+        Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p1).getText());
         Assert.assertNotNull(table2);
         Assert.assertNotNull(table3);
-        Assert.assertEquals("This paragraph stays untouched.", new RunAggregator(p4).getText());
+        Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p4).getText());
     }
 
     private void nestedTablesAreRemoved(WordprocessingMLPackage document) {
         Tbl outerTable = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(3)).getValue();
         Tc cell = (Tc) ((JAXBElement) ((Tr) outerTable.getContent().get(1)).getContent().get(1)).getValue();
-        Assert.assertEquals("", new RunAggregator((P) cell.getContent().get(0)).getText()); // empty paragraph, since the last element inside the cell was removed
+        Assert.assertEquals("", new ParagraphWrapper((P) cell.getContent().get(0)).getText()); // empty paragraph, since the last element inside the cell was removed
     }
 
 

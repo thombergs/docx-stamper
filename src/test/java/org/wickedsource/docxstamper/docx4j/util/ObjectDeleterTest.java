@@ -6,7 +6,6 @@ import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.RunAggregator;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.*;
 
 import java.io.IOException;
@@ -36,8 +35,8 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
         WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
         Assert.assertEquals(2, savedDocument.getMainDocumentPart().getContent().size());
-        Assert.assertEquals("This is the second paragraph.", new RunAggregator((P) savedDocument.getMainDocumentPart().getContent().get(0)).getText());
-        Assert.assertEquals("This is the fifth paragraph.", new RunAggregator((P) savedDocument.getMainDocumentPart().getContent().get(1)).getText());
+        Assert.assertEquals("This is the second paragraph.", new ParagraphWrapper((P) savedDocument.getMainDocumentPart().getContent().get(0)).getText());
+        Assert.assertEquals("This is the fifth paragraph.", new ParagraphWrapper((P) savedDocument.getMainDocumentPart().getContent().get(1)).getText());
     }
 
     @Test
@@ -57,13 +56,13 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
         WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
         List<TableCellCoordinates> cellCoordinates = getTableCellCoordinats(savedDocument);
 
-        Assert.assertEquals("0 This paragraph stays.", new RunAggregator((P) cellCoordinates.get(0).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("", new RunAggregator((P) cellCoordinates.get(1).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("3 This is the second paragraph.", new RunAggregator((P) cellCoordinates.get(2).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("6 This is the fifth paragraph.", new RunAggregator((P) cellCoordinates.get(2).getCell().getContent().get(1)).getText());
-        Assert.assertEquals("7 This is the first paragraph.", new RunAggregator((P) cellCoordinates.get(3).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("9 This is the third paragraph.", new RunAggregator((P) cellCoordinates.get(3).getCell().getContent().get(1)).getText());
-        Assert.assertEquals("10 This is the fourth paragraph.", new RunAggregator((P) cellCoordinates.get(3).getCell().getContent().get(2)).getText());
+        Assert.assertEquals("0 This paragraph stays.", new ParagraphWrapper((P) cellCoordinates.get(0).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("", new ParagraphWrapper((P) cellCoordinates.get(1).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("3 This is the second paragraph.", new ParagraphWrapper((P) cellCoordinates.get(2).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("6 This is the fifth paragraph.", new ParagraphWrapper((P) cellCoordinates.get(2).getCell().getContent().get(1)).getText());
+        Assert.assertEquals("7 This is the first paragraph.", new ParagraphWrapper((P) cellCoordinates.get(3).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("9 This is the third paragraph.", new ParagraphWrapper((P) cellCoordinates.get(3).getCell().getContent().get(1)).getText());
+        Assert.assertEquals("10 This is the fourth paragraph.", new ParagraphWrapper((P) cellCoordinates.get(3).getCell().getContent().get(2)).getText());
     }
 
     @Test
@@ -82,11 +81,11 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
         Assert.assertEquals(2, newTableCoordinates.size());
 
         List<TableCellCoordinates> cellCoordinates = getTableCellCoordinats(savedDocument);
-        Assert.assertEquals("This", new RunAggregator((P) cellCoordinates.get(0).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Table", new RunAggregator((P) cellCoordinates.get(1).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Stays", new RunAggregator((P) cellCoordinates.get(2).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("!", new RunAggregator((P) cellCoordinates.get(3).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("This table stays", new RunAggregator((P) cellCoordinates.get(4).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("This", new ParagraphWrapper((P) cellCoordinates.get(0).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Table", new ParagraphWrapper((P) cellCoordinates.get(1).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Stays", new ParagraphWrapper((P) cellCoordinates.get(2).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("!", new ParagraphWrapper((P) cellCoordinates.get(3).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("This table stays", new ParagraphWrapper((P) cellCoordinates.get(4).getCell().getContent().get(0)).getText());
     }
 
     @Test
@@ -105,12 +104,12 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
         Assert.assertEquals(3, newRowCoordinates.size());
 
         List<TableCellCoordinates> cellCoordinates = getTableCellCoordinats(savedDocument);
-        Assert.assertEquals("This row", new RunAggregator((P) cellCoordinates.get(0).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Stays!", new RunAggregator((P) cellCoordinates.get(1).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("This row", new RunAggregator((P) cellCoordinates.get(2).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Stays!", new RunAggregator((P) cellCoordinates.get(3).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("This row", new RunAggregator((P) cellCoordinates.get(4).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Stays!", new RunAggregator((P) cellCoordinates.get(5).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(0).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(1).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(2).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(3).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(4).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(5).getCell().getContent().get(0)).getText());
     }
 
     private List<ParagraphCoordinates> getParagraphCoordinates(WordprocessingMLPackage document) {
