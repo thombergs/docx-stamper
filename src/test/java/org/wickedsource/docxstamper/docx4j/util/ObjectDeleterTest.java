@@ -6,6 +6,7 @@ import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
+import org.wickedsource.docxstamper.docx4j.replace.ParagraphWrapper;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.*;
 
 import java.io.IOException;

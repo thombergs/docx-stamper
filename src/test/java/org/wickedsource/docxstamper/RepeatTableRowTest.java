@@ -8,7 +8,7 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.util.ParagraphWrapper;
+import org.wickedsource.docxstamper.docx4j.replace.ParagraphWrapper;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;

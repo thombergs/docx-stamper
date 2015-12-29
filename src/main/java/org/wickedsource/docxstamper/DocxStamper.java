@@ -2,14 +2,16 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.wickedsource.docxstamper.docx4j.PlaceholderReplacer;
 import org.wickedsource.docxstamper.docx4j.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.docx4j.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.repeat.RepeatProcessor;
+import org.wickedsource.docxstamper.docx4j.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.docx4j.replace.TypeResolverRegistry;
+import org.wickedsource.docxstamper.docx4j.replace.image.Image;
+import org.wickedsource.docxstamper.docx4j.replace.image.ImageResolver;
+import org.wickedsource.docxstamper.docx4j.replace.string.StringResolver;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,14 +19,17 @@ import java.io.OutputStream;
 
 public class DocxStamper<T> {
 
-    private Logger logger = LoggerFactory.getLogger(DocxStamper.class);
-
-    private PlaceholderReplacer<T> placeholderReplacer = new PlaceholderReplacer<>();
+    private PlaceholderReplacer<T> placeholderReplacer;
 
     private CommentProcessorRegistry commentProcessorRegistry = new CommentProcessorRegistry();
 
+    private TypeResolverRegistry typeResolverRegistry;
+
     public DocxStamper() {
-        commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor());
+        typeResolverRegistry = new TypeResolverRegistry(new StringResolver());
+        typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
+        placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+        commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
     }
 
@@ -49,6 +54,10 @@ public class DocxStamper<T> {
 
     private void processComments(final WordprocessingMLPackage document, final T contextRoot) {
         commentProcessorRegistry.runProcessors(document, contextRoot);
+    }
+
+    public TypeResolverRegistry getTypeResolverRegistry() {
+        return typeResolverRegistry;
     }
 
     public CommentProcessorRegistry getCommentProcessorRegistry() {

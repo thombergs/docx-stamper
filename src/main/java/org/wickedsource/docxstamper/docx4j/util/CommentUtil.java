@@ -12,6 +12,7 @@ import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wickedsource.docxstamper.docx4j.replace.ParagraphWrapper;
 
 import java.math.BigInteger;
 

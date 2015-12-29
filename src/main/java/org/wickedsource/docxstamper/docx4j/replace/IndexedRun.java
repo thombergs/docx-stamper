@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.docx4j;
+package org.wickedsource.docxstamper.docx4j.replace;
 
 import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.docx4j.util.RunUtil;
@@ -9,11 +9,14 @@ public class IndexedRun {
 
     private final int endIndex;
 
+    private final int indexInParent;
+
     private final R run;
 
-    public IndexedRun(int startIndex, int endIndex, R run) {
+    public IndexedRun(int startIndex, int endIndex, int indexInParent, R run) {
         this.startIndex = startIndex;
         this.endIndex = endIndex;
+        this.indexInParent = indexInParent;
         this.run = run;
     }
 
@@ -27,6 +30,10 @@ public class IndexedRun {
 
     public int getEndIndex() {
         return endIndex;
+    }
+
+    public int getIndexInParent() {
+        return indexInParent;
     }
 
     public R getRun() {
@@ -80,6 +87,7 @@ public class IndexedRun {
         IndexedRun that = (IndexedRun) o;
 
         if (endIndex != that.endIndex) return false;
+        if (indexInParent != that.indexInParent) return false;
         if (startIndex != that.startIndex) return false;
 
         return true;
@@ -89,11 +97,12 @@ public class IndexedRun {
     public int hashCode() {
         int result = startIndex;
         result = 31 * result + endIndex;
+        result = 31 * result + indexInParent;
         return result;
     }
 
     @Override
     public String toString() {
-        return String.format("[IndexedRun: startIndex=%d; endIndex=%d; text=%s}", startIndex, endIndex, RunUtil.getText(run));
+        return String.format("[IndexedRun: startIndex=%d; endIndex=%d; indexInParent=%d text=%s}", startIndex, endIndex, indexInParent, RunUtil.getText(run));
     }
 }

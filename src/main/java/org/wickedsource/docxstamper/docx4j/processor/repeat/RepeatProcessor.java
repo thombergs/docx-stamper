@@ -4,9 +4,10 @@ import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tr;
-import org.wickedsource.docxstamper.docx4j.PlaceholderReplacer;
 import org.wickedsource.docxstamper.docx4j.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.docx4j.processor.CommentProcessingException;
+import org.wickedsource.docxstamper.docx4j.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.docx4j.replace.TypeResolverRegistry;
 import org.wickedsource.docxstamper.docx4j.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.docx4j.walk.DocumentWalker;
 import org.wickedsource.docxstamper.docx4j.walk.coordinates.ParagraphCoordinates;
@@ -20,14 +21,18 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     private Map<TableRowCoordinates, List<Object>> tableRowsToRepeat = new HashMap<>();
 
-    private PlaceholderReplacer<Object> placeholderReplacer = new PlaceholderReplacer<>();
+    private PlaceholderReplacer<Object> placeholderReplacer;
+
+    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry) {
+        this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+    }
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
-        repeatRows();
+        repeatRows(document);
     }
 
-    private void repeatRows() {
+    private void repeatRows(final WordprocessingMLPackage document) {
         for (TableRowCoordinates rCoords : tableRowsToRepeat.keySet()) {
             List<Object> expressionContexts = tableRowsToRepeat.get(rCoords);
             for (final Object expressionContext : expressionContexts) {
@@ -35,7 +40,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
                 DocumentWalker walker = new BaseDocumentWalker(rowClone) {
                     @Override
                     protected void onParagraph(P paragraph) {
-                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext);
+                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
                     }
                 };
                 walker.walk();

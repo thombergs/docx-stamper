@@ -10,7 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.util.ParagraphWrapper;
+import org.wickedsource.docxstamper.docx4j.replace.ParagraphWrapper;
 
 import javax.xml.bind.JAXBElement;
 import java.io.IOException;

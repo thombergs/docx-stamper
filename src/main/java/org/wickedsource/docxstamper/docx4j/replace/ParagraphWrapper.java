@@ -1,8 +1,8 @@
-package org.wickedsource.docxstamper.docx4j.util;
+package org.wickedsource.docxstamper.docx4j.replace;
 
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.docx4j.IndexedRun;
+import org.wickedsource.docxstamper.docx4j.util.RunUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +26,17 @@ public class ParagraphWrapper {
 
     public ParagraphWrapper(P paragraph) {
         this.paragraph = paragraph;
+        recalculateRuns();
+    }
+
+    private void recalculateRuns() {
+        this.runs.clear();
+        int index = 0;
         for (Object contentElement : paragraph.getContent()) {
             if (contentElement instanceof R && !"".equals(RunUtil.getText((R) contentElement))) {
-                this.addRun((R) contentElement);
+                this.addRun((R) contentElement, index);
             }
+            index++;
         }
     }
 
@@ -38,20 +45,21 @@ public class ParagraphWrapper {
      *
      * @param run the run to add.
      */
-    private void addRun(R run) {
+    private void addRun(R run, int index) {
         int startIndex = currentPosition;
         int endIndex = currentPosition + RunUtil.getText(run).length() - 1;
-        runs.add(new IndexedRun(startIndex, endIndex, run));
+        runs.add(new IndexedRun(startIndex, endIndex, index, run));
         currentPosition = endIndex + 1;
     }
 
     /**
-     * Replaces the first occurrence of the given placeholder by the given string.
+     * Removes the specified placeholder from the runs that are touched by it and returns the index at which
+     * a replacement for the placeholder may be inserted into the paragraph.
      *
-     * @param placeholder the placeholder to replace.
-     * @param replacement the string to replace the placeholder.
+     * @param placeholder the placeholder which is to be removed from the paragraph.
      */
-    public void replaceFirst(String placeholder, String replacement) {
+    public int cleanPlaceholder(String placeholder) {
+        int replacementIndex = 0;
         String text = getText();
         int matchStartIndex = text.indexOf(placeholder);
         int matchEndIndex = matchStartIndex + placeholder.length() - 1;
@@ -62,22 +70,41 @@ public class ParagraphWrapper {
         int currentRun = 0;
         for (IndexedRun run : affectedRuns) {
 
-            if (isFirstRun) {
+            if (isFirstRun && isLastRun) {
+                if (placeholder.length() == RunUtil.getText(run.getRun()).length()) {
+                    // the placeholder is the whole run, simply remove the run and return its index
+                    this.paragraph.getContent().remove(run.getRun());
+                    replacementIndex = run.getIndexInParent();
+                    recalculateRuns();
+                } else {
+                    // cut the run in two parts left and right of the match
+                    String runText = RunUtil.getText(run.getRun());
+                    R run1 = RunUtil.create(runText.substring(0, matchStartIndex));
+                    R run2 = RunUtil.create(runText.substring(matchEndIndex + 1));
+                    this.paragraph.getContent().add(run.getIndexInParent(), run2);
+                    this.paragraph.getContent().add(run.getIndexInParent(), run1);
+                    this.paragraph.getContent().remove(run.getRun());
+                    replacementIndex = run.getIndexInParent() + 1;
+                    recalculateRuns();
+                }
+            } else if (isFirstRun) {
                 // put the whole replacement into the first affected run
-                run.replace(matchStartIndex, matchEndIndex, replacement);
+                run.replace(matchStartIndex, matchEndIndex, "");
+                replacementIndex = run.getIndexInParent();
             } else if (isLastRun) {
                 // replace the last part of the match with empty string
                 run.replace(run.getStartIndex(), matchEndIndex, "");
             } else {
                 // the run is in the middle of the match...we simply remove it
                 this.paragraph.getContent().remove(run.getRun());
-                this.runs.remove(run);
+                recalculateRuns();
             }
 
             currentRun++;
             isFirstRun = false;
             isLastRun = currentRun == affectedRuns.size() - 1;
         }
+        return replacementIndex;
     }
 
     private List<IndexedRun> getAffectedRuns(int startIndex, int endIndex) {

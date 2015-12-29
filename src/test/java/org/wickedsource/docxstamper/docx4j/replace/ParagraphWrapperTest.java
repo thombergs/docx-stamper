@@ -1,7 +1,9 @@
-package org.wickedsource.docxstamper.docx4j.util;
+package org.wickedsource.docxstamper.docx4j.replace;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.wickedsource.docxstamper.docx4j.util.ParagraphUtil;
+import org.wickedsource.docxstamper.docx4j.util.RunUtil;
 
 import java.io.IOException;
 
@@ -25,36 +27,43 @@ public class ParagraphWrapperTest {
     @Test
     public void replaceFirstReplacesSingleRun() {
         ParagraphWrapper aggregator = createLoremIpsumAggregator();
-        aggregator.replaceFirst("lorem", "ipsum");
-        Assert.assertEquals("ipsum ipsum", aggregator.getText());
+        int replacementIndex = aggregator.cleanPlaceholder("lorem");
+        Assert.assertEquals(0, replacementIndex);
+        Assert.assertEquals(" ipsum", aggregator.getText());
     }
 
     @Test
     public void replaceFirstReplacesWithinSingleRun() {
         ParagraphWrapper aggregator = new ParagraphWrapper(ParagraphUtil.create("My name is ${name}."));
-        aggregator.replaceFirst("${name}", "Bob");
-        Assert.assertEquals("My name is Bob.", aggregator.getText());
+        int replacementIndex = aggregator.cleanPlaceholder("${name}");
+        Assert.assertEquals(2, aggregator.getRuns().size());
+        Assert.assertEquals(1, replacementIndex);
+        Assert.assertEquals("My name is .", aggregator.getText());
     }
 
     @Test
     public void replaceFirstReplacesTwoRuns() {
         ParagraphWrapper aggregator = createLoremIpsumAggregator();
-        aggregator.replaceFirst("lorem ", "ipsum");
-        Assert.assertEquals("ipsumipsum", aggregator.getText());
+        int replacementIndex = aggregator.cleanPlaceholder("lorem ");
+        Assert.assertEquals(0, replacementIndex);
+        Assert.assertEquals("ipsum", aggregator.getText());
     }
 
     @Test
     public void replaceFirstReplacesThreeRuns() {
         ParagraphWrapper aggregator = createLoremIpsumAggregator();
-        aggregator.replaceFirst("lorem ipsum", "ipsum");
-        Assert.assertEquals("ipsum", aggregator.getText());
+        int replacementIndex = aggregator.cleanPlaceholder("lorem ipsum");
+        Assert.assertEquals(0, replacementIndex);
+        Assert.assertEquals("", aggregator.getText());
     }
 
     @Test
     public void replaceFirstReplacesOverlappingRuns() {
         ParagraphWrapper aggregator = createLoremIpsumAggregator();
-        aggregator.replaceFirst("lorem ips", "ipsum");
-        Assert.assertEquals("ipsumum", aggregator.getText());
+        int replacementIndex = aggregator.cleanPlaceholder("lorem ips");
+        Assert.assertEquals(0, replacementIndex);
+        Assert.assertEquals("um", aggregator.getText());
+
     }
 
     private ParagraphWrapper createLoremIpsumAggregator() {
