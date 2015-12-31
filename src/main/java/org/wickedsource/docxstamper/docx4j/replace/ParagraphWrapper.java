@@ -65,6 +65,10 @@ public class ParagraphWrapper {
         int matchEndIndex = matchStartIndex + placeholder.length() - 1;
         List<IndexedRun> affectedRuns = getAffectedRuns(matchStartIndex, matchEndIndex);
 
+        String affectedRunsText = getText(affectedRuns);
+        int affectedRunsMatchStartIndex = affectedRunsText.indexOf(placeholder);
+        int affectedRunsMatchEndIndex = affectedRunsMatchStartIndex + placeholder.length() - 1;
+
         boolean isFirstRun = true;
         boolean isLastRun = affectedRuns.size() == 1;
         int currentRun = 0;
@@ -79,8 +83,8 @@ public class ParagraphWrapper {
                 } else {
                     // cut the run in two parts left and right of the match
                     String runText = RunUtil.getText(run.getRun());
-                    R run1 = RunUtil.create(runText.substring(0, matchStartIndex));
-                    R run2 = RunUtil.create(runText.substring(matchEndIndex + 1));
+                    R run1 = RunUtil.create(runText.substring(0, affectedRunsMatchStartIndex));
+                    R run2 = RunUtil.create(runText.substring(affectedRunsMatchEndIndex + 1));
                     this.paragraph.getContent().add(run.getIndexInParent(), run2);
                     this.paragraph.getContent().add(run.getIndexInParent(), run1);
                     this.paragraph.getContent().remove(run.getRun());
@@ -89,11 +93,11 @@ public class ParagraphWrapper {
                 }
             } else if (isFirstRun) {
                 // put the whole replacement into the first affected run
-                run.replace(matchStartIndex, matchEndIndex, "");
+                run.replace(affectedRunsMatchStartIndex, affectedRunsMatchEndIndex, "");
                 replacementIndex = run.getIndexInParent();
             } else if (isLastRun) {
                 // replace the last part of the match with empty string
-                run.replace(run.getStartIndex(), matchEndIndex, "");
+                run.replace(run.getStartIndex(), affectedRunsMatchEndIndex, "");
             } else {
                 // the run is in the middle of the match...we simply remove it
                 this.paragraph.getContent().remove(run.getRun());
@@ -124,6 +128,10 @@ public class ParagraphWrapper {
      * @return the text of all runs.
      */
     public String getText() {
+        return getText(this.runs);
+    }
+
+    private String getText(List<IndexedRun> runs) {
         StringBuilder builder = new StringBuilder();
         for (IndexedRun run : runs) {
             builder.append(RunUtil.getText(run.getRun()));
