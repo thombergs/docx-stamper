@@ -66,7 +66,6 @@ public class CommentProcessorRegistry {
     }
 
     private <T> void runProcessor(final WordprocessingMLPackage document, final ICommentProcessor processor, final T contextRoot) {
-        logger.info(String.format("Starting run of comment processor %s", processor.getClass()));
         CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
@@ -76,9 +75,9 @@ public class CommentProcessorRegistry {
                     if (comment != null) {
                         try {
                             expressionResolver.resolveExpression(comment, contextRoot);
-                            logger.info(String.format("Comment '%s' has been successfully processed.", comment));
+                            logger.debug(String.format("Comment '%s' has been successfully processed by comment processor %s.", comment, processor.getClass()));
                         } catch (SpelEvaluationException e) {
-                            logger.info(String.format("Skipping comment '%s' because it can not be resolved against current comment processor.", comment));
+                            logger.debug(String.format("Skipping comment '%s' because it can not be resolved by comment processor %s.", comment, processor.getClass()));
                         }
                     }
                     // TODO: remove comment once it was successfully processed.
