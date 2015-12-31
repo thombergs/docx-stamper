@@ -29,7 +29,8 @@ public class ParagraphWrapper {
         recalculateRuns();
     }
 
-    private void recalculateRuns() {
+    public void recalculateRuns() {
+        currentPosition = 0;
         this.runs.clear();
         int index = 0;
         for (Object contentElement : paragraph.getContent()) {
@@ -151,6 +152,11 @@ public class ParagraphWrapper {
             resultList.add(run.getRun());
         }
         return resultList;
+    }
+
+    @Override
+    public String toString() {
+        return getText();
     }
 
 }

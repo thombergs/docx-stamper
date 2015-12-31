@@ -52,10 +52,12 @@ public class PlaceholderReplacer<T> {
             try {
                 Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
                 if (replacement != null) {
-                    int replacementIndex = aggregator.cleanPlaceholder(placeholder); //TODO: support images
+                    int replacementIndex = aggregator.cleanPlaceholder(placeholder);
                     TypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
                     p.getContent().add(replacementIndex, replacementObject);
+                    aggregator.recalculateRuns();
+                    logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 }
             } catch (SpelEvaluationException e) {
                 logger.warn(String.format("Expression %s could not be resolved against context root of type %s", placeholder, expressionContext.getClass()));
