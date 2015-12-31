@@ -2,6 +2,7 @@ package org.wickedsource.docxstamper.docx4j.processor;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Comments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -71,10 +72,11 @@ public class CommentProcessorRegistry {
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 try {
                     processor.setCurrentParagraphCoordinates(paragraphCoordinates);
-                    String comment = CommentUtil.getCommentFor(paragraphCoordinates.getParagraph(), document);
+                    Comments.Comment comment = CommentUtil.getCommentFor(paragraphCoordinates.getParagraph(), document);
                     if (comment != null) {
                         try {
-                            expressionResolver.resolveExpression(comment, contextRoot);
+                            expressionResolver.resolveExpression(CommentUtil.getCommentString(comment), contextRoot);
+                            CommentUtil.deleteCommentFromParagraph(paragraphCoordinates.getParagraph(), comment);
                             logger.debug(String.format("Comment '%s' has been successfully processed by comment processor %s.", comment, processor.getClass()));
                         } catch (SpelEvaluationException e) {
                             logger.debug(String.format("Skipping comment '%s' because it can not be resolved by comment processor %s.", comment, processor.getClass()));
@@ -88,7 +90,6 @@ public class CommentProcessorRegistry {
         };
         walker.walk();
         processor.commitChanges(document);
-        logger.info(String.format("Finished run of comment processor %s", processor.getClass()));
     }
 
 }
