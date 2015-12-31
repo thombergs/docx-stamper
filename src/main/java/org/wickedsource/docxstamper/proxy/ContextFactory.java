@@ -1,7 +1,7 @@
 package org.wickedsource.docxstamper.proxy;
 
 import javassist.util.proxy.ProxyFactory;
-import org.wickedsource.docxstamper.docx4j.processor.ICommentProcessor;
+import org.wickedsource.docxstamper.processor.ICommentProcessor;
 
 public class ContextFactory<T> {
 

@@ -5,10 +5,9 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
-import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
+import org.wickedsource.docxstamper.walk.coordinates.TableRowCoordinates;
 
 import java.io.IOException;
 import java.io.InputStream;

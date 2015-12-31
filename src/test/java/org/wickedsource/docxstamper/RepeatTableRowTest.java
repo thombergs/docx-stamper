@@ -7,12 +7,11 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
-import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.replace.ParagraphWrapper;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
+import org.wickedsource.docxstamper.walk.coordinates.TableCellCoordinates;
+import org.wickedsource.docxstamper.walk.coordinates.TableRowCoordinates;
 
 import java.io.IOException;
 import java.io.InputStream;

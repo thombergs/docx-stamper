@@ -9,11 +9,10 @@ import org.docx4j.wml.Tr;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
-import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.replace.ParagraphWrapper;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.docx4j.walk.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
+import org.wickedsource.docxstamper.walk.coordinates.TableCoordinates;
 
 import javax.xml.bind.JAXBElement;
 import java.io.IOException;

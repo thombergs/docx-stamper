@@ -1,6 +1,6 @@
 package org.wickedsource.docxstamper.context;
 
-import org.wickedsource.docxstamper.docx4j.replace.image.Image;
+import org.wickedsource.docxstamper.replace.image.Image;
 
 public class ImageContext {
 

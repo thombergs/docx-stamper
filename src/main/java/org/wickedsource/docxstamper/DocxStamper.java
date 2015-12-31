@@ -2,16 +2,16 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.wickedsource.docxstamper.docx4j.processor.CommentProcessorRegistry;
-import org.wickedsource.docxstamper.docx4j.processor.displayif.DisplayIfProcessor;
-import org.wickedsource.docxstamper.docx4j.processor.displayif.IDisplayIfProcessor;
-import org.wickedsource.docxstamper.docx4j.processor.repeat.IRepeatProcessor;
-import org.wickedsource.docxstamper.docx4j.processor.repeat.RepeatProcessor;
-import org.wickedsource.docxstamper.docx4j.replace.PlaceholderReplacer;
-import org.wickedsource.docxstamper.docx4j.replace.TypeResolverRegistry;
-import org.wickedsource.docxstamper.docx4j.replace.image.Image;
-import org.wickedsource.docxstamper.docx4j.replace.image.ImageResolver;
-import org.wickedsource.docxstamper.docx4j.replace.string.StringResolver;
+import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
+import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
+import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
+import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
+import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.replace.TypeResolverRegistry;
+import org.wickedsource.docxstamper.replace.image.Image;
+import org.wickedsource.docxstamper.replace.image.ImageResolver;
+import org.wickedsource.docxstamper.replace.string.StringResolver;
 
 import java.io.IOException;
 import java.io.InputStream;

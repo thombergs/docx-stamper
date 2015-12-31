@@ -7,9 +7,7 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.context.NameContext;
-import org.wickedsource.docxstamper.docx4j.commentprocessing.ITestInterface;
-import org.wickedsource.docxstamper.docx4j.commentprocessing.TestImpl;
-import org.wickedsource.docxstamper.docx4j.processor.CommentProcessorRegistry;
+import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 
 public class ProxyMethodHandlerTest {
 

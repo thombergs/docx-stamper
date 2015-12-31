@@ -8,8 +8,7 @@ import org.docx4j.wml.R;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.ImageContext;
-import org.wickedsource.docxstamper.docx4j.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.docx4j.replace.image.Image;
+import org.wickedsource.docxstamper.replace.image.Image;
 
 import javax.xml.bind.JAXBElement;
 import java.io.IOException;
