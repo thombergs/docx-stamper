@@ -26,12 +26,12 @@ public class ExpressionReplacementInGlobalParagraphsTest extends AbstractDocx4jT
 
     private void resolvedExpressionsAreReplaced(WordprocessingMLPackage document) {
         P nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
-        Assert.assertEquals("In this paragraph, the variable „name“ should be resolved to the value Homer Simpson.", new ParagraphWrapper(nameParagraph).getText());
+        Assert.assertEquals("In this paragraph, the variable name should be resolved to the value Homer Simpson.", new ParagraphWrapper(nameParagraph).getText());
     }
 
     private void unresolvedExpressionsAreNotReplaced(WordprocessingMLPackage document) {
         P fooParagraph = (P) document.getMainDocumentPart().getContent().get(3);
-        Assert.assertEquals("In this paragraph, the variable „foo“ should not be resolved: ${foo}.", new ParagraphWrapper(fooParagraph).getText());
+        Assert.assertEquals("In this paragraph, the variable foo should not be resolved: ${foo}.", new ParagraphWrapper(fooParagraph).getText());
     }
 
 
