@@ -21,7 +21,7 @@ The value an expression resolves to may be of the following types:
 | java.lang.Object | The expression is replaced by the String representation of the object (`String.valueOf()`).
 | java.lang.String | The expression is replaced with the String value.|
 | java.util.Date   | The expression is replaced by a formatted Date string (by default "dd.MM.yyyy"). You can change the format string by registering your own DateResolver (see below).|
-| org.wickedsource.docxstamper.replace.typeresolver.image.Image | The expression is replaced with an inline image.|
+| [org.wickedsource.docxstamper...Image](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/replace/typeresolver/image/Image.html) | The expression is replaced with an inline image.|
 
 If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement and register your own [TypeResolver](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/typeresolver/ITypeResolver.html).
 
