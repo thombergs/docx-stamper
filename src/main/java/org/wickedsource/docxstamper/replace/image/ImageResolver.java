@@ -7,9 +7,11 @@ import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.DocxStamperException;
 import org.wickedsource.docxstamper.replace.TypeResolver;
 
-import java.util.UUID;
+import java.util.Random;
 
 public class ImageResolver implements TypeResolver {
+
+    private static Random random = new Random();
 
     @Override
     public R resolve(WordprocessingMLPackage document, Object image) {
@@ -26,13 +28,15 @@ public class ImageResolver implements TypeResolver {
     public static R createRunWithImage(WordprocessingMLPackage wordMLPackage, byte[] bytes, String filenameHint, String altText) throws Exception {
         BinaryPartAbstractImage imagePart = BinaryPartAbstractImage.createImagePart(wordMLPackage, bytes);
 
-        int id1 = UUID.randomUUID().hashCode();
-        int id2 = UUID.randomUUID().hashCode();
+        // creating random ids assuming they are unique
+        // id must not be too large, otherwise Word cannot open the document
+        int id1 = random.nextInt(100000);
+        int id2 = random.nextInt(100000);
         if (filenameHint == null) {
-            filenameHint = "";
+            filenameHint = "dummyFileName";
         }
         if (altText == null) {
-            altText = "";
+            altText = "dummyAltText";
         }
 
         Inline inline = imagePart.createImageInline(filenameHint, altText,
