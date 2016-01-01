@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper.processor;
 
 
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
 
 public abstract class BaseCommentProcessor implements ICommentProcessor {

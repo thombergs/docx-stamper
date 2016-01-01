@@ -1,6 +1,6 @@
 package org.wickedsource.docxstamper.processor;
 
-import org.wickedsource.docxstamper.DocxStamperException;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.walk.coordinates.TableCoordinates;
 

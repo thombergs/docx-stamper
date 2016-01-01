@@ -5,6 +5,8 @@ import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
+import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
@@ -53,7 +55,7 @@ public class PlaceholderReplacer<T> {
                 Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
                 if (replacement != null) {
                     int replacementIndex = aggregator.cleanPlaceholder(placeholder);
-                    TypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
+                    ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
                     p.getContent().add(replacementIndex, replacementObject);
                     aggregator.recalculateRuns();

@@ -1,7 +1,7 @@
 package org.wickedsource.docxstamper.proxy;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.wickedsource.docxstamper.processor.ICommentProcessor;
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
 
 public class TestImpl implements ITestInterface, ICommentProcessor {

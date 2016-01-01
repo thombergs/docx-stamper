@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.processor;
+package org.wickedsource.docxstamper.api.commentprocessor;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -6,7 +6,7 @@ import org.docx4j.wml.Comments;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
-import org.wickedsource.docxstamper.DocxStamperException;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.proxy.ContextFactory;
 import org.wickedsource.docxstamper.util.CommentUtil;

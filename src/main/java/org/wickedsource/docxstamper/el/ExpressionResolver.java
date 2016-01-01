@@ -9,6 +9,13 @@ public class ExpressionResolver {
 
     private ExpressionUtil expressionUtil = new ExpressionUtil();
 
+    /**
+     * Runs the given expression against the given context object and returns the result of the evaluated expression.
+     *
+     * @param expressionString the expression to evaluate.
+     * @param contextRoot      the context object against which the expression is evaluated.
+     * @return the result of the evaluated expression.
+     */
     public Object resolveExpression(String expressionString, Object contextRoot) {
         if (expressionString.startsWith("${") && expressionString.endsWith("}")) {
             expressionString = expressionUtil.stripExpression(expressionString);
@@ -16,6 +23,6 @@ public class ExpressionResolver {
         ExpressionParser parser = new SpelExpressionParser();
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext(contextRoot);
         Expression expression = parser.parseExpression(expressionString);
-        return expression.getValue(evaluationContext); // TODO: mit Image und Date usw. umgehen
+        return expression.getValue(evaluationContext);
     }
 }

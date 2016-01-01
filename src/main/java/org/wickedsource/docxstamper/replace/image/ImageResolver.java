@@ -4,12 +4,17 @@ import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.DocxStamperException;
-import org.wickedsource.docxstamper.replace.TypeResolver;
+import org.wickedsource.docxstamper.api.DocxStamperException;
+import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 
 import java.util.UUID;
 
-public class ImageResolver implements TypeResolver {
+/**
+ * This ITypeResolver allows context objects to return objects of type Image. An expression that resolves to an Image
+ * object will be replaced by an actual image in the resulting .docx document. The image will be put as an inline into
+ * the surrounding paragraph of text.
+ */
+public class ImageResolver implements ITypeResolver {
 
     @Override
     public R resolve(WordprocessingMLPackage document, Object image) {
