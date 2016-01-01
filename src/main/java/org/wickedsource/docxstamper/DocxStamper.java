@@ -47,22 +47,25 @@ public class DocxStamper<T> {
      * </p>
      * <p>
      * In the .docx template you have the following options to influence the "stamping" process:
+     * </p>
      * <ul>
      * <li>Use expressions like ${name} or ${person.isOlderThan(18)} in the template's text. These expressions are resolved
      * against the contextRoot object you pass into this method and are replaced by the results.</li>
-     * <li>Use comments within the .docx template to mark certain paragraphs to be manipulated. By default, you can use
-     * the following methods within comments:
+     * <li>Use comments within the .docx template to mark certain paragraphs to be manipulated. </li>
+     * </ul>
+     * <p>
+     * Within comments, you can put expressions in which you can use the following methods by default:
+     * </p>
      * <ul>
-     * <li>displayParagraphIf(boolean) to conditionally display paragraphs or not</li>
-     * <li>displayTableRowIf(boolean) to conditionally display table rows or not</li>
-     * <li>displayTableIf(boolean) to conditionally display whole tables or not</li>
-     * <li>repeatTableRow(List<Object>) to create a new table row for each object in the list and resolve expressions
+     * <li><em>displayParagraphIf(boolean)</em> to conditionally display paragraphs or not</li>
+     * <li><em>displayTableRowIf(boolean)</em> to conditionally display table rows or not</li>
+     * <li><em>displayTableIf(boolean)</em> to conditionally display whole tables or not</li>
+     * <li><em>repeatTableRow(List&lt;Object&gt;)</em> to create a new table row for each object in the list and resolve expressions
      * within the table cells against one of the objects within the list.</li>
      * </ul>
+     * <p>
      * If you need a wider vocabulary of methods available in the comments, you can create your own ICommentProcessor
      * and register it via getCommentProcessorRegistry().registerCommentProcessor().
-     * </li>
-     * </ul>
      * </p>
      *
      * @param template    the .docx template.
