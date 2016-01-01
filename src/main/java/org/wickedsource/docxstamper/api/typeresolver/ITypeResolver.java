@@ -9,7 +9,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
  * </p>
  * <p>
  * Example: if an expression returns a Date object as result, this date object is passed to a DateResolver which
- * creates a R object (run of text) containing the properly formatted date string.
+ * creates a org.docx4j.wml.R object (run of text) containing the properly formatted date string.
  * </p>
  * <p>
  * To use your own type resolver, implement this interface and register your implementation by calling
