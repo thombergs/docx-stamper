@@ -2,8 +2,8 @@
 docx-stamper is a template engine for docx documents. You create a template .docx document with your favorite word processor
 and feed it to a DocxStamper instance to create a document based on the template at runtime. Example code:
 ```java
-MyContext context = ...;                 // your own POJO containing all the data needed to fill 
-                                         // the template .docx document
+MyContext context = ...;                 // your own POJO against which expressions found in the template
+                                         // will be resolved
 InputStream template = ...;              // InputStream to your .docx template file
 OutputStream out = ...;                  // OutputStream in which to write the resulting .docx document
 DocxStamper stamper = new DocxStamper();
