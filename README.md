@@ -20,10 +20,18 @@ The value an expression resolves to may be of the following types:
 | ---|---|
 | java.lang.Object | The expression is replaced by the String representation of the object (`String.valueOf()`).
 | java.lang.String | The expression is replaced with the String value.|
-| java.util.Date   | The expression is replaced by a formatted Date string (by default "dd.MM.yyyy"). You can change the format string by registering your own DateResolver (see below).|
+| java.util.Date   | The expression is replaced by a formatted Date string (by default "dd.MM.yyyy"). You can change the format string by registering your own [DateResolver](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/replace/typeresolver/DateResolver.html).|
 | [org.wickedsource.docxstamper...Image](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/replace/typeresolver/image/Image.html) | The expression is replaced with an inline image.|
 
-If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement and register your own [TypeResolver](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/typeresolver/ITypeResolver.html).
+If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement your own [TypeResolver](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/typeresolver/ITypeResolver.html). To register your own TypeResolver with docx-stamper, use the following code:
+
+```java
+DocxStamper stamper = ...;              
+ITypeResolver typeResolver = ...;              // instance of your own ITypeResolver implementation
+Class<?> type ...;                             // class of expression values your resolver handles
+stamper.getTypeResolverRegistry()
+    .registerTypeResolver(type, typeResolver);
+```
 
 ## Conditional Display and Repeating of Elements
 Besides replacing expressions, docx-stamper can **process comments on paragraphs of text** in the template .docx document and do manipulations on the template based on these comments. By default, you can use the following expressions in comments:
@@ -35,7 +43,17 @@ Besides replacing expressions, docx-stamper can **process comments on paragraphs
 | `displayTableIf(boolean)`      | The whole table surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
 | `repeatTableRow(List<Object>)`      | The table row surrounding the commented paragraph is copied once for each object in the passed-in list. Expressions found in the cells of the table row are evaluated against the object from the list.
 
-If a comment cannot be processed, it is simply skipped. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing and registering your own [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html).
+If a comment cannot be processed, it is simply skipped. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html). To register you comment processor to docx-stamper, use the following code:
+
+```java
+DocxStamper stamper = ...;              
+ICommentProcessor commentProcessor = ...;      // instance of your own ICommentProcessor implementation
+Class<?> interfaceClass = ...;                 // class of the interface that defines the methods that are
+                                               // exposed into the expression language
+stamper.getCommentProcessorRegistry()
+    .registerCommentProcessor(interfaceClass, commentProcessor);
+```
+For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html).
 
 ## Sample Code
 The source code contains a set of tests show how to use the features. If you want to run them yourself, clone the repository and run [the tests in the main package](https://github.com/thombergs/docx-stamper/tree/master/src/test/java/org/wickedsource/docxstamper) with the system property `-DkeepOutputFile=true` so that the resulting .docx documents will not be cleaned up so you can view them. The resulting files will be stored in your local temp folder (watch the logging output for the exact location of the files).
