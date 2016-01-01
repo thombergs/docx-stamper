@@ -9,12 +9,14 @@ import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
-import org.wickedsource.docxstamper.replace.image.Image;
-import org.wickedsource.docxstamper.replace.image.ImageResolver;
-import org.wickedsource.docxstamper.replace.string.StringResolver;
+import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
+import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
+import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
+import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Date;
 
 /**
  * <p>
@@ -33,8 +35,9 @@ public class DocxStamper<T> {
     private TypeResolverRegistry typeResolverRegistry;
 
     public DocxStamper() {
-        typeResolverRegistry = new TypeResolverRegistry(new StringResolver());
+        typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
         typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
+        typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
         placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());

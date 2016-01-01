@@ -16,7 +16,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
  * DocxStamper.getTypeResolverRegistry().registerTypeResolver().
  * </p>
  */
-public interface ITypeResolver<T> {
+public interface ITypeResolver<S, T> {
 
     /**
      * This method is called when a placeholder in the .docx template is to replaced by the result of an expression that
@@ -26,9 +26,9 @@ public interface ITypeResolver<T> {
      * @param document         the word document that can be accessed via the DOCX4J api.
      * @param expressionResult the result of an expression. Only objects of classes this type resolver is registered for
      *                         within the TypeResolverRegistrey are passed into this method.
-     * @return an object of the DOCX4J api (usually of type R = "run of text") that will be put in the place of an
+     * @return an object of the DOCX4J api (usually of type org.docx4j.wml.R = "run of text") that will be put in the place of an
      * expression found in the .docx document.
      */
-    Object resolve(WordprocessingMLPackage document, T expressionResult);
+    T resolve(WordprocessingMLPackage document, S expressionResult);
 
 }

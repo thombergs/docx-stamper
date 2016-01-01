@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.replace.image;
+package org.wickedsource.docxstamper.replace.typeresolver.image;
 
 import org.apache.commons.io.IOUtils;
 

@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.replace.image;
+package org.wickedsource.docxstamper.replace.typeresolver.image;
 
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
