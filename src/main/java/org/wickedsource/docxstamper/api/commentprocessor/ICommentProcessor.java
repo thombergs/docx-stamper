@@ -32,7 +32,7 @@ import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
  * that were commented bold.
  * </p>
  * <p><strong>3. Registering you comment processor with DocxStamper</strong><br/>
- * Register your comment processor in the DocxStamper by calling DocxStamper#getCommentProcessorRegistry().registerCommentProcessor().
+ * Register your comment processor in DocxStamper by calling DocxStamper#getCommentProcessorRegistry().registerCommentProcessor().
  * </p>
  */
 public interface ICommentProcessor {
