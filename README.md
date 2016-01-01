@@ -51,5 +51,10 @@ To include docx-stamper in your project, you can use the following maven coordin
 </dependency>
 ```
 
+## Contribute
+If you have an issue or created a comment processor or type resolver that you think deserves to be part of the default distribution, feel free to open an issue or - even better - a pull request with your contribution.
+
+## Frequently Asked Questions
+See the [Frequently Asked Questions] wiki page for some answers to recurring questions.
 
 
