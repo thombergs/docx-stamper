@@ -1,0 +1,15 @@
+org.wickedsource.docxstamper
+org.wickedsource.docxstamper.api
+org.wickedsource.docxstamper.api.commentprocessor
+org.wickedsource.docxstamper.api.typeresolver
+org.wickedsource.docxstamper.el
+org.wickedsource.docxstamper.processor
+org.wickedsource.docxstamper.processor.displayif
+org.wickedsource.docxstamper.processor.repeat
+org.wickedsource.docxstamper.proxy
+org.wickedsource.docxstamper.replace
+org.wickedsource.docxstamper.replace.typeresolver
+org.wickedsource.docxstamper.replace.typeresolver.image
+org.wickedsource.docxstamper.util
+org.wickedsource.docxstamper.walk
+org.wickedsource.docxstamper.walk.coordinates
