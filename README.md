@@ -58,6 +58,8 @@ For an in-depth description of how to create a comment processor, see the javado
 ## Sample Code
 The source code contains a set of tests show how to use the features. If you want to run them yourself, clone the repository and run [the tests in the main package](https://github.com/thombergs/docx-stamper/tree/master/src/test/java/org/wickedsource/docxstamper) with the system property `-DkeepOutputFile=true` so that the resulting .docx documents will not be cleaned up so you can view them. The resulting files will be stored in your local temp folder (watch the logging output for the exact location of the files).
 
+If you want to have a look at the .docx templates used in the tests, have a look at the [resources subfolder](https://github.com/thombergs/docx-stamper/tree/master/src/test/resources/org/wickedsource/docxstamper) in the test folder.
+
 ## Maven coordinates
 To include docx-stamper in your project, you can use the following maven coordinates in your dependency management system:
 
