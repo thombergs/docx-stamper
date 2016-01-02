@@ -1,5 +1,5 @@
 # docx-stamper
-docx-stamper is a template engine for docx documents. You create a template .docx document with your favorite word processor
+docx-stamper is a Java template engine for docx documents. You create a template .docx document with your favorite word processor
 and feed it to a DocxStamper instance to create a document based on the template at runtime. Example code:
 ```java
 MyContext context = ...;                 // your own POJO against which expressions found in the template
