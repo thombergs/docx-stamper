@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.replace;
 
+import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
@@ -64,6 +65,28 @@ public class ParagraphWrapperTest {
         Assert.assertEquals(0, replacementIndex);
         Assert.assertEquals("um", aggregator.getText());
 
+    }
+
+    @Test
+    public void replaceFirstWorksWithFragmentedParagraph() {
+        P p = ParagraphUtil.create("Eine Weitergabe an Dritte ist nicht zulässig.", "Leihfrist bis", ": ", " ", "${", "leihfrist", "}",
+                "Ort der Aufbewahrung: ", " ", "${", "aufbewahrungsOrt", "}",
+                "Ort und Datum, Unterschrift");
+        p.getContent().add(1, new Object()); // add random Object to simulate other docx-Object
+        p.getContent().add(2, new Object());
+        p.getContent().add(6, new Object());
+        p.getContent().add(7, new Object());
+        p.getContent().add(9, new Object());
+        p.getContent().add(11, new Object());
+        p.getContent().add(13, new Object());
+        p.getContent().add(15, new Object());
+        p.getContent().add(17, new Object());
+        p.getContent().add(19, new Object());
+        p.getContent().add(21, new Object());
+        ParagraphWrapper aggregator = new ParagraphWrapper(p);
+        int replacementIndex = aggregator.cleanPlaceholder("${leihfrist}");
+        Assert.assertEquals(8, replacementIndex);
+        Assert.assertEquals("Eine Weitergabe an Dritte ist nicht zulässig.Leihfrist bis:  Ort der Aufbewahrung:  ${aufbewahrungsOrt}Ort und Datum, Unterschrift", aggregator.getText());
     }
 
     private ParagraphWrapper createLoremIpsumAggregator() {

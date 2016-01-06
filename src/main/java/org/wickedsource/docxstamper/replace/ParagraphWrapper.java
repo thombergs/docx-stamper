@@ -94,7 +94,7 @@ public class ParagraphWrapper {
                 }
             } else if (isFirstRun) {
                 // put the whole replacement into the first affected run
-                run.replace(affectedRunsMatchStartIndex, affectedRunsMatchEndIndex, "");
+                run.replace(matchStartIndex, matchEndIndex, "");
                 replacementIndex = run.getIndexInParent();
             } else if (isLastRun) {
                 // replace the last part of the match with empty string
