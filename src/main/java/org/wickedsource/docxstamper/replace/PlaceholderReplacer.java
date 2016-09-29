@@ -1,10 +1,13 @@
 package org.wickedsource.docxstamper.replace;
 
+import java.util.List;
+
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
+import org.springframework.expression.spel.SpelParseException;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -12,8 +15,6 @@ import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-
-import java.util.List;
 
 public class PlaceholderReplacer<T> {
 
@@ -61,8 +62,11 @@ public class PlaceholderReplacer<T> {
                     aggregator.recalculateRuns();
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 }
-            } catch (SpelEvaluationException e) {
-                logger.warn(String.format("Expression %s could not be resolved against context root of type %s", placeholder, expressionContext.getClass()));
+            } catch (SpelEvaluationException | SpelParseException e) {
+                logger.warn(String.format(
+                        "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
+                        placeholder, expressionContext.getClass(), e.getMessage()));
+                logger.trace("Reason for skipping expression:", e);
             }
         }
     }
