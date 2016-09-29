@@ -5,7 +5,6 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.replace.ParagraphWrapper;
 
 import java.io.IOException;
@@ -15,22 +14,40 @@ public class ExpressionReplacementInGlobalParagraphsTest extends AbstractDocx4jT
 
     @Test
     public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer Simpson");
-        InputStream template = getClass().getResourceAsStream("ExpressionReplacementInGlobalParagraphsTest.docx");
+        Context context = new Context();
+        InputStream template = getClass().getResourceAsStream("ExpressionWithSurroundingSpacesTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
-        resolvedExpressionsAreReplaced(document);
-        unresolvedExpressionsAreNotReplaced(document);
+
+        Assert.assertEquals("Before Expression After.", new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(2)).getText());
+        Assert.assertEquals("Before Expression After.", new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(3)).getText());
+        Assert.assertEquals("Before Expression After.", new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(4)).getText());
+        Assert.assertEquals("Before Expression After.", new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(5)).getText());
+        Assert.assertEquals("Before Expression After.", new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(6)).getText());
+        Assert.assertEquals("Before Expression After.", new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(7)).getText());
+        Assert.assertEquals("Before Expression After.", new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(8)).getText());
     }
 
-    private void resolvedExpressionsAreReplaced(WordprocessingMLPackage document) {
-        P nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
-        Assert.assertEquals("In this paragraph, the variable name should be resolved to the value Homer Simpson.", new ParagraphWrapper(nameParagraph).getText());
-    }
+    static class Context {
+        private String expressionWithLeadingAndTrailingSpace = " Expression ";
+        private String expressionWithLeadingSpace = " Expression";
+        private String expressionWithTrailingSpace = "Expression ";
+        private String expressionWithoutSpaces = "Expression";
 
-    private void unresolvedExpressionsAreNotReplaced(WordprocessingMLPackage document) {
-        P fooParagraph = (P) document.getMainDocumentPart().getContent().get(3);
-        Assert.assertEquals("In this paragraph, the variable foo should not be resolved: ${foo}.", new ParagraphWrapper(fooParagraph).getText());
+        public String getExpressionWithLeadingAndTrailingSpace() {
+            return expressionWithLeadingAndTrailingSpace;
+        }
+
+        public String getExpressionWithLeadingSpace() {
+            return expressionWithLeadingSpace;
+        }
+
+        public String getExpressionWithTrailingSpace() {
+            return expressionWithTrailingSpace;
+        }
+
+        public String getExpressionWithoutSpaces() {
+            return expressionWithoutSpaces;
+        }
     }
 
 

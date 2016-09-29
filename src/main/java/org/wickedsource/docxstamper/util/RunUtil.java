@@ -27,7 +27,14 @@ public class RunUtil {
             if (content instanceof JAXBElement) {
                 JAXBElement element = (JAXBElement) content;
                 if (element.getValue() instanceof Text) {
-                    result += ((Text) element.getValue()).getValue();
+                    Text textObj = (Text) element.getValue();
+                    String text = textObj.getValue();
+                    if (!"preserve".equals(textObj.getSpace())) {
+                        // trimming text if spaces are not to be preserved (simulates behavior of Word; LibreOffice seems
+                        // to ignore the "space" property and always preserves spaces)
+                        text = text.trim();
+                    }
+                    result += text;
                 }
             } else if (content instanceof Text) {
                 result += ((Text) content).getValue();
@@ -46,6 +53,7 @@ public class RunUtil {
         run.getContent().clear();
         Text textObj = factory.createText();
         textObj.setValue(text);
+        textObj.setSpace("preserve"); // make the text preserve spaces
         run.getContent().add(textObj);
     }
 

@@ -1,7 +1,5 @@
 package org.wickedsource.docxstamper.replace;
 
-import java.util.List;
-
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.slf4j.Logger;
@@ -15,6 +13,8 @@ import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
+
+import java.util.List;
 
 public class PlaceholderReplacer<T> {
 
@@ -49,17 +49,17 @@ public class PlaceholderReplacer<T> {
 
     @SuppressWarnings("unchecked")
     public void resolveExpressionsForParagraph(P p, T expressionContext, WordprocessingMLPackage document) {
-        ParagraphWrapper aggregator = new ParagraphWrapper(p);
-        List<String> placeholders = expressionUtil.findExpressions(aggregator.getText());
+        ParagraphWrapper paragraphWrapper = new ParagraphWrapper(p);
+        List<String> placeholders = expressionUtil.findExpressions(paragraphWrapper.getText());
         for (String placeholder : placeholders) {
             try {
                 Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
                 if (replacement != null) {
-                    int replacementIndex = aggregator.cleanPlaceholder(placeholder);
+                    int replacementIndex = paragraphWrapper.cleanPlaceholder(placeholder);
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
                     p.getContent().add(replacementIndex, replacementObject);
-                    aggregator.recalculateRuns();
+                    paragraphWrapper.recalculateRuns();
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 }
             } catch (SpelEvaluationException | SpelParseException e) {
