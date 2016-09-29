@@ -2,12 +2,18 @@ package org.wickedsource.docxstamper.walk.coordinates;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
+import org.docx4j.openpackaging.parts.WordprocessingML.HeaderPart;
+import org.docx4j.openpackaging.parts.relationships.Namespaces;
+import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
+import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 
 import javax.xml.bind.JAXBElement;
+import java.util.List;
 
 public abstract class CoordinatesWalker {
 
@@ -18,8 +24,30 @@ public abstract class CoordinatesWalker {
     }
 
     public void walk() {
+
+        RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
+
+        // walk through elements in header
+        Relationship headerRel = relationshipsPart.getRelationshipByType(Namespaces.HEADER);
+        if (headerRel != null) {
+            HeaderPart headerPart = (HeaderPart) relationshipsPart.getPart(headerRel);
+            walkContent(headerPart.getContent());
+        }
+
+        // walk through elements in main document part
+        walkContent(document.getMainDocumentPart().getContent());
+
+        // walk through elements in footer
+        Relationship footerRel = relationshipsPart.getRelationshipByType(Namespaces.FOOTER);
+        if (footerRel != null) {
+            FooterPart footerPart = (FooterPart) relationshipsPart.getPart(footerRel);
+            walkContent(footerPart.getContent());
+        }
+    }
+
+    private void walkContent(List<Object> contentElements) {
         int elementIndex = 0;
-        for (Object contentElement : document.getMainDocumentPart().getContent()) {
+        for (Object contentElement : contentElements) {
             Object unwrappedObject = XmlUtils.unwrap(contentElement);
             if (unwrappedObject instanceof P) {
                 P p = (P) unwrappedObject;

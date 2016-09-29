@@ -28,17 +28,23 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 paragraphCount.increment();
                 switch (paragraphCount.getCount()) {
-                    case 1:
+                    case 1:     // header
+                    case 9:     // main content
+                    case 17:    // footer
                         Assert.assertEquals(0, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are: index 0.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates());
                         break;
                     case 2:
+                    case 10:
+                    case 18:
                         Assert.assertEquals(1, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are: index 1.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates());
                         break;
                     case 3:
+                    case 11:
+                    case 19:
                         Assert.assertEquals(0, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are: table 2, row 0, cell 0, index 0.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertEquals(0, paragraphCoordinates.getParentTableCellCoordinates().getIndex());
@@ -47,6 +53,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 4:
+                    case 12:
+                    case 20:
                         Assert.assertEquals(1, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are: table 2, row 0, cell 0, index 1.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertEquals(0, paragraphCoordinates.getParentTableCellCoordinates().getIndex());
@@ -55,6 +63,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 5:
+                    case 13:
+                    case 21:
                         Assert.assertEquals(0, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are: table 2, row 1, cell 0, table 0, row 0, cell 0, index 0.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertEquals(0, paragraphCoordinates.getParentTableCellCoordinates().getIndex());
@@ -66,6 +76,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 6:
+                    case 14:
+                    case 22:
                         Assert.assertEquals(0, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are: table 2, row 1, cell 0, table 0, row 1, cell 0, index 0.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertEquals(0, paragraphCoordinates.getParentTableCellCoordinates().getIndex());
@@ -77,6 +89,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 7:
+                    case 15:
+                    case 23:
                         Assert.assertEquals(1, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are table 2, row 1, cell 0, index 1.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertEquals(0, paragraphCoordinates.getParentTableCellCoordinates().getIndex());
@@ -85,6 +99,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 8:
+                    case 16:
+                    case 24:
                         Assert.assertEquals(3, paragraphCoordinates.getIndex());
                         Assert.assertEquals("The coordinates of this paragraph are index 3.", new ParagraphWrapper(paragraphCoordinates.getParagraph()).getText());
                         Assert.assertNull(paragraphCoordinates.getParentTableCellCoordinates());
@@ -96,11 +112,15 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
             protected void onTable(TableCoordinates tableCoordinates) {
                 tableCount.increment();
                 switch (tableCount.getCount()) {
-                    case 1:
+                    case 1: // header
+                    case 3: // main content
+                    case 5: // footer
                         Assert.assertEquals(2, tableCoordinates.getIndex());
                         Assert.assertNull(tableCoordinates.getParentTableCellCoordinates());
                         break;
                     case 2:
+                    case 4:
+                    case 6:
                         Assert.assertEquals(0, tableCoordinates.getIndex());
                         Assert.assertEquals(0, tableCoordinates.getParentTableCellCoordinates().getIndex());
                         Assert.assertEquals(1, tableCoordinates.getParentTableCellCoordinates().getParentTableRowCoordinates().getIndex());
@@ -114,17 +134,23 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
             protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
                 rowCount.increment();
                 switch (rowCount.getCount()) {
-                    case 1:
+                    case 1: // header
+                    case 5: // main content
+                    case 9: // footer
                         Assert.assertEquals(0, tableRowCoordinates.getIndex());
                         Assert.assertEquals(2, tableRowCoordinates.getParentTableCoordinates().getIndex());
                         Assert.assertNull(tableRowCoordinates.getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 2:
+                    case 6:
+                    case 10:
                         Assert.assertEquals(1, tableRowCoordinates.getIndex());
                         Assert.assertEquals(2, tableRowCoordinates.getParentTableCoordinates().getIndex());
                         Assert.assertNull(tableRowCoordinates.getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 3:
+                    case 7:
+                    case 11:
                         Assert.assertEquals(0, tableRowCoordinates.getIndex());
                         Assert.assertEquals(0, tableRowCoordinates.getParentTableCoordinates().getIndex());
                         Assert.assertEquals(0, tableRowCoordinates.getParentTableCoordinates().getParentTableCellCoordinates().getIndex());
@@ -133,6 +159,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
                         Assert.assertNull(tableRowCoordinates.getParentTableCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 4:
+                    case 8:
+                    case 12:
                         Assert.assertEquals(1, tableRowCoordinates.getIndex());
                         Assert.assertEquals(0, tableRowCoordinates.getParentTableCoordinates().getIndex());
                         Assert.assertEquals(0, tableRowCoordinates.getParentTableCoordinates().getParentTableCellCoordinates().getIndex());
@@ -148,19 +176,25 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
             protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
                 cellCount.increment();
                 switch (cellCount.getCount()) {
-                    case 1:
+                    case 1: // header
+                    case 5: // main content
+                    case 9: // footer
                         Assert.assertEquals(0, tableCellCoordinates.getIndex());
                         Assert.assertEquals(0, tableCellCoordinates.getParentTableRowCoordinates().getIndex());
                         Assert.assertEquals(2, tableCellCoordinates.getParentTableRowCoordinates().getParentTableCoordinates().getIndex());
                         Assert.assertNull(tableCellCoordinates.getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 2:
+                    case 6:
+                    case 10:
                         Assert.assertEquals(0, tableCellCoordinates.getIndex());
                         Assert.assertEquals(1, tableCellCoordinates.getParentTableRowCoordinates().getIndex());
                         Assert.assertEquals(2, tableCellCoordinates.getParentTableRowCoordinates().getParentTableCoordinates().getIndex());
                         Assert.assertNull(tableCellCoordinates.getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 3:
+                    case 7:
+                    case 11:
                         Assert.assertEquals(0, tableCellCoordinates.getIndex());
                         Assert.assertEquals(0, tableCellCoordinates.getParentTableRowCoordinates().getIndex());
                         Assert.assertEquals(0, tableCellCoordinates.getParentTableRowCoordinates().getParentTableCoordinates().getIndex());
@@ -170,6 +204,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
                         Assert.assertNull(tableCellCoordinates.getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates().getParentTableCoordinates().getParentTableCellCoordinates());
                         break;
                     case 4:
+                    case 8:
+                    case 12:
                         Assert.assertEquals(0, tableCellCoordinates.getIndex());
                         Assert.assertEquals(1, tableCellCoordinates.getParentTableRowCoordinates().getIndex());
                         Assert.assertEquals(0, tableCellCoordinates.getParentTableRowCoordinates().getParentTableCoordinates().getIndex());
@@ -184,10 +220,10 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
         };
 
         walker.walk();
-        Assert.assertEquals(8, paragraphCount.getCount());
-        Assert.assertEquals(2, tableCount.getCount());
-        Assert.assertEquals(4, rowCount.getCount());
-        Assert.assertEquals(4, cellCount.getCount());
+        Assert.assertEquals(24, paragraphCount.getCount());
+        Assert.assertEquals(6, tableCount.getCount());
+        Assert.assertEquals(12, rowCount.getCount());
+        Assert.assertEquals(12, cellCount.getCount());
 
 
     }
