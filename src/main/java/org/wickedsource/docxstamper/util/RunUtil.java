@@ -1,9 +1,8 @@
 package org.wickedsource.docxstamper.util;
 
 import org.docx4j.jaxb.Context;
-import org.docx4j.wml.ObjectFactory;
-import org.docx4j.wml.R;
-import org.docx4j.wml.Text;
+import org.docx4j.model.styles.StyleUtil;
+import org.docx4j.wml.*;
 
 import javax.xml.bind.JAXBElement;
 
@@ -44,6 +43,20 @@ public class RunUtil {
     }
 
     /**
+     * Applies the style of the given paragraph to the given content object (if the content object is a Run).
+     *
+     * @param p   the paragraph whose style to use.
+     * @param run the Run to which the style should be applied.
+     */
+    public static void applyParagraphStyle(P p, R run) {
+        if (p.getPPr() != null && p.getPPr().getRPr() != null) {
+            RPr runProperties = new RPr();
+            StyleUtil.apply(p.getPPr().getRPr(), runProperties);
+            run.setRPr(runProperties);
+        }
+    }
+
+    /**
      * Sets the text of the given run to the given value.
      *
      * @param run  the run whose text to change.
@@ -66,6 +79,19 @@ public class RunUtil {
     public static R create(String text) {
         R run = factory.createR();
         setText(run, text);
+        return run;
+    }
+
+    /**
+     * Creates a new run with the specified text and inherits the style of the parent paragraph.
+     *
+     * @param text            the initial text of the run.
+     * @param parentParagraph the parent paragraph whose style to inherit.
+     * @return the newly created run.
+     */
+    public static R create(String text, P parentParagraph) {
+        R run = create(text);
+        applyParagraphStyle(parentParagraph, run);
         return run;
     }
 }

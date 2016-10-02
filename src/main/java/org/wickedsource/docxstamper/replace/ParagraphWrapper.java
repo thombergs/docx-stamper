@@ -84,8 +84,8 @@ public class ParagraphWrapper {
                 } else {
                     // cut the run in two parts left and right of the match
                     String runText = RunUtil.getText(run.getRun());
-                    R run1 = RunUtil.create(runText.substring(0, affectedRunsMatchStartIndex));
-                    R run2 = RunUtil.create(runText.substring(affectedRunsMatchEndIndex + 1));
+                    R run1 = RunUtil.create(runText.substring(0, affectedRunsMatchStartIndex), this.paragraph);
+                    R run2 = RunUtil.create(runText.substring(affectedRunsMatchEndIndex + 1), this.paragraph);
                     this.paragraph.getContent().add(run.getIndexInParent(), run2);
                     this.paragraph.getContent().add(run.getIndexInParent(), run1);
                     this.paragraph.getContent().remove(run.getRun());

@@ -22,7 +22,7 @@ public class ParagraphUtil {
     public static P create(String... texts) {
         P p = objectFactory.createP();
         for (String text : texts) {
-            R r = RunUtil.create(text);
+            R r = RunUtil.create(text, p);
             p.getContent().add(r);
         }
         return p;

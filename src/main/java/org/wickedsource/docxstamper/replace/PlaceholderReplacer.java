@@ -2,6 +2,7 @@ package org.wickedsource.docxstamper.replace;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -10,6 +11,7 @@ import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
+import org.wickedsource.docxstamper.util.RunUtil;
 import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
@@ -58,6 +60,9 @@ public class PlaceholderReplacer<T> {
                     int replacementIndex = paragraphWrapper.cleanPlaceholder(placeholder);
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
+                    if (replacementObject instanceof R) {
+                        RunUtil.applyParagraphStyle(p, (R) replacementObject);
+                    }
                     p.getContent().add(replacementIndex, replacementObject);
                     paragraphWrapper.recalculateRuns();
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
