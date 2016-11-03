@@ -12,7 +12,7 @@ out.close();
 ```
 
 ## Replacing Expressions in a .docx Template
-The main feature of docx-stamper is **replacement of expressions** within the text of the template document. Simply add expressions like `${person.name}` in the text of your .docx template and provide a context object against which the expression can be resolved. docx-stamper will try to keep the original formatting of the text in the template intact.
+The main feature of docx-stamper is **replacement of expressions** within the text of the template document. Simply add expressions like `${person.name}` or `${person.name.equals("Homer") ? "Duff" : "Budweiser"}` in the text of your .docx template and provide a context object against which the expression can be resolved. docx-stamper will try to keep the original formatting of the text in the template intact. You can use the full feature set of [Spring Expression Language](http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html).
 
 The value an expression resolves to may be of the following types:
 
