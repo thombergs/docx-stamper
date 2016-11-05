@@ -11,10 +11,12 @@ import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.proxy.ContextFactory;
 import org.wickedsource.docxstamper.util.CommentUtil;
+import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,10 +39,8 @@ public class CommentProcessorRegistry {
     /**
      * Registers the specified ICommentProcessor as an implementation of the specified interface.
      *
-     * @param interfaceClass
-     *            the Interface which is implemented by the commentProcessor.
-     * @param commentProcessor
-     *            the commentProcessor implementing the specified interface.
+     * @param interfaceClass   the Interface which is implemented by the commentProcessor.
+     * @param commentProcessor the commentProcessor implementing the specified interface.
      */
     public void registerCommentProcessor(Class<?> interfaceClass, ICommentProcessor commentProcessor) {
         this.commentProcessorInterfaces.put(commentProcessor, interfaceClass);
@@ -51,27 +51,25 @@ public class CommentProcessorRegistry {
      * Lets each registered ICommentProcessor have a run on the specified docx document. At the end of the document the commit method is called for each
      * ICommentProcessor. The ICommentProcessors are run in the order they were registered.
      *
-     * @param document
-     *            the docx document over which to run the registered ICommentProcessors.
-     * @param contextRoot
-     *            the context root object against which to resolve expressions within the comments.
-     * @param <T>
-     *            type of the contextRoot object.
+     * @param document    the docx document over which to run the registered ICommentProcessors.
+     * @param contextRoot the context root object against which to resolve expressions within the comments.
+     * @param <T>         type of the contextRoot object.
      */
     public <T> void runProcessors(final WordprocessingMLPackage document, final T contextRoot) {
+        Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
         for (final ICommentProcessor processor : commentProcessors) {
             try {
                 Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
                 ContextFactory<T> contextFactory = new ContextFactory<>();
                 final T contextRootProxy = contextFactory.createProxy(contextRoot, commentProcessorInterface, processor);
-                runProcessor(document, processor, contextRootProxy);
+                runProcessor(document, processor, comments, contextRootProxy);
             } catch (Exception e) {
                 throw new DocxStamperException(String.format("Could not create a proxy around context root object of class %s", contextRoot.getClass()), e);
             }
         }
     }
 
-    private <T> void runProcessor(final WordprocessingMLPackage document, final ICommentProcessor processor, final T contextRoot) {
+    private <T> void runProcessor(final WordprocessingMLPackage document, final ICommentProcessor processor, final Map<BigInteger, CommentWrapper> comments, final T contextRoot) {
         CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
 
             @Override
@@ -87,10 +85,11 @@ public class CommentProcessorRegistry {
                 }
 
                 if (comment != null) {
+                    CommentWrapper commentWrapper = comments.get(comment.getId());
                     String commentString = CommentUtil.getCommentString(comment);
                     try {
                         expressionResolver.resolveExpression(commentString, contextRoot);
-                        CommentUtil.deleteCommentFromParagraph(paragraphCoordinates.getParagraph(), comment);
+                        CommentUtil.deleteComment(commentWrapper);
                         logger.debug(
                                 String.format("Comment '%s' has been successfully processed by comment processor %s.", commentString, processor.getClass()));
                     } catch (SpelEvaluationException | SpelParseException e) {

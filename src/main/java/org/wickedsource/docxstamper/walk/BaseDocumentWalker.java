@@ -27,4 +27,14 @@ public abstract class BaseDocumentWalker extends DocumentWalker {
     protected void onTableRow(Tr tableRow) {
 
     }
+
+    @Override
+    protected void onCommentRangeStart(CommentRangeStart commentRangeStart) {
+
+    }
+
+    @Override
+    protected void onCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
+
+    }
 }

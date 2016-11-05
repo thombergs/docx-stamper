@@ -11,14 +11,20 @@ import org.docx4j.wml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.walk.BaseDocumentWalker;
+import org.wickedsource.docxstamper.walk.DocumentWalker;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CommentUtil {
 
     private static Logger logger = LoggerFactory.getLogger(CommentUtil.class);
+
+    private CommentUtil() {
+
+    }
 
     /**
      * Returns the first comment found for the given docx object. Note that an object is only considered commented if
@@ -59,46 +65,98 @@ public class CommentUtil {
      * Returns the string value of the specified comment object.
      */
     public static String getCommentString(Comments.Comment comment) {
-        String commentString = "";
+        StringBuilder builder = new StringBuilder();
         for (Object commentChildObject : comment.getContent()) {
             if (commentChildObject instanceof P) {
-                commentString += new ParagraphWrapper((P) commentChildObject).getText();
+                builder.append(new ParagraphWrapper((P) commentChildObject).getText());
             }
         }
-        return commentString;
+        return builder.toString();
     }
 
-    public static void deleteCommentFromParagraph(P paragraph, Comments.Comment comment) {
-        List<Integer> indicesToRemove = new ArrayList<>();
+    public static void deleteComment(CommentWrapper comment) {
+        if (comment.getCommentRangeEnd() != null) {
+            ContentAccessor commentRangeEndParent = (ContentAccessor) comment.getCommentRangeEnd().getParent();
+            commentRangeEndParent.getContent().remove(comment.getCommentRangeEnd());
+            deleteCommentReference(commentRangeEndParent, comment.getCommentRangeEnd().getId());
+        }
+        if (comment.getCommentRangeStart() != null) {
+            ContentAccessor commentRangeStartParent = (ContentAccessor) comment.getCommentRangeStart().getParent();
+            commentRangeStartParent.getContent().remove(comment.getCommentRangeStart());
+            deleteCommentReference(commentRangeStartParent, comment.getCommentRangeStart().getId());
+        }
+        // TODO: also delete comment from comments.xml
+    }
+
+    private static void deleteCommentReference(ContentAccessor parent, BigInteger commentId) {
         int index = 0;
-        for (Object contentObject : paragraph.getContent()) {
-            BigInteger commentId = null;
-            if (contentObject instanceof CommentRangeStart) {
-                commentId = ((CommentRangeStart) contentObject).getId();
-            }
-            if (contentObject instanceof CommentRangeEnd) {
-                commentId = ((CommentRangeEnd) contentObject).getId();
-            }
+        Integer indexToDelete = null;
+        for (Object contentObject : parent.getContent()) {
             if (contentObject instanceof R) {
                 for (Object runContentObject : ((R) contentObject).getContent()) {
                     Object unwrapped = XmlUtils.unwrap(runContentObject);
                     if (unwrapped instanceof R.CommentReference) {
-                        commentId = ((R.CommentReference) unwrapped).getId();
+                        BigInteger foundCommentId = ((R.CommentReference) unwrapped).getId();
+                        if (foundCommentId.equals(commentId)) {
+                            indexToDelete = index;
+                            break;
+                        }
                     }
                 }
             }
-            if (comment.getId().equals(commentId)) {
-                indicesToRemove.add(index);
-            }
             index++;
         }
-        int indexCorrection = 0;
-        for (Integer indexToRemove : indicesToRemove) {
-            paragraph.getContent().remove(indexToRemove - indexCorrection);
-            indexCorrection++;
+        if (indexToDelete != null) {
+            parent.getContent().remove(indexToDelete.intValue());
         }
+    }
 
-        // TODO: also delete comment from comments.xml within the word document
+    public static Map<BigInteger, CommentWrapper> getComments(WordprocessingMLPackage document) {
+        Map<BigInteger, CommentWrapper> comments = new HashMap<>();
+        collectCommentRanges(comments, document);
+        collectComments(comments, document);
+        return comments;
+    }
+
+    private static void collectCommentRanges(final Map<BigInteger, CommentWrapper> comments, WordprocessingMLPackage document) {
+        DocumentWalker documentWalker = new BaseDocumentWalker(document.getMainDocumentPart()) {
+            @Override
+            protected void onCommentRangeStart(CommentRangeStart commentRangeStart) {
+                CommentWrapper commentWrapper = comments.get(commentRangeStart.getId());
+                if (commentWrapper == null) {
+                    commentWrapper = new CommentWrapper();
+                    comments.put(commentRangeStart.getId(), commentWrapper);
+                }
+                commentWrapper.setCommentRangeStart(commentRangeStart);
+            }
+
+            @Override
+            protected void onCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
+                CommentWrapper commentWrapper = comments.get(commentRangeEnd.getId());
+                if (commentWrapper == null) {
+                    commentWrapper = new CommentWrapper();
+                    comments.put(commentRangeEnd.getId(), commentWrapper);
+                }
+                commentWrapper.setCommentRangeEnd(commentRangeEnd);
+            }
+        };
+        documentWalker.walk();
+    }
+
+    private static void collectComments(final Map<BigInteger, CommentWrapper> comments, WordprocessingMLPackage document) {
+        try {
+            CommentsPart commentsPart = (CommentsPart) document.getParts().get(new PartName("/word/comments.xml"));
+            if (commentsPart != null) {
+                for (Comments.Comment comment : commentsPart.getContents().getComment()) {
+                    CommentWrapper commentWrapper = comments.get(comment.getId());
+                    if (commentWrapper != null) {
+                        commentWrapper.setComment(comment);
+                    }
+                }
+            }
+        } catch (Docx4JException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
 }

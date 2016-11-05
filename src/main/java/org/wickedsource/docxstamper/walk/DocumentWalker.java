@@ -18,7 +18,7 @@ public abstract class DocumentWalker {
             Object unwrappedObject = XmlUtils.unwrap(contentElement);
             if (unwrappedObject instanceof P) {
                 P p = (P) unwrappedObject;
-                onParagraph(p);
+                walkParagraph(p);
             } else if (unwrappedObject instanceof Tbl) {
                 Tbl table = (Tbl) unwrappedObject;
                 walkTable(table);
@@ -58,10 +58,23 @@ public abstract class DocumentWalker {
         for (Object cellContentElement : cell.getContent()) {
             if (XmlUtils.unwrap(cellContentElement) instanceof P) {
                 P p = (P) cellContentElement;
-                onParagraph(p);
+                walkParagraph(p);
             } else if (XmlUtils.unwrap(cellContentElement) instanceof Tbl) {
                 Tbl nestedTable = (Tbl) ((JAXBElement) cellContentElement).getValue();
                 walkTable(nestedTable);
+            }
+        }
+    }
+
+    private void walkParagraph(P p) {
+        onParagraph(p);
+        for (Object element : p.getContent()) {
+            if (XmlUtils.unwrap(element) instanceof CommentRangeStart) {
+                CommentRangeStart commentRangeStart = (CommentRangeStart) element;
+                onCommentRangeStart(commentRangeStart);
+            } else if (XmlUtils.unwrap(element) instanceof CommentRangeEnd) {
+                CommentRangeEnd commentRangeEnd = (CommentRangeEnd) element;
+                onCommentRangeEnd(commentRangeEnd);
             }
         }
     }
@@ -73,5 +86,9 @@ public abstract class DocumentWalker {
     protected abstract void onTableCell(Tc tableCell);
 
     protected abstract void onTableRow(Tr tableRow);
+
+    protected abstract void onCommentRangeStart(CommentRangeStart commentRangeStart);
+
+    protected abstract void onCommentRangeEnd(CommentRangeEnd commentRangeEnd);
 
 }
