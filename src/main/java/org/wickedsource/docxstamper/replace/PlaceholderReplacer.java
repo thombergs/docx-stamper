@@ -57,14 +57,12 @@ public class PlaceholderReplacer<T> {
             try {
                 Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
                 if (replacement != null) {
-                    int replacementIndex = paragraphWrapper.cleanPlaceholder(placeholder);
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
                     if (replacementObject instanceof R) {
                         RunUtil.applyParagraphStyle(p, (R) replacementObject);
                     }
-                    p.getContent().add(replacementIndex, replacementObject);
-                    paragraphWrapper.recalculateRuns();
+                    paragraphWrapper.replace(placeholder, replacementObject);
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 }
             } catch (SpelEvaluationException | SpelParseException e) {

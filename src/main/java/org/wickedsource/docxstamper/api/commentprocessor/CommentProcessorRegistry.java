@@ -1,10 +1,5 @@
 package org.wickedsource.docxstamper.api.commentprocessor;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Comments;
@@ -19,6 +14,11 @@ import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Allows registration of ICommentProcessor objects. Each registered ICommentProcessor must implement an interface which has to be specified at registration
@@ -100,7 +100,6 @@ public class CommentProcessorRegistry {
                         logger.trace("Reason for skipping comment: ", e);
                     }
                 }
-                // TODO: remove comment once it was successfully processed.
             }
         };
         walker.walk();

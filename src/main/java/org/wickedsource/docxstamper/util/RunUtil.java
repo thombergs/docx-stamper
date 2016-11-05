@@ -65,6 +65,7 @@ public class RunUtil {
     public static void setText(R run, String text) {
         run.getContent().clear();
         Text textObj = factory.createText();
+        textObj.setSpace("preserve");
         textObj.setValue(text);
         textObj.setSpace("preserve"); // make the text preserve spaces
         run.getContent().add(textObj);

@@ -44,16 +44,17 @@ public class IndexedRun {
      * Determines whether the specified range of start and end index touches this run.
      */
     public boolean isTouchedByRange(int globalStartIndex, int globalEndIndex) {
-        return (startIndex >= globalStartIndex && startIndex <= globalEndIndex)
-                || (endIndex >= globalStartIndex && endIndex <= globalEndIndex)
-                || (startIndex <= globalStartIndex && endIndex >= globalEndIndex);
+        return ((startIndex >= globalStartIndex) && (startIndex <= globalEndIndex))
+                || ((endIndex >= globalStartIndex) && (endIndex <= globalEndIndex))
+                || ((startIndex <= globalStartIndex) && (endIndex >= globalEndIndex));
 
     }
 
     /**
      * Replaces the substring starting at the given index with the given replacement string.
      *
-     * @param globalStartIndex the global index (meaning the index relative to multiple aggregated runs) at which to perform the replacement.
+     * @param globalStartIndex the global index (meaning the index relative to multiple aggregated runs) at which to start the replacement.
+     * @param globalEndIndex   the global index (meaning the index relative to multiple aggregated runs) at which to end the replacement.
      * @param replacement      the string to replace the substring at the specified global index.
      */
     public void replace(int globalStartIndex, int globalEndIndex, String replacement) {
