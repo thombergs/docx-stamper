@@ -17,7 +17,7 @@ public class ExpressionResolver {
      * @return the result of the evaluated expression.
      */
     public Object resolveExpression(String expressionString, Object contextRoot) {
-        if (expressionString.startsWith("${") && expressionString.endsWith("}")) {
+        if ((expressionString.startsWith("${") || expressionString.startsWith("#{")) && expressionString.endsWith("}")) {
             expressionString = expressionUtil.stripExpression(expressionString);
         }
         ExpressionParser parser = new SpelExpressionParser();

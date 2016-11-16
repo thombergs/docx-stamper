@@ -52,17 +52,14 @@ public class PlaceholderReplacer<T> {
     @SuppressWarnings("unchecked")
     public void resolveExpressionsForParagraph(P p, T expressionContext, WordprocessingMLPackage document) {
         ParagraphWrapper paragraphWrapper = new ParagraphWrapper(p);
-        List<String> placeholders = expressionUtil.findExpressions(paragraphWrapper.getText());
+        List<String> placeholders = expressionUtil.findVariableExpressions(paragraphWrapper.getText());
         for (String placeholder : placeholders) {
             try {
                 Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
                 if (replacement != null) {
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
-                    if (replacementObject instanceof R) {
-                        RunUtil.applyParagraphStyle(p, (R) replacementObject);
-                    }
-                    paragraphWrapper.replace(placeholder, replacementObject);
+                    replace(paragraphWrapper, placeholder, replacementObject);
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 }
             } catch (SpelEvaluationException | SpelParseException e) {
@@ -72,6 +69,16 @@ public class PlaceholderReplacer<T> {
                 logger.trace("Reason for skipping expression:", e);
             }
         }
+    }
+
+    public void replace(ParagraphWrapper p, String placeholder, Object replacementObject) {
+        if (replacementObject == null) {
+            replacementObject = RunUtil.create("");
+        }
+        if (replacementObject instanceof R) {
+            RunUtil.applyParagraphStyle(p.getParagraph(), (R) replacementObject);
+        }
+        p.replace(placeholder, replacementObject);
     }
 
 }

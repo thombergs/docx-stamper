@@ -30,7 +30,7 @@ public class DocxStamper<T> {
 
     private PlaceholderReplacer<T> placeholderReplacer;
 
-    private CommentProcessorRegistry commentProcessorRegistry = new CommentProcessorRegistry();
+    private CommentProcessorRegistry commentProcessorRegistry;
 
     private TypeResolverRegistry typeResolverRegistry;
 
@@ -39,6 +39,7 @@ public class DocxStamper<T> {
         typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
         typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
         placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+        commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
     }

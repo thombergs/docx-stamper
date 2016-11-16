@@ -9,7 +9,10 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
+import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.proxy.ContextFactory;
+import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
@@ -35,6 +38,15 @@ public class CommentProcessorRegistry {
     private List<ICommentProcessor> commentProcessors = new ArrayList<>();
 
     private ExpressionResolver expressionResolver = new ExpressionResolver();
+
+    private ExpressionUtil expressionUtil = new ExpressionUtil();
+
+    private PlaceholderReplacer placeholderReplacer;
+
+    public CommentProcessorRegistry(PlaceholderReplacer placeholderReplacer) {
+        this.placeholderReplacer = placeholderReplacer;
+    }
+
 
     /**
      * Registers the specified ICommentProcessor as an implementation of the specified interface.
@@ -84,10 +96,12 @@ public class CommentProcessorRegistry {
                     return;
                 }
 
+                // evaluating processor expressions in comment
                 if (comment != null) {
                     CommentWrapper commentWrapper = comments.get(comment.getId());
                     String commentString = CommentUtil.getCommentString(comment);
                     try {
+                        // TODO: only allow processor expressions ("#") instead of variable expressions ("$")
                         expressionResolver.resolveExpression(commentString, contextRoot);
                         CommentUtil.deleteComment(commentWrapper);
                         logger.debug(
@@ -97,6 +111,24 @@ public class CommentProcessorRegistry {
                                 "Skipping comment expression '%s' because it can not be resolved by comment processor %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
                                 commentString, processor.getClass(), e.getMessage()));
                         logger.trace("Reason for skipping comment: ", e);
+                    }
+                }
+
+                // evaluating inline processor expressions (inline = within the paragraph text itself)
+                ParagraphWrapper paragraph = new ParagraphWrapper(paragraphCoordinates.getParagraph());
+                List<String> processorExpressions = expressionUtil.findProcessorExpressions(paragraph.getText());
+                for (String processorExpression : processorExpressions) {
+                    try {
+                        String strippedExpression = expressionUtil.stripExpression(processorExpression);
+                        expressionResolver.resolveExpression(strippedExpression, contextRoot);
+                        placeholderReplacer.replace(paragraph, processorExpression, null);
+                        logger.debug(
+                                String.format("Processor expression '%s' has been successfully processed by comment processor %s.", processorExpression, processor.getClass()));
+                    } catch (SpelEvaluationException | SpelParseException e) {
+                        logger.warn(String.format(
+                                "Skipping processor expression '%s' because it can not be resolved by comment processor %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
+                                processorExpression, processor.getClass(), e.getMessage()));
+                        logger.trace("Reason for skipping processor expression: ", e);
                     }
                 }
             }
