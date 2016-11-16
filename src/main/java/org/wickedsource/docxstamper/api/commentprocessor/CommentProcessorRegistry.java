@@ -101,7 +101,6 @@ public class CommentProcessorRegistry {
                     CommentWrapper commentWrapper = comments.get(comment.getId());
                     String commentString = CommentUtil.getCommentString(comment);
                     try {
-                        // TODO: only allow processor expressions ("#") instead of variable expressions ("$")
                         expressionResolver.resolveExpression(commentString, contextRoot);
                         CommentUtil.deleteComment(commentWrapper);
                         logger.debug(
