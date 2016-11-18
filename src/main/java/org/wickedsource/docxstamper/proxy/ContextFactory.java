@@ -16,12 +16,16 @@ public class ContextFactory<T> {
      * @throws Exception in case a proxy could not be created.
      */
     @SuppressWarnings("unchecked")
-    public T createProxy(T root, Class<?> interfaceClass, ICommentProcessor interfaceImpl) throws Exception {
-        ProxyMethodHandler methodHandler = new ProxyMethodHandler(root, interfaceClass, interfaceImpl);
-        ProxyFactory proxyFactory = new ProxyFactory();
-        proxyFactory.setSuperclass(root.getClass());
-        proxyFactory.setInterfaces(new Class[]{interfaceClass});
-        return (T) proxyFactory.create(new Class[0], new Object[0], methodHandler);
+    public T createProxy(T root, Class<?> interfaceClass, ICommentProcessor interfaceImpl) throws ProxyException {
+        try {
+            ProxyMethodHandler methodHandler = new ProxyMethodHandler(root, interfaceClass, interfaceImpl);
+            ProxyFactory proxyFactory = new ProxyFactory();
+            proxyFactory.setSuperclass(root.getClass());
+            proxyFactory.setInterfaces(new Class[]{interfaceClass});
+            return (T) proxyFactory.create(new Class[0], new Object[0], methodHandler);
+        } catch (Exception e) {
+            throw new ProxyException(e);
+        }
     }
 
 }

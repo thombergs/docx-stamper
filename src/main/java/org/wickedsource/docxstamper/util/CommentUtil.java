@@ -10,6 +10,7 @@ import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
 import org.docx4j.wml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.replace.ParagraphWrapper;
 import org.wickedsource.docxstamper.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.walk.DocumentWalker;
@@ -36,24 +37,28 @@ public class CommentUtil {
      * commented.
      * @throws Docx4JException in case of a Docx4J processing error.
      */
-    public static Comments.Comment getCommentFor(ContentAccessor object, WordprocessingMLPackage document) throws Docx4JException {
-        for (Object contentObject : object.getContent()) {
-            if (contentObject instanceof CommentRangeStart) {
-                try {
-                    BigInteger id = ((CommentRangeStart) contentObject).getId();
-                    CommentsPart commentsPart = (CommentsPart) document.getParts().get(new PartName("/word/comments.xml"));
-                    Comments comments = commentsPart.getContents();
-                    for (Comments.Comment comment : comments.getComment()) {
-                        if (comment.getId().equals(id)) {
-                            return comment;
+    public static Comments.Comment getCommentFor(ContentAccessor object, WordprocessingMLPackage document) {
+        try {
+            for (Object contentObject : object.getContent()) {
+                if (contentObject instanceof CommentRangeStart) {
+                    try {
+                        BigInteger id = ((CommentRangeStart) contentObject).getId();
+                        CommentsPart commentsPart = (CommentsPart) document.getParts().get(new PartName("/word/comments.xml"));
+                        Comments comments = commentsPart.getContents();
+                        for (Comments.Comment comment : comments.getComment()) {
+                            if (comment.getId().equals(id)) {
+                                return comment;
+                            }
                         }
+                    } catch (InvalidFormatException e) {
+                        logger.warn(String.format("Error while searching comment. Skipping object %s.", object), e);
                     }
-                } catch (InvalidFormatException e) {
-                    logger.warn(String.format("Error while searching comment. Skipping object %s.", object), e);
                 }
             }
+            return null;
+        } catch (Docx4JException e) {
+            throw new DocxStamperException("error accessing the comments of the document!", e);
         }
-        return null;
     }
 
     public static String getCommentStringFor(ContentAccessor object, WordprocessingMLPackage document) throws Docx4JException {

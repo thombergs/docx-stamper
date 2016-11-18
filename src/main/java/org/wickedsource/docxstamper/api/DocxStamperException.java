@@ -5,9 +5,6 @@ package org.wickedsource.docxstamper.api;
  */
 public class DocxStamperException extends RuntimeException {
 
-    public DocxStamperException() {
-    }
-
     public DocxStamperException(String message) {
         super(message);
     }
@@ -20,7 +17,4 @@ public class DocxStamperException extends RuntimeException {
         super(cause);
     }
 
-    public DocxStamperException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-        super(message, cause, enableSuppression, writableStackTrace);
-    }
 }
