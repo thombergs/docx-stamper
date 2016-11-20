@@ -23,7 +23,7 @@ import java.util.List;
 public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     @Test
-    public void test() throws Docx4JException, IOException {
+    public void processorExpressionsInCommentsAreResolved() throws Docx4JException, IOException {
         NameContext context = new NameContext();
         context.setName("Homer");
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsTest.docx");
@@ -33,11 +33,36 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
         paragraphsInNestedTablesAreRemoved(document);
     }
 
+    @Test
+    public void inlineProcessorExpressionsAreResolved() throws Docx4JException, IOException {
+        NameContext context = new NameContext();
+        context.setName("Homer");
+        InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
+        WordprocessingMLPackage document = stampAndLoad(template, context);
+        globalParagraphsAreRemoved(document);
+        paragraphsInTableAreRemoved(document);
+        paragraphsInNestedTablesAreRemoved(document);
+    }
+
+    @Test
+    public void unresolvedInlineProcessorExpressionsAreRemoved() throws Docx4JException, IOException {
+        NameContext context = new NameContext();
+        context.setName("Bart");
+        InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
+        WordprocessingMLPackage document = stampAndLoad(template, context);
+        globalInlineProcessorExpressionIsRemoved(document);
+    }
+
     private void globalParagraphsAreRemoved(WordprocessingMLPackage document) {
         P p1 = (P) document.getMainDocumentPart().getContent().get(1);
         P p2 = (P) document.getMainDocumentPart().getContent().get(2);
         Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p1).getText());
         Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p2).getText());
+    }
+
+    private void globalInlineProcessorExpressionIsRemoved(WordprocessingMLPackage document) {
+        P p2 = (P) document.getMainDocumentPart().getContent().get(2);
+        Assert.assertFalse(new ParagraphWrapper(p2).getText().contains("#{"));
     }
 
     private void paragraphsInTableAreRemoved(WordprocessingMLPackage document) {

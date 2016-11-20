@@ -7,16 +7,21 @@ import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.api.commentprocessor.CommentProcessorRegistry;
+import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
 
 public class ProxyMethodHandlerTest {
 
     private ContextFactory contextFactory = new ContextFactory();
 
+    private PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer(new TypeResolverRegistry(new FallbackResolver()));
+
     @Test
     public void proxyDelegatesToRegisteredCommentProcessors() throws Exception {
 
-        CommentProcessorRegistry processorRegistry = new CommentProcessorRegistry();
+        CommentProcessorRegistry processorRegistry = new CommentProcessorRegistry(placeholderReplacer);
         processorRegistry.registerCommentProcessor(ITestInterface.class, new TestImpl());
 
         NameContext contextRoot = new NameContext();

@@ -8,17 +8,31 @@ import java.util.regex.Pattern;
 public class ExpressionUtil {
 
     /**
-     * Finds all expressions in a text and returns them as list. Example expression: "${myObject.property}".
+     * Finds all variable expressions in a text and returns them as list. Example expression: "${myObject.property}".
      *
      * @param text the text to find expressions in.
      * @return a list of expressions (including the starting "${" and trailing "}").
      */
-    public List<String> findExpressions(String text) {
+    public List<String> findVariableExpressions(String text) {
+        return findExpressions(text, "\\$\\{.*?\\}");
+    }
+
+    /**
+     * Finds all processor expressions in a text and returns them as list. Example expression: "#{myObject.property}".
+     *
+     * @param text the text to find expressions in.
+     * @return a list of expressions (including the starting "#{" and trailing "}").
+     */
+    public List<String> findProcessorExpressions(String text) {
+        return findExpressions(text, "\\#\\{.*?\\}");
+    }
+
+    private List<String> findExpressions(String text, String expressionPattern) {
         List<String> matches = new ArrayList<>();
         if ("".equals(text) || text == null) {
             return matches;
         }
-        Pattern pattern = Pattern.compile("\\$\\{.*?\\}");
+        Pattern pattern = Pattern.compile(expressionPattern);
         Matcher matcher = pattern.matcher(text);
         int index = 0;
         while (matcher.find(index)) {
@@ -30,16 +44,18 @@ public class ExpressionUtil {
     }
 
     /**
-     * Strips an expression of the leading "${" and the trailing "}".
+     * Strips an expression of the leading "${" or "#{" and the trailing "}".
      *
      * @param expression the expression to strip.
-     * @return the expression without the leading "${" and the trailing "}".
+     * @return the expression without the leading "${" or "#{" and the trailing "}".
      */
     public String stripExpression(String expression) {
         if (expression == null) {
             throw new IllegalArgumentException("Cannot strip NULL expression!");
         }
-        return expression.replaceAll("^\\$\\{", "").replaceAll("\\}$", "");
+        expression = expression.replaceAll("^\\$\\{", "").replaceAll("\\}$", "");
+        expression = expression.replaceAll("^#\\{", "").replaceAll("\\}$", "");
+        return expression;
     }
 
 }

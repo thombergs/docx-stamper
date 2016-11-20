@@ -12,7 +12,7 @@ public class ExpressionUtilTest {
         String text = "lorem ipsum ${placeholder1} lorem ipsum ${placeholder2}";
 
         ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findExpressions(text);
+        List<String> placeholders = finder.findVariableExpressions(text);
 
         Assert.assertEquals(2, placeholders.size());
         Assert.assertEquals("${placeholder1}", placeholders.get(0));
@@ -20,11 +20,23 @@ public class ExpressionUtilTest {
     }
 
     @Test
+    public void findsProcessorExpressions() throws Exception {
+        String text = "lorem ipsum #{expression1} lorem ipsum #{expression2}";
+
+        ExpressionUtil finder = new ExpressionUtil();
+        List<String> placeholders = finder.findProcessorExpressions(text);
+
+        Assert.assertEquals(2, placeholders.size());
+        Assert.assertEquals("#{expression1}", placeholders.get(0));
+        Assert.assertEquals("#{expression2}", placeholders.get(1));
+    }
+
+    @Test
     public void findsPlaceholdersWithError() throws Exception {
         String text = "lorem ipsum ${placeholder1} ${ lorem ipsum } ${placeholder2";
 
         ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findExpressions(text);
+        List<String> placeholders = finder.findVariableExpressions(text);
 
         Assert.assertEquals(2, placeholders.size());
         Assert.assertEquals("${placeholder1}", placeholders.get(0));
@@ -35,14 +47,14 @@ public class ExpressionUtilTest {
     public void returnsEmptyListOnEmptyText() {
         String text = "";
         ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findExpressions(text);
+        List<String> placeholders = finder.findVariableExpressions(text);
         Assert.assertTrue(placeholders.isEmpty());
     }
 
     @Test
     public void returnsEmptyListOnNullText() {
         ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findExpressions(null);
+        List<String> placeholders = finder.findVariableExpressions(null);
         Assert.assertTrue(placeholders.isEmpty());
     }
 

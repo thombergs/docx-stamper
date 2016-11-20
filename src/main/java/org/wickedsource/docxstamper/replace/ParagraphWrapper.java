@@ -170,4 +170,7 @@ public class ParagraphWrapper {
         return getText();
     }
 
+    public P getParagraph() {
+        return paragraph;
+    }
 }

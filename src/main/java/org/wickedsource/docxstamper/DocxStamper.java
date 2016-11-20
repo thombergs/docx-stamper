@@ -30,7 +30,7 @@ public class DocxStamper<T> {
 
     private PlaceholderReplacer<T> placeholderReplacer;
 
-    private CommentProcessorRegistry commentProcessorRegistry = new CommentProcessorRegistry();
+    private CommentProcessorRegistry commentProcessorRegistry;
 
     private TypeResolverRegistry typeResolverRegistry;
 
@@ -39,6 +39,8 @@ public class DocxStamper<T> {
         typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
         typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
         placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+        commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
+        commentProcessorRegistry.setFailOnInvalidExpression(true);
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
     }
@@ -80,6 +82,8 @@ public class DocxStamper<T> {
         try {
             WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
             stamp(document, contextRoot, out);
+        } catch (DocxStamperException e) {
+            throw e;
         } catch (Exception e) {
             throw new DocxStamperException(e);
         }
@@ -99,6 +103,8 @@ public class DocxStamper<T> {
             replaceExpressions(document, contextRoot);
             processComments(document, contextRoot);
             document.save(out);
+        } catch (DocxStamperException e) {
+            throw e;
         } catch (Exception e) {
             throw new DocxStamperException(e);
         }
@@ -126,5 +132,13 @@ public class DocxStamper<T> {
      */
     public CommentProcessorRegistry getCommentProcessorRegistry() {
         return commentProcessorRegistry;
+    }
+
+    /**
+     * If set to true, calling {@link #stamp(InputStream, Object, OutputStream)} will throw an {@link org.wickedsource.docxstamper.api.UnresolvedExpressionException}
+     * if a variable expression or processor expression within the document or within the comments is encountered that cannot be resolved. Is set to true by default.
+     */
+    public void setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
+        commentProcessorRegistry.setFailOnInvalidExpression(failOnUnresolvedExpression);
     }
 }

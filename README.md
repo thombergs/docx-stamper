@@ -55,6 +55,14 @@ stamper.getCommentProcessorRegistry()
 ```
 For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html).
 
+## Error Handling
+By default DocxStamper fails with an UnresolvedExpressionException if an expression within the document or within the comments cannot be resolved successfully. If you want to change this behavior, you can do the following:
+
+```java
+DocxStamper stamper = ...;
+stamper.setFailOnUnresolvedExpression(false);
+```
+
 ## Sample Code
 The source code contains a set of tests show how to use the features. If you want to run them yourself, clone the repository and run [the tests in the main package](https://github.com/thombergs/docx-stamper/tree/master/src/test/java/org/wickedsource/docxstamper) with the system property `-DkeepOutputFile=true` so that the resulting .docx documents will not be cleaned up so you can view them. The resulting files will be stored in your local temp folder (watch the logging output for the exact location of the files).
 
@@ -72,8 +80,8 @@ To include docx-stamper in your project, you can use the following maven coordin
 ```
 
 ## Changelog
-* 1.0.2 (2016-10-02) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.2+is%3Aclosed)
 * 1.0.3 (2016-11-05) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.3+is%3Aclosed)
+* 1.0.2 (2016-10-02) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.2+is%3Aclosed)
 
 ## Contribute
 If you have an issue or created a comment processor or type resolver that you think deserves to be part of the default distribution, feel free to open an issue or - even better - a pull request with your contribution.
