@@ -4,6 +4,7 @@ import org.docx4j.XmlUtils;
 import org.docx4j.wml.*;
 
 import javax.xml.bind.JAXBElement;
+import javax.xml.namespace.QName;
 
 public abstract class DocumentWalker {
 
@@ -47,6 +48,8 @@ public abstract class DocumentWalker {
         onTableRow(row);
         for (Object rowContentElement : row.getContent()) {
             if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
+                if (rowContentElement instanceof Tc) 
+                    rowContentElement = new JAXBElement<>(QName.valueOf("tc"),Tc.class, XmlUtils.unwrap(rowContentElement));
                 Tc cell = (Tc) ((JAXBElement) rowContentElement).getValue();
                 walkTableCell(cell);
             }
