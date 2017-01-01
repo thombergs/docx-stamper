@@ -48,9 +48,7 @@ public abstract class DocumentWalker {
         onTableRow(row);
         for (Object rowContentElement : row.getContent()) {
             if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
-                if (rowContentElement instanceof Tc) 
-                    rowContentElement = new JAXBElement<>(QName.valueOf("tc"),Tc.class, XmlUtils.unwrap(rowContentElement));
-                Tc cell = (Tc) ((JAXBElement) rowContentElement).getValue();
+                Tc cell = rowContentElement instanceof Tc? rowContentElement: (Tc) ((JAXBElement) rowContentElement).getValue();
                 walkTableCell(cell);
             }
         }
