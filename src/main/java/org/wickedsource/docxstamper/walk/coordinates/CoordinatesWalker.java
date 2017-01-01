@@ -81,7 +81,7 @@ public abstract class CoordinatesWalker {
         int cellIndex = 0;
         for (Object rowContentElement : rowCoordinates.getRow().getContent()) {
             if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
-                Tc cell = rowContentElement instanceof Tc ? rowContentElement : (Tc) ((JAXBElement) rowContentElement).getValue();
+                Tc cell = rowContentElement instanceof Tc ? (Tc) rowContentElement : (Tc) ((JAXBElement) rowContentElement).getValue();
                 TableCellCoordinates cellCoordinates = new TableCellCoordinates(cell, cellIndex, rowCoordinates);
                 walkTableCell(cellCoordinates);
             }
