@@ -13,7 +13,6 @@ import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 import java.util.List;
 
 public abstract class CoordinatesWalker {
@@ -82,9 +81,7 @@ public abstract class CoordinatesWalker {
         int cellIndex = 0;
         for (Object rowContentElement : rowCoordinates.getRow().getContent()) {
             if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
-                if (rowContentElement instanceof Tc) 
-                    rowContentElement = new JAXBElement<>(QName.valueOf("tc"),Tc.class, XmlUtils.unwrap(rowContentElement));
-                Tc cell = (Tc) ((JAXBElement) rowContentElement).getValue();
+                Tc cell = rowContentElement instanceof Tc ? rowContentElement : (Tc) ((JAXBElement) rowContentElement).getValue();
                 TableCellCoordinates cellCoordinates = new TableCellCoordinates(cell, cellIndex, rowCoordinates);
                 walkTableCell(cellCoordinates);
             }
