@@ -4,7 +4,6 @@ import org.docx4j.XmlUtils;
 import org.docx4j.wml.*;
 
 import javax.xml.bind.JAXBElement;
-import javax.xml.namespace.QName;
 
 public abstract class DocumentWalker {
 
