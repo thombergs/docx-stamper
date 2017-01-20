@@ -64,6 +64,10 @@ public class ParagraphWrapper {
     public void replace(String placeholder, Object replacement) {
         String text = getText();
         int matchStartIndex = text.indexOf(placeholder);
+        if (matchStartIndex == -1) {
+            // nothing to replace
+            return;
+        }
         int matchEndIndex = matchStartIndex + placeholder.length() - 1;
         List<IndexedRun> affectedRuns = getAffectedRuns(matchStartIndex, matchEndIndex);
 

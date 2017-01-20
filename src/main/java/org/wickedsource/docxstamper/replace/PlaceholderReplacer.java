@@ -1,6 +1,8 @@
 package org.wickedsource.docxstamper.replace;
 
+import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Br;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.slf4j.Logger;
@@ -28,8 +30,15 @@ public class PlaceholderReplacer<T> {
 
     private TypeResolverRegistry typeResolverRegistry;
 
+    private String lineBreakPlaceholder;
+
     public PlaceholderReplacer(TypeResolverRegistry typeResolverRegistry) {
         this.typeResolverRegistry = typeResolverRegistry;
+    }
+
+    public PlaceholderReplacer(TypeResolverRegistry typeResolverRegistry, String lineBreakPlaceholder) {
+        this.typeResolverRegistry = typeResolverRegistry;
+        this.lineBreakPlaceholder = lineBreakPlaceholder;
     }
 
     /**
@@ -69,6 +78,14 @@ public class PlaceholderReplacer<T> {
                 logger.trace("Reason for skipping expression:", e);
             }
         }
+        if (this.lineBreakPlaceholder != null) {
+            replaceLineBreaks(paragraphWrapper);
+        }
+    }
+
+    private void replaceLineBreaks(ParagraphWrapper paragraphWrapper) {
+        Br lineBreak = Context.getWmlObjectFactory().createBr();
+        replace(paragraphWrapper, this.lineBreakPlaceholder, lineBreak);
     }
 
     public void replace(ParagraphWrapper p, String placeholder, Object replacementObject) {

@@ -34,11 +34,22 @@ public class DocxStamper<T> {
 
     private TypeResolverRegistry typeResolverRegistry;
 
+    private DocxStamperConfiguration config = new DocxStamperConfiguration();
+
     public DocxStamper() {
+        initFields();
+    }
+
+    public DocxStamper(DocxStamperConfiguration config) {
+        this.config = config;
+        initFields();
+    }
+
+    private void initFields() {
         typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
         typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
         typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
-        placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+        placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
         commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
         commentProcessorRegistry.setFailOnInvalidExpression(true);
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
@@ -141,4 +152,5 @@ public class DocxStamper<T> {
     public void setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
         commentProcessorRegistry.setFailOnInvalidExpression(failOnUnresolvedExpression);
     }
+
 }

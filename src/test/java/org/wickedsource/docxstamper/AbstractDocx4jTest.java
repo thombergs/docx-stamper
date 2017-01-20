@@ -41,8 +41,12 @@ public abstract class AbstractDocx4jTest {
      * object structure were really transported into the XML of the .docx file.
      */
     protected <T> WordprocessingMLPackage stampAndLoad(InputStream template, T contextRoot) throws IOException, Docx4JException {
+        return stampAndLoad(template, contextRoot, new DocxStamperConfiguration());
+    }
+
+    protected <T> WordprocessingMLPackage stampAndLoad(InputStream template, T contextRoot, DocxStamperConfiguration config) throws IOException, Docx4JException {
         OutputStream out = getOutputStream();
-        DocxStamper stamper = new DocxStamper();
+        DocxStamper stamper = new DocxStamper(config);
         stamper.stamp(template, contextRoot, out);
         InputStream in = getInputStream(out);
         return WordprocessingMLPackage.load(in);
