@@ -47,7 +47,7 @@ public abstract class DocumentWalker {
         onTableRow(row);
         for (Object rowContentElement : row.getContent()) {
             if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
-                Tc cell = (Tc) ((JAXBElement) rowContentElement).getValue();
+                Tc cell = rowContentElement instanceof Tc ? (Tc) rowContentElement : (Tc) ((JAXBElement) rowContentElement).getValue();
                 walkTableCell(cell);
             }
         }

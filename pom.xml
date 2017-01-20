@@ -6,12 +6,12 @@
 
     <groupId>org.wickedsource</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
     <name>docx-stamper</name>
     <description>Template engine for .docx documents.</description>
 
-    <url>http://thombergs.github.io/diffparser/</url>
+    <url>https://github.com/thombergs/docx-stamper</url>
 
     <scm>
         <url>https://github.com/thombergs/docx-stamper</url>

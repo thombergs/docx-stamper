@@ -1,4 +1,7 @@
 # docx-stamper
+
+[![Build Status](https://travis-ci.org/thombergs/docx-stamper.png?branch=master)](https://travis-ci.org/thombergs/docx-stamper)
+
 docx-stamper is a Java template engine for docx documents. You create a template .docx document with your favorite word processor
 and feed it to a DocxStamper instance to create a document based on the template at runtime. Example code:
 ```java
@@ -43,7 +46,7 @@ Besides replacing expressions, docx-stamper can **process comments on paragraphs
 | `displayTableIf(boolean)`      | The whole table surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
 | `repeatTableRow(List<Object>)`      | The table row surrounding the commented paragraph is copied once for each object in the passed-in list. Expressions found in the cells of the table row are evaluated against the object from the list.
 
-If a comment cannot be processed, it is simply skipped. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html). To register you comment processor to docx-stamper, use the following code:
+If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html). To register you comment processor to docx-stamper, use the following code:
 
 ```java
 DocxStamper stamper = ...;              
@@ -54,6 +57,9 @@ stamper.getCommentProcessorRegistry()
     .registerCommentProcessor(interfaceClass, commentProcessor);
 ```
 For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html).
+
+## Conditional Display and Repeating of Elements in Headers or Footers
+The docx file format does not allow comments in Headers or Footers of a document. To be able to conditionally display content in a header or footer, simply surround the expression you would put in a comment with "#{}" and put it at the beginning of the paragraph you want to manipulate. The expression will be evaluated as it would be in a comment.
 
 ## Error Handling
 By default DocxStamper fails with an UnresolvedExpressionException if an expression within the document or within the comments cannot be resolved successfully. If you want to change this behavior, you can do the following:
@@ -75,11 +81,13 @@ To include docx-stamper in your project, you can use the following maven coordin
 <dependency>
     <groupId>org.wickedsource</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.5</version>
 </dependency>
 ```
 
 ## Changelog
+* 1.0.5 (2017-01-09) - bugfix release
+* 1.0.4 (2016-11-20) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.4+is%3Aclosed)
 * 1.0.3 (2016-11-05) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.3+is%3Aclosed)
 * 1.0.2 (2016-10-02) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.2+is%3Aclosed)
 
