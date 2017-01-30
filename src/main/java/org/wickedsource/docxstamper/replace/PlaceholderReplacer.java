@@ -85,7 +85,9 @@ public class PlaceholderReplacer<T> {
 
     private void replaceLineBreaks(ParagraphWrapper paragraphWrapper) {
         Br lineBreak = Context.getWmlObjectFactory().createBr();
-        replace(paragraphWrapper, this.lineBreakPlaceholder, lineBreak);
+        while (paragraphWrapper.getText().contains(this.lineBreakPlaceholder)) {
+            replace(paragraphWrapper, this.lineBreakPlaceholder, lineBreak);
+        }
     }
 
     public void replace(ParagraphWrapper p, String placeholder, Object replacementObject) {

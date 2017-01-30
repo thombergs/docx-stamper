@@ -26,7 +26,8 @@ public class LineBreakReplacementTest extends AbstractDocx4jTest {
     private void lineBreaksAreReplaced(WordprocessingMLPackage document) {
         P paragraph = (P) document.getMainDocumentPart().getContent().get(2);
         Assert.assertTrue(new ParagraphWrapper(paragraph).getText().contains("This paragraph should be"));
-        Assert.assertTrue(new ParagraphWrapper(paragraph).getText().contains("split in two lines"));
+        Assert.assertTrue(new ParagraphWrapper(paragraph).getText().contains("split in"));
+        Assert.assertTrue(new ParagraphWrapper(paragraph).getText().contains("three lines"));
         // This test does NOT assert that there is a line break, since I cannot find a way to find out if there
         // is a line break or not.
     }
