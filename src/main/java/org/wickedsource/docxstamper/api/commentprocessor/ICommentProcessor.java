@@ -2,6 +2,7 @@ package org.wickedsource.docxstamper.api.commentprocessor;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.walk.coordinates.RunCoordinates;
 
 /**
  * <p>
@@ -55,5 +56,15 @@ public interface ICommentProcessor {
      * @param coordinates coordinates of the currently processed paragraph within the template.
      */
     public void setCurrentParagraphCoordinates(ParagraphCoordinates coordinates);
+    
+    
+    /**
+     * Passes the run that is currently being processed (i.e. the run that is commented in the
+     * .docx template. This method is always called BEFORE the custom methods of the custom comment processor interface
+     * are called.
+     *
+     * @param coordinates coordinates of the currently processed run within the template.
+     */
+    public void setCurrentRunCoordinates(RunCoordinates coordinates);
 
 }

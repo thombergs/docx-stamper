@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper.walk.coordinates;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.wickedsource.docxstamper.util.CommentWrapper;
 
 public abstract class BaseCoordinatesWalker extends CoordinatesWalker {
 
@@ -27,4 +28,9 @@ public abstract class BaseCoordinatesWalker extends CoordinatesWalker {
     protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
 
     }
+    
+    @Override
+	protected CommentWrapper onRun(RunCoordinates runCoordinates) {
+		return null;
+	}
 }

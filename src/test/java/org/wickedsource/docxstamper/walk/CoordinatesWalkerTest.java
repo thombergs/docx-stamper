@@ -1,14 +1,20 @@
 package org.wickedsource.docxstamper.walk;
 
+import java.io.IOException;
+
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.replace.ParagraphWrapper;
-import org.wickedsource.docxstamper.walk.coordinates.*;
-
-import java.io.IOException;
+import org.wickedsource.docxstamper.util.CommentWrapper;
+import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
+import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.walk.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.walk.coordinates.TableCellCoordinates;
+import org.wickedsource.docxstamper.walk.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.walk.coordinates.TableRowCoordinates;
 
 public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 
@@ -23,7 +29,12 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 
         CoordinatesWalker walker = new CoordinatesWalker(document) {
 
-
+        	@Override
+			protected CommentWrapper onRun(RunCoordinates runCoordinates) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+        	
             @Override
             protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
                 paragraphCount.increment();
