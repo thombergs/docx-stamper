@@ -1,5 +1,9 @@
 package org.wickedsource.docxstamper;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
+
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.commentprocessor.CommentProcessorRegistry;
@@ -8,15 +12,13 @@ import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
+import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
+import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Date;
 
 /**
  * <p>
@@ -54,6 +56,8 @@ public class DocxStamper<T> {
         commentProcessorRegistry.setFailOnInvalidExpression(true);
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
+		commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
+				new ReplaceWithProcessor());
     }
 
     /**

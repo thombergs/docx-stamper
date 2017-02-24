@@ -52,7 +52,7 @@ public abstract class AbstractDocx4jTest {
         return WordprocessingMLPackage.load(in);
     }
 
-    private OutputStream getOutputStream() throws IOException {
+    protected OutputStream getOutputStream() throws IOException {
         OutputStream out;
         if (Boolean.valueOf(System.getProperty("keepOutputFile"))) {
             tempFile = File.createTempFile(getClass().getSimpleName(), ".docx");
@@ -64,7 +64,7 @@ public abstract class AbstractDocx4jTest {
         return out;
     }
 
-    private InputStream getInputStream(OutputStream out) throws FileNotFoundException {
+    protected InputStream getInputStream(OutputStream out) throws FileNotFoundException {
         InputStream in;
         if (Boolean.valueOf(System.getProperty("keepOutputFile"))) {
             in = new FileInputStream(tempFile);
