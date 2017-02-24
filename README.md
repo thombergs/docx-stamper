@@ -45,7 +45,7 @@ Besides replacing expressions, docx-stamper can **process comments on paragraphs
 | `displayTableRowIf(boolean)`      | The table row surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
 | `displayTableIf(boolean)`      | The whole table surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
 | `repeatTableRow(List<Object>)`      | The table row surrounding the commented paragraph is copied once for each object in the passed-in list. Expressions found in the cells of the table row are evaluated against the object from the list.
-| `replaceWith(expression)`         | Replaces the commented word (must be a single word!) with the value of the given expression. |
+| `replaceWordWith(expression)`         | Replaces the commented word (must be a single word!) with the value of the given expression. |
 
 If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html). To register you comment processor to docx-stamper, use the following code:
 
@@ -82,11 +82,12 @@ To include docx-stamper in your project, you can use the following maven coordin
 <dependency>
     <groupId>org.wickedsource</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.0.7</version>
+    <version>1.0.8</version>
 </dependency>
 ```
 
 ## Changelog
+* 1.0.8 (2017-02-24) - [minor feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.8+is%3Aclosed)
 * 1.0.7 (2017-01-30) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.7+is%3Aclosed)
 * 1.0.6 (2017-01-20) - [minor feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.6+is%3Aclosed)
 * 1.0.5 (2017-01-09) - bugfix release
