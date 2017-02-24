@@ -30,7 +30,7 @@ public abstract class BaseCoordinatesWalker extends CoordinatesWalker {
     }
     
     @Override
-	protected CommentWrapper onRun(RunCoordinates runCoordinates) {
+	protected CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
 		return null;
 	}
 }

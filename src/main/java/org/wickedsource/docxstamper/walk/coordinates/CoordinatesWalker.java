@@ -74,7 +74,7 @@ public abstract class CoordinatesWalker {
     		 if (XmlUtils.unwrap(contentElement) instanceof R) {
     			 R run = (R) contentElement;
     			 RunCoordinates runCooridnates = new RunCoordinates(run, rowIndex);
-    			 CommentWrapper commentToDelete = onRun(runCooridnates);
+    			 CommentWrapper commentToDelete = onRun(runCooridnates, paragraphCoordinates);
     			 if (commentToDelete != null)
     				 commentsToDelete.add(commentToDelete);
     		 }
@@ -132,7 +132,7 @@ public abstract class CoordinatesWalker {
 
     protected abstract void onParagraph(ParagraphCoordinates paragraphCoordinates);
 
-    protected abstract CommentWrapper onRun(RunCoordinates runCoordinates);
+    protected abstract CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates);
     
     protected abstract void onTable(TableCoordinates tableCoordinates);
 

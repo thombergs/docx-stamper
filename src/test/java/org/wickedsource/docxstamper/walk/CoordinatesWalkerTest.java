@@ -30,7 +30,7 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
         CoordinatesWalker walker = new CoordinatesWalker(document) {
 
         	@Override
-			protected CommentWrapper onRun(RunCoordinates runCoordinates) {
+			protected CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
 				// TODO Auto-generated method stub
 				return null;
 			}

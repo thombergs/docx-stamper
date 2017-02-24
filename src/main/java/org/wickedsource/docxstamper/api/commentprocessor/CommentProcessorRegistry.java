@@ -94,8 +94,8 @@ public class CommentProcessorRegistry {
 			}
 
 			@Override
-			protected CommentWrapper onRun(RunCoordinates runCoordinates) {
-				return runProcessorsOnRunComment(document, comments, contextRoot, runCoordinates);
+			protected CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
+				return runProcessorsOnRunComment(document, comments, contextRoot, runCoordinates, paragraphCoordinates);
 			}
 
 		};
@@ -229,7 +229,7 @@ public class CommentProcessorRegistry {
 	}
 
 	private <T> CommentWrapper runProcessorsOnRunComment(final WordprocessingMLPackage document,
-			final Map<BigInteger, CommentWrapper> comments, T contextRoot, RunCoordinates runCoordinates) {
+			final Map<BigInteger, CommentWrapper> comments, T contextRoot, RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
 		Exception latestException = null;
 		boolean expressionResolvedSuccessfully = false;
 		Comments.Comment comment = CommentUtil.getCommentAround(runCoordinates.getRun(), document);
@@ -246,6 +246,7 @@ public class CommentProcessorRegistry {
 				final T contextRootProxy = contextFactory.createProxy(contextRoot, commentProcessorInterface,
 						processor);
 				processor.setCurrentRunCoordinates(runCoordinates);
+				processor.setCurrentParagraphCoordinates(paragraphCoordinates);
 				CommentWrapper commentWrapper = comments.get(comment.getId());
 
 				try {

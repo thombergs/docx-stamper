@@ -37,6 +37,8 @@ public class CommentUtil {
 			if (object instanceof Child) {
 				Child child = (Child) object;
 				ContentAccessor parent = (ContentAccessor) child.getParent();
+				if (parent == null)
+				  return null;
 				CommentRangeStart possibleComment = null;
 				boolean foundChild = false;
 				for (Object contentElement : parent.getContent()) {
