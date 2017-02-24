@@ -4,9 +4,10 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.util.RunUtil;
 
-public class ReplaceExpressionProcessor extends BaseCommentProcessor implements IReplaceExpressionProcessor {
+public class ReplaceWithProcessor extends BaseCommentProcessor
+		implements IReplaceWithProcessor {
 
-	public ReplaceExpressionProcessor() {
+	public ReplaceWithProcessor() {
 
 	}
 
@@ -15,7 +16,7 @@ public class ReplaceExpressionProcessor extends BaseCommentProcessor implements 
 	}
 
 	@Override
-	public void replaceExpression(String expression) {
+	public void replaceWordWith(String expression) {
 		if (this.getCurrentRunCoordinates() != null) {
 			RunUtil.setText(this.getCurrentRunCoordinates().getRun(), expression);
 		}
