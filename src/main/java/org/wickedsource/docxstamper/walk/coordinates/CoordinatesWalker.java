@@ -1,5 +1,10 @@
 package org.wickedsource.docxstamper.walk.coordinates;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.bind.JAXBElement;
+
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
@@ -8,12 +13,12 @@ import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
-
-import javax.xml.bind.JAXBElement;
-import java.util.List;
+import org.wickedsource.docxstamper.util.CommentUtil;
+import org.wickedsource.docxstamper.util.CommentWrapper;
 
 public abstract class CoordinatesWalker {
 
@@ -52,7 +57,7 @@ public abstract class CoordinatesWalker {
             if (unwrappedObject instanceof P) {
                 P p = (P) unwrappedObject;
                 ParagraphCoordinates coordinates = new ParagraphCoordinates(p, elementIndex);
-                onParagraph(coordinates);
+                walkParagraph(coordinates);
             } else if (unwrappedObject instanceof Tbl) {
                 Tbl table = (Tbl) unwrappedObject;
                 TableCoordinates tableCoordinates = new TableCoordinates(table, elementIndex);
@@ -61,7 +66,26 @@ public abstract class CoordinatesWalker {
             elementIndex++;
         }
     }
+    
+    private void walkParagraph(ParagraphCoordinates paragraphCoordinates){
+    	int rowIndex = 0;
+    	List<CommentWrapper> commentsToDelete = new ArrayList<>();
+    	for (Object contentElement : paragraphCoordinates.getParagraph().getContent()){
+    		 if (XmlUtils.unwrap(contentElement) instanceof R) {
+    			 R run = (R) contentElement;
+    			 RunCoordinates runCooridnates = new RunCoordinates(run, rowIndex);
+    			 CommentWrapper commentToDelete = onRun(runCooridnates, paragraphCoordinates);
+    			 if (commentToDelete != null)
+    				 commentsToDelete.add(commentToDelete);
+    		 }
+    	}
+    	for (CommentWrapper cw : commentsToDelete)
+    		CommentUtil.deleteComment(cw);
+    	// we run the paragraph afterwards so that the comments inside work before the whole paragraph comments
+    	onParagraph(paragraphCoordinates);
 
+    }
+    
     private void walkTable(TableCoordinates tableCoordinates) {
         onTable(tableCoordinates);
         int rowIndex = 0;
@@ -108,6 +132,8 @@ public abstract class CoordinatesWalker {
 
     protected abstract void onParagraph(ParagraphCoordinates paragraphCoordinates);
 
+    protected abstract CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates);
+    
     protected abstract void onTable(TableCoordinates tableCoordinates);
 
     protected abstract void onTableCell(TableCellCoordinates tableCellCoordinates);
