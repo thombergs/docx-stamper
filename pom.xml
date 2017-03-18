@@ -6,7 +6,7 @@
 
     <groupId>org.wickedsource</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <packaging>jar</packaging>
     <name>docx-stamper</name>
     <description>Template engine for .docx documents.</description>
