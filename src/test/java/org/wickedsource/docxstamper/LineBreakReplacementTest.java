@@ -2,7 +2,9 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Br;
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
@@ -28,8 +30,12 @@ public class LineBreakReplacementTest extends AbstractDocx4jTest {
         Assert.assertTrue(new ParagraphWrapper(paragraph).getText().contains("This paragraph should be"));
         Assert.assertTrue(new ParagraphWrapper(paragraph).getText().contains("split in"));
         Assert.assertTrue(new ParagraphWrapper(paragraph).getText().contains("three lines"));
-        // This test does NOT assert that there is a line break, since I cannot find a way to find out if there
-        // is a line break or not.
+
+        Assert.assertEquals(R.class, paragraph.getContent().get(1).getClass());
+        Assert.assertEquals(Br.class, ((R)paragraph.getContent().get(1)).getContent().get(0).getClass());
+
+        Assert.assertEquals(R.class, paragraph.getContent().get(3).getClass());
+        Assert.assertEquals(Br.class, ((R)paragraph.getContent().get(3)).getContent().get(0).getClass());
     }
 
 }

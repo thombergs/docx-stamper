@@ -84,6 +84,17 @@ public class RunUtil {
     }
 
     /**
+     * Creates a new run with the given object as content.
+     * @param content the content of the run.
+     * @return the newly created run.
+     */
+    public static R create(Object content){
+        R run = factory.createR();
+        run.getContent().add(content);
+        return run;
+    }
+
+    /**
      * Creates a new run with the specified text and inherits the style of the parent paragraph.
      *
      * @param text            the initial text of the run.
