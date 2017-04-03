@@ -1,10 +1,5 @@
 package org.wickedsource.docxstamper.walk.coordinates;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.bind.JAXBElement;
-
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
@@ -12,13 +7,13 @@ import org.docx4j.openpackaging.parts.WordprocessingML.HeaderPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
-import org.docx4j.wml.P;
-import org.docx4j.wml.R;
-import org.docx4j.wml.Tbl;
-import org.docx4j.wml.Tc;
-import org.docx4j.wml.Tr;
+import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
+
+import javax.xml.bind.JAXBElement;
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class CoordinatesWalker {
 
@@ -32,22 +27,37 @@ public abstract class CoordinatesWalker {
 
         RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
 
-        // walk through elements in header
-        Relationship headerRel = relationshipsPart.getRelationshipByType(Namespaces.HEADER);
-        if (headerRel != null) {
-            HeaderPart headerPart = (HeaderPart) relationshipsPart.getPart(headerRel);
+        // walk through elements in headers
+        List<Relationship> headerRelationships = getRelationshipsOfType(document, Namespaces.HEADER);
+        for (Relationship header : headerRelationships) {
+            HeaderPart headerPart = (HeaderPart) relationshipsPart.getPart(header.getId());
             walkContent(headerPart.getContent());
         }
 
         // walk through elements in main document part
         walkContent(document.getMainDocumentPart().getContent());
 
-        // walk through elements in footer
-        Relationship footerRel = relationshipsPart.getRelationshipByType(Namespaces.FOOTER);
-        if (footerRel != null) {
-            FooterPart footerPart = (FooterPart) relationshipsPart.getPart(footerRel);
+        // walk through elements in headers
+        List<Relationship> footerRelationships = getRelationshipsOfType(document, Namespaces.FOOTER);
+        for (Relationship footer : footerRelationships) {
+            FooterPart footerPart = (FooterPart) relationshipsPart.getPart(footer.getId());
             walkContent(footerPart.getContent());
         }
+    }
+
+    private List<Relationship> getRelationshipsOfType(WordprocessingMLPackage document, String type) {
+        List<Relationship> allRelationhips = document
+                .getMainDocumentPart()
+                .getRelationshipsPart()
+                .getRelationships()
+                .getRelationship();
+        List<Relationship> headerRelationships = new ArrayList<>();
+        for (Relationship r : allRelationhips) {
+            if (r.getType().equals(type)) {
+                headerRelationships.add(r);
+            }
+        }
+        return headerRelationships;
     }
 
     private void walkContent(List<Object> contentElements) {
