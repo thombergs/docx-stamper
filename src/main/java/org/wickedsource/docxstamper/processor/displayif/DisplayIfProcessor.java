@@ -25,6 +25,9 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
         removeParagraphs(deleter);
         removeTables(deleter);
         removeTableRows(deleter);
+        paragraphsToBeRemoved = new ArrayList<>();
+        tablesToBeRemoved = new ArrayList<>();
+        tableRowsToBeRemoved = new ArrayList<>();
     }
 
     private void removeParagraphs(ObjectDeleter deleter) {
