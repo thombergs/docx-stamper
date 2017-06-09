@@ -30,6 +30,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
         repeatRows(document);
+        tableRowsToRepeat = new HashMap<>();
     }
 
     private void repeatRows(final WordprocessingMLPackage document) {
