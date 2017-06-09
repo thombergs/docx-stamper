@@ -16,6 +16,11 @@ public class ReplaceWithProcessor extends BaseCommentProcessor
 	}
 
 	@Override
+	public void reset() {
+		// nothing to rest
+	}
+
+	@Override
 	public void replaceWordWith(String expression) {
 		if (this.getCurrentRunCoordinates() != null) {
 			RunUtil.setText(this.getCurrentRunCoordinates().getRun(), expression);

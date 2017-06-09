@@ -97,6 +97,7 @@ public class DocxStamper<T> {
         try {
             WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
             stamp(document, contextRoot, out);
+            commentProcessorRegistry.reset();
         } catch (DocxStamperException e) {
             throw e;
         } catch (Exception e) {
@@ -118,6 +119,7 @@ public class DocxStamper<T> {
             replaceExpressions(document, contextRoot);
             processComments(document, contextRoot);
             document.save(out);
+            commentProcessorRegistry.reset();
         } catch (DocxStamperException e) {
             throw e;
         } catch (Exception e) {

@@ -46,7 +46,7 @@ public interface ICommentProcessor {
      *
      * @param document The word document that can be manipulated by using the DOCX4J api.
      */
-    public void commitChanges(WordprocessingMLPackage document);
+    void commitChanges(WordprocessingMLPackage document);
 
     /**
      * Passes the paragraph that is currently being processed (i.e. the paragraph that is commented in the
@@ -55,9 +55,9 @@ public interface ICommentProcessor {
      *
      * @param coordinates coordinates of the currently processed paragraph within the template.
      */
-    public void setCurrentParagraphCoordinates(ParagraphCoordinates coordinates);
-    
-    
+    void setCurrentParagraphCoordinates(ParagraphCoordinates coordinates);
+
+
     /**
      * Passes the run that is currently being processed (i.e. the run that is commented in the
      * .docx template. This method is always called BEFORE the custom methods of the custom comment processor interface
@@ -65,6 +65,11 @@ public interface ICommentProcessor {
      *
      * @param coordinates coordinates of the currently processed run within the template.
      */
-    public void setCurrentRunCoordinates(RunCoordinates coordinates);
+    void setCurrentRunCoordinates(RunCoordinates coordinates);
+
+    /**
+     * Resets all state in the comment processor so that it can be re-used in another stamping process.
+     */
+    void reset();
 
 }

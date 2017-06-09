@@ -84,7 +84,7 @@ public class CommentProcessorRegistry {
 	 */
 	public <T> void runProcessors(final WordprocessingMLPackage document, final T contextRoot) {
 		final Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
-		
+
 		CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
 
 			@Override
@@ -285,5 +285,11 @@ public class CommentProcessorRegistry {
 
 	public void setFailOnInvalidExpression(boolean failOnInvalidExpression) {
 		this.failOnInvalidExpression = failOnInvalidExpression;
+	}
+
+	public void reset(){
+		for(ICommentProcessor processor : commentProcessors){
+			processor.reset();
+		}
 	}
 }
