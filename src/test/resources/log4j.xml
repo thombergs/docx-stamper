@@ -16,7 +16,7 @@
     </root>
 
     <logger name="org.wickedsource">
-        <level value="DEBUG"/>
+        <level value="TRACE"/>
     </logger>
 
 </log4j:configuration>
