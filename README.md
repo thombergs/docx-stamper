@@ -82,11 +82,12 @@ To include docx-stamper in your project, you can use the following maven coordin
 <dependency>
     <groupId>org.wickedsource</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.0.10</version>
+    <version>1.0.12</version>
 </dependency>
 ```
 
 ## Changelog
+* 1.0.12 (2017-09-08) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.12)
 * 1.0.11 (2017-06-09) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.11)
 * 1.0.10 (2017-04-03) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.10+is%3Aclosed)
 * 1.0.9 (2017-03-18) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.9+is%3Aclosed)
