@@ -9,12 +9,12 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.replace.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.CommentWrapper;
-import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
+import org.wickedsource.docxstamper.api.coordinates.CoordinatesWalker;
 import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.RunCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 
 public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 
