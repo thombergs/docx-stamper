@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper.walk.coordinates;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.wickedsource.docxstamper.api.coordinates.*;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
 public abstract class BaseCoordinatesWalker extends CoordinatesWalker {

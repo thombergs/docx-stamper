@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.walk.coordinates;
+package org.wickedsource.docxstamper.api.coordinates;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -10,6 +10,7 @@ import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
+import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
 
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;

@@ -1,6 +1,8 @@
 package org.wickedsource.docxstamper.walk.coordinates;
 
 import org.docx4j.wml.P;
+import org.wickedsource.docxstamper.api.coordinates.AbstractCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
 
 public class ParagraphCoordinates extends AbstractCoordinates {
 
