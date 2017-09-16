@@ -4,10 +4,21 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 
 public class ExpressionResolver {
 
-    private ExpressionUtil expressionUtil = new ExpressionUtil();
+    private static final ExpressionUtil expressionUtil = new ExpressionUtil();
+
+    private final EvaluationContextConfigurer evaluationContextConfigurer;
+
+    public ExpressionResolver() {
+        this.evaluationContextConfigurer = new NoOpEvaluationContextConfigurer();
+    }
+
+    public ExpressionResolver(EvaluationContextConfigurer evaluationContextConfigurer) {
+        this.evaluationContextConfigurer = evaluationContextConfigurer;
+    }
 
     /**
      * Runs the given expression against the given context object and returns the result of the evaluated expression.
@@ -22,7 +33,9 @@ public class ExpressionResolver {
         }
         ExpressionParser parser = new SpelExpressionParser();
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext(contextRoot);
+        evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
         Expression expression = parser.parseExpression(expressionString);
         return expression.getValue(evaluationContext);
     }
+
 }

@@ -41,6 +41,10 @@ public class PlaceholderReplacer<T> {
         this.lineBreakPlaceholder = lineBreakPlaceholder;
     }
 
+    public void setExpressionResolver(ExpressionResolver expressionResolver) {
+        this.expressionResolver = expressionResolver;
+    }
+
     /**
      * Finds expressions in a document and resolves them against the specified context object. The expressions in the
      * document are then replaced by the resolved values.
