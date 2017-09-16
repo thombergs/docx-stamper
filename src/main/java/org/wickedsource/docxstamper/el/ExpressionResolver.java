@@ -4,19 +4,20 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.wickedsource.docxstamper.api.EvaluationContextExtender;
+import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 
 public class ExpressionResolver {
 
     private static final ExpressionUtil expressionUtil = new ExpressionUtil();
-    private final EvaluationContextExtender elExtender;
+
+    private final EvaluationContextConfigurer evaluationContextConfigurer;
 
     public ExpressionResolver() {
-        this.elExtender = new EmptyEvaluationContextExtender();
+        this.evaluationContextConfigurer = new NoOpEvaluationContextConfigurer();
     }
 
-    public ExpressionResolver(EvaluationContextExtender elExtender) {
-        this.elExtender = elExtender;
+    public ExpressionResolver(EvaluationContextConfigurer evaluationContextConfigurer) {
+        this.evaluationContextConfigurer = evaluationContextConfigurer;
     }
 
     /**
@@ -32,7 +33,7 @@ public class ExpressionResolver {
         }
         ExpressionParser parser = new SpelExpressionParser();
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext(contextRoot);
-        elExtender.configureEvaluationContext(evaluationContext);
+        evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
         Expression expression = parser.parseExpression(expressionString);
         return expression.getValue(evaluationContext);
     }

@@ -1,14 +1,16 @@
 package org.wickedsource.docxstamper.el;
 
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.wickedsource.docxstamper.api.EvaluationContextExtender;
+import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 
 /**
- * {@link org.wickedsource.docxstamper.api.EvaluationContextExtender} that does no customization.
+ * {@link EvaluationContextConfigurer} that does no customization.
  */
-class EmptyEvaluationContextExtender implements EvaluationContextExtender {
+public class NoOpEvaluationContextConfigurer implements EvaluationContextConfigurer {
+
     @Override
     public void configureEvaluationContext(StandardEvaluationContext context) {
         // don't customize it
     }
+
 }

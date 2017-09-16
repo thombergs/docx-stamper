@@ -6,7 +6,7 @@ import java.util.Date;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
-import org.wickedsource.docxstamper.api.EvaluationContextExtender;
+import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.commentprocessor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -53,8 +53,11 @@ public class DocxStamper<T> {
         typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
         typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
         typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
+        ExpressionResolver expressionResolver = new ExpressionResolver(config.getEvaluationContextConfigurer());
         placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
+        placeholderReplacer.setExpressionResolver(expressionResolver);
         commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
+        commentProcessorRegistry.setExpressionResolver(expressionResolver);
         commentProcessorRegistry.setFailOnInvalidExpression(true);
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
@@ -159,12 +162,6 @@ public class DocxStamper<T> {
      */
     public void setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
         commentProcessorRegistry.setFailOnInvalidExpression(failOnUnresolvedExpression);
-    }
-
-    public void setEvaluationContextExtender(EvaluationContextExtender evaluationContextExtender) {
-        ExpressionResolver expressionResolver = new ExpressionResolver(evaluationContextExtender);
-        placeholderReplacer.setExpressionResolver(expressionResolver);
-        commentProcessorRegistry.setExpressionResolver(expressionResolver);
     }
 
 }

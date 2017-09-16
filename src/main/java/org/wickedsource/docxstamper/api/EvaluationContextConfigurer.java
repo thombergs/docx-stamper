@@ -3,10 +3,10 @@ package org.wickedsource.docxstamper.api;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 /**
- * Allows for custom configuration of an spring expression language {@link org.springframework.expression.EvaluationContext}.
- * This can be used to add custom {@link org.springframework.expression.PropertyAccessor}s and {@link org.springframework.expression.MethodResolver}s.
+ * Allows for custom configuration of a spring expression language {@link org.springframework.expression.EvaluationContext}.
+ * This can  for example be used to add custom {@link org.springframework.expression.PropertyAccessor}s and {@link org.springframework.expression.MethodResolver}s.
  */
-public interface EvaluationContextExtender {
+public interface EvaluationContextConfigurer {
 
     /**
      * Configure the context before it's used by docxstamper.
