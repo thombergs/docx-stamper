@@ -14,7 +14,7 @@ import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.TypedValue;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
-import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 public class CustomEvaluationContextConfigurerTest extends AbstractDocx4jTest {
 
