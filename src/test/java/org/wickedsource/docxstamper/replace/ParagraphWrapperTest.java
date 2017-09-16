@@ -3,6 +3,7 @@ package org.wickedsource.docxstamper.replace;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.RunUtil;
 
 import java.io.IOException;

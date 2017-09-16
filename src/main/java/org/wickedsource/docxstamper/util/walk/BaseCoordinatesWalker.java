@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.walk.coordinates;
+package org.wickedsource.docxstamper.util.walk;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.coordinates.*;

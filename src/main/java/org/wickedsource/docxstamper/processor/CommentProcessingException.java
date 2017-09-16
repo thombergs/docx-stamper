@@ -1,8 +1,8 @@
 package org.wickedsource.docxstamper.processor;
 
 import org.wickedsource.docxstamper.api.DocxStamperException;
-import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 
 public class CommentProcessingException extends DocxStamperException {
 

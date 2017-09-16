@@ -6,7 +6,7 @@ import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.DateContext;
-import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;

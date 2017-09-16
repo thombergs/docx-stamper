@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.walk;
+package org.wickedsource.docxstamper.util.walk;
 
 import java.io.IOException;
 
@@ -7,14 +7,9 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.api.coordinates.*;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.CommentWrapper;
-import org.wickedsource.docxstamper.api.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 
 public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 

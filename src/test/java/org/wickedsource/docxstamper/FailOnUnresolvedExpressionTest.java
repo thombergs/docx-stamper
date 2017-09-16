@@ -25,8 +25,9 @@ public class FailOnUnresolvedExpressionTest extends AbstractDocx4jTest {
         NameContext context = new NameContext();
         context.setName("Homer");
         InputStream template = getClass().getResourceAsStream("FailOnUnresolvedExpressionTest.docx");
-        DocxStamper stamper = new DocxStamper();
-        stamper.setFailOnUnresolvedExpression(false);
+        DocxStamperConfiguration config = new DocxStamperConfiguration();
+        config.setFailOnUnresolvedExpression(false);
+        DocxStamper stamper = new DocxStamper(config);
         stamper.stamp(template, context, new ByteArrayOutputStream());
         // no exception
     }

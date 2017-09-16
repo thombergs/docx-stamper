@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.walk.coordinates;
+package org.wickedsource.docxstamper.api.coordinates;
 
 import org.docx4j.wml.Tbl;
 

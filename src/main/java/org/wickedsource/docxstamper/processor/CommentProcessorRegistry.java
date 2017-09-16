@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.api.commentprocessor;
+package org.wickedsource.docxstamper.processor;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Comments;
@@ -8,18 +8,19 @@ import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
+import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.proxy.ProxyBuilder;
 import org.wickedsource.docxstamper.proxy.ProxyException;
-import org.wickedsource.docxstamper.replace.ParagraphWrapper;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
-import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
