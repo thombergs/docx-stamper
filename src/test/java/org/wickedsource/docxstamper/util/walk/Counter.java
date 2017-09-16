@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.walk;
+package org.wickedsource.docxstamper.util.walk;
 
 public class Counter {
 

@@ -4,14 +4,14 @@ import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tr;
+import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
-import org.wickedsource.docxstamper.walk.BaseDocumentWalker;
-import org.wickedsource.docxstamper.walk.DocumentWalker;
-import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
+import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
 import java.util.HashMap;
 import java.util.List;

@@ -20,9 +20,8 @@ import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wickedsource.docxstamper.api.DocxStamperException;
-import org.wickedsource.docxstamper.replace.ParagraphWrapper;
-import org.wickedsource.docxstamper.walk.BaseDocumentWalker;
-import org.wickedsource.docxstamper.walk.DocumentWalker;
+import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
+import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
 public class CommentUtil {
 

@@ -4,9 +4,9 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
-import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 
 import java.util.HashMap;
 import java.util.Map;

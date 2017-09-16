@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.walk;
+package org.wickedsource.docxstamper.util.walk;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.wml.*;

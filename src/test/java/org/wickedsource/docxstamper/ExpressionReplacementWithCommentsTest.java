@@ -10,7 +10,7 @@ import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
-import org.wickedsource.docxstamper.replace.ParagraphWrapper;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 public class ExpressionReplacementWithCommentsTest extends AbstractDocx4jTest {
 

@@ -6,8 +6,12 @@ import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.replace.ParagraphWrapper;
-import org.wickedsource.docxstamper.walk.coordinates.*;
+import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import org.wickedsource.docxstamper.util.walk.*;
 
 import java.io.IOException;
 import java.io.InputStream;

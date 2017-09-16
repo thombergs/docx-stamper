@@ -1,12 +1,12 @@
 package org.wickedsource.docxstamper.processor.displayif;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.util.ObjectDeleter;
-import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.walk.coordinates.TableRowCoordinates;
 
 import java.util.ArrayList;
 import java.util.List;

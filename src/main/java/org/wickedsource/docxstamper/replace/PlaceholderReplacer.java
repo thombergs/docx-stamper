@@ -9,14 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
+import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.RunUtil;
-import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.walk.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 import java.util.List;
 

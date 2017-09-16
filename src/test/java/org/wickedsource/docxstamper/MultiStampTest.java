@@ -10,9 +10,9 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.walk.coordinates.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.walk.coordinates.CoordinatesWalker;
-import org.wickedsource.docxstamper.walk.coordinates.TableCellCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
+import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 public class MultiStampTest extends AbstractDocx4jTest {
 
