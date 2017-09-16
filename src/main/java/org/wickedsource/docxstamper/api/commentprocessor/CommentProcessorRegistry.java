@@ -53,6 +53,10 @@ public class CommentProcessorRegistry {
 		this.placeholderReplacer = placeholderReplacer;
 	}
 
+	public void setExpressionResolver(ExpressionResolver expressionResolver) {
+		this.expressionResolver = expressionResolver;
+	}
+
 	/**
 	 * Registers the specified ICommentProcessor as an implementation of the
 	 * specified interface.

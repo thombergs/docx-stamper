@@ -6,8 +6,10 @@ import java.util.Date;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
+import org.wickedsource.docxstamper.api.EvaluationContextExtender;
 import org.wickedsource.docxstamper.api.commentprocessor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
@@ -56,8 +58,8 @@ public class DocxStamper<T> {
         commentProcessorRegistry.setFailOnInvalidExpression(true);
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
-		commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
-				new ReplaceWithProcessor());
+        commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
+                new ReplaceWithProcessor());
     }
 
     /**
@@ -157,6 +159,12 @@ public class DocxStamper<T> {
      */
     public void setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
         commentProcessorRegistry.setFailOnInvalidExpression(failOnUnresolvedExpression);
+    }
+
+    public void setEvaluationContextExtender(EvaluationContextExtender evaluationContextExtender) {
+        ExpressionResolver expressionResolver = new ExpressionResolver(evaluationContextExtender);
+        placeholderReplacer.setExpressionResolver(expressionResolver);
+        commentProcessorRegistry.setExpressionResolver(expressionResolver);
     }
 
 }
