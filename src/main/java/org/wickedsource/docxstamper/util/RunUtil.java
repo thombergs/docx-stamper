@@ -34,6 +34,8 @@ public class RunUtil {
                         text = text.trim();
                     }
                     result += text;
+                }else if (element.getValue() instanceof R.Tab){
+                    result += "\t";
                 }
             } else if (content instanceof Text) {
                 result += ((Text) content).getValue();
