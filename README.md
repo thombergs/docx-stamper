@@ -55,7 +55,8 @@ ICommentProcessor commentProcessor = ...;      // instance of your own ICommentP
 Class<?> interfaceClass = ...;                 // class of the interface that defines the methods that are
                                                // exposed into the expression language
 DocxStamper stamper = new DocxStamperConfiguration()
-  .addCommentProcessor(interfaceClass, commentProcessor);
+  .addCommentProcessor(interfaceClass, commentProcessor)
+  .build();
 ```
 For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html).
 
