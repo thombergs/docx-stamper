@@ -3,9 +3,12 @@ package org.wickedsource.docxstamper;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
+import java.util.Map;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
+import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
@@ -52,9 +55,14 @@ public class DocxStamper<T> {
     typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
     typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
     typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
+    for(Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()){
+      typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
+    }
+
     ExpressionResolver expressionResolver = new ExpressionResolver(config.getEvaluationContextConfigurer());
     placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
     placeholderReplacer.setExpressionResolver(expressionResolver);
+
     commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
     commentProcessorRegistry.setExpressionResolver(expressionResolver);
     commentProcessorRegistry.setFailOnInvalidExpression(config.isFailOnUnresolvedExpression());
@@ -62,6 +70,9 @@ public class DocxStamper<T> {
     commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
     commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
             new ReplaceWithProcessor());
+    for(Map.Entry<Class<?>, ICommentProcessor> entry : config.getCommentProcessors().entrySet()){
+      commentProcessorRegistry.registerCommentProcessor(entry.getKey(), entry.getValue());
+    }
   }
 
   /**
@@ -89,7 +100,7 @@ public class DocxStamper<T> {
    * </ul>
    * <p>
    * If you need a wider vocabulary of methods available in the comments, you can create your own ICommentProcessor
-   * and register it via getCommentProcessorRegistry().registerCommentProcessor().
+   * and register it via getCommentProcessorRegistry().addCommentProcessor().
    * </p>
    *
    * @param template    the .docx template.
@@ -137,22 +148,6 @@ public class DocxStamper<T> {
 
   private void processComments(final WordprocessingMLPackage document, final T contextRoot) {
     commentProcessorRegistry.runProcessors(document, contextRoot);
-  }
-
-  /**
-   * Returns the registry in which all ITypeResolvers are registered. Use it to register your own ITypeResolver
-   * implementation.
-   */
-  public TypeResolverRegistry getTypeResolverRegistry() {
-    return typeResolverRegistry;
-  }
-
-  /**
-   * Returns the registry in which all ICommentProcessors are registeres. Use it to register your own
-   * ICommentProcessor implementation.
-   */
-  public CommentProcessorRegistry getCommentProcessorRegistry() {
-    return commentProcessorRegistry;
   }
 
 }

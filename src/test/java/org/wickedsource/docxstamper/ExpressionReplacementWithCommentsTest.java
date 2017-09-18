@@ -14,30 +14,31 @@ import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 public class ExpressionReplacementWithCommentsTest extends AbstractDocx4jTest {
 
-	@Test
-    public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer Simpson");
-        InputStream template = getClass().getResourceAsStream("ExpressionReplacementWithCommentsTest.docx");
-        OutputStream out = getOutputStream();
-		DocxStamper stamper = new DocxStamper();
-		stamper.getCommentProcessorRegistry().setFailOnInvalidExpression(false);
-		stamper.stamp(template, context, out);
-		InputStream in = getInputStream(out);
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
-        resolvedExpressionsAreReplaced(document);
-        unresolvedExpressionsAreNotReplaced(document);
-    }
+  @Test
+  public void test() throws Docx4JException, IOException {
+    NameContext context = new NameContext();
+    context.setName("Homer Simpson");
+    InputStream template = getClass().getResourceAsStream("ExpressionReplacementWithCommentsTest.docx");
+    OutputStream out = getOutputStream();
+    DocxStamper stamper = new DocxStamperConfiguration()
+            .setFailOnUnresolvedExpression(false)
+            .build();
+    stamper.stamp(template, context, out);
+    InputStream in = getInputStream(out);
+    WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
+    resolvedExpressionsAreReplaced(document);
+    unresolvedExpressionsAreNotReplaced(document);
+  }
 
-    private void resolvedExpressionsAreReplaced(WordprocessingMLPackage document) {
-        P nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
-        Assert.assertEquals("In this paragraph, the variable name should be resolved to the value Homer Simpson.", new ParagraphWrapper(nameParagraph).getText());
-    }
+  private void resolvedExpressionsAreReplaced(WordprocessingMLPackage document) {
+    P nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
+    Assert.assertEquals("In this paragraph, the variable name should be resolved to the value Homer Simpson.", new ParagraphWrapper(nameParagraph).getText());
+  }
 
-    private void unresolvedExpressionsAreNotReplaced(WordprocessingMLPackage document) {
-        P fooParagraph = (P) document.getMainDocumentPart().getContent().get(3);
-        Assert.assertEquals("In this paragraph, the variable foo should not be resolved: unresolvedValueWithComment.", new ParagraphWrapper(fooParagraph).getText());
-    }
+  private void unresolvedExpressionsAreNotReplaced(WordprocessingMLPackage document) {
+    P fooParagraph = (P) document.getMainDocumentPart().getContent().get(3);
+    Assert.assertEquals("In this paragraph, the variable foo should not be resolved: unresolvedValueWithComment.", new ParagraphWrapper(fooParagraph).getText());
+  }
 
 
 }

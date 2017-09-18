@@ -13,7 +13,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
  * </p>
  * <p>
  * To use your own type resolver, implement this interface and register your implementation by calling
- * DocxStamper.getTypeResolverRegistry().registerTypeResolver().
+ * DocxStamper.getTypeResolverRegistry().addTypeResolver().
  * </p>
  */
 public interface ITypeResolver<S, T> {

@@ -58,13 +58,6 @@ public class CommentProcessorRegistry {
 		this.expressionResolver = expressionResolver;
 	}
 
-	/**
-	 * Registers the specified ICommentProcessor as an implementation of the
-	 * specified interface.
-	 *
-	 * @param interfaceClass   the Interface which is implemented by the commentProcessor.
-	 * @param commentProcessor the commentProcessor implementing the specified interface.
-	 */
 	public void registerCommentProcessor(Class<?> interfaceClass,
 										 ICommentProcessor commentProcessor) {
 		this.commentProcessorInterfaces.put(commentProcessor, interfaceClass);

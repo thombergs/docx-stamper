@@ -16,20 +16,6 @@ public class TypeResolverRegistry {
         this.defaultResolver = defaultResolver;
     }
 
-    /**
-     * <p>
-     * Registers the given ITypeResolver for the given class. The registered ITypeResolver's reolve().method will only
-     * be called with objects of the specified class.
-     * </p>
-     * <p>
-     * Note that each type can only be resolved by ONE ITypeResolver implementation. Multiple calls to registerTypeResolver()
-     * with the same resolvedType parameter will override earlier calls.
-     * </p>
-     *
-     * @param resolvedType the class whose objects are to be passed to the given ITypeResolver.
-     * @param resolver     the resolver to resolve objects of the given type.
-     * @param <T>          the type resolved by the ITypeResolver.
-     */
     public <T> void registerTypeResolver(Class<T> resolvedType, ITypeResolver resolver) {
         typeResolversByType.put(resolvedType, resolver);
     }

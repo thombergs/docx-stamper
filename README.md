@@ -9,7 +9,8 @@ MyContext context = ...;                 // your own POJO against which expressi
                                          // will be resolved
 InputStream template = ...;              // InputStream to your .docx template file
 OutputStream out = ...;                  // OutputStream in which to write the resulting .docx document
-DocxStamper stamper = new DocxStamper();
+DocxStamper stamper = new DocxStamperConfiguration()
+  .build();
 stamper.stamp(template, context, out);
 out.close();
 ```
@@ -29,11 +30,11 @@ The value an expression resolves to may be of the following types:
 If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement your own [TypeResolver](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/typeresolver/ITypeResolver.html). To register your own TypeResolver with docx-stamper, use the following code:
 
 ```java
-DocxStamper stamper = ...;              
 ITypeResolver typeResolver = ...;              // instance of your own ITypeResolver implementation
 Class<?> type ...;                             // class of expression values your resolver handles
-stamper.getTypeResolverRegistry()
-    .registerTypeResolver(type, typeResolver);
+DocxStamper stamper = new DocxStamperConfiguration()
+  .addTypeResolver(type, typeResolver)
+  .build();
 ```
 
 ## Conditional Display and Repeating of Elements
@@ -50,12 +51,11 @@ Besides replacing expressions, docx-stamper can **process comments on paragraphs
 If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html). To register you comment processor to docx-stamper, use the following code:
 
 ```java
-DocxStamper stamper = ...;              
 ICommentProcessor commentProcessor = ...;      // instance of your own ICommentProcessor implementation
 Class<?> interfaceClass = ...;                 // class of the interface that defines the methods that are
                                                // exposed into the expression language
-stamper.getCommentProcessorRegistry()
-    .registerCommentProcessor(interfaceClass, commentProcessor);
+DocxStamper stamper = new DocxStamperConfiguration()
+  .addCommentProcessor(interfaceClass, commentProcessor);
 ```
 For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html).
 
@@ -66,8 +66,9 @@ The docx file format does not allow comments in Headers or Footers of a document
 By default DocxStamper fails with an UnresolvedExpressionException if an expression within the document or within the comments cannot be resolved successfully. If you want to change this behavior, you can do the following:
 
 ```java
-DocxStamper stamper = ...;
-stamper.setFailOnUnresolvedExpression(false);
+DocxStamper stamper = new DocxStamperConfiguration()
+  .setFailOnUnresolvedExpression(false)
+  .build();
 ```
 
 ## Sample Code
@@ -82,11 +83,16 @@ To include docx-stamper in your project, you can use the following maven coordin
 <dependency>
     <groupId>org.wickedsource</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.0.12</version>
+    <version>1.1.0</version>
 </dependency>
 ```
 
 ## Changelog
+* 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.1.0)
+  * API Break: All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
+  * API Break: Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
+    configure CommentProcessors and TypeResolvers via `DocxStamperConfiguration` now.
+  * `DocxStamperConfiguration` can now be used as a Builder for `DocxStamper` objects.
 * 1.0.12 (2017-09-08) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.12)
 * 1.0.11 (2017-06-09) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.11)
 * 1.0.10 (2017-04-03) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.10+is%3Aclosed)
