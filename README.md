@@ -90,8 +90,8 @@ To include docx-stamper in your project, you can use the following maven coordin
 
 ## Changelog
 * 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.1.0)
-  * API Break: All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
-  * API Break: Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
+  * *API Break:* All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
+  * *API Break:* Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
     configure CommentProcessors and TypeResolvers via `DocxStamperConfiguration` now.
   * `DocxStamperConfiguration` can now be used as a Builder for `DocxStamper` objects.
 * 1.0.12 (2017-09-08) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.12)
