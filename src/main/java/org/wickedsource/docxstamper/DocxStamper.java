@@ -18,6 +18,8 @@ import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
+import org.wickedsource.docxstamper.proxy.ProxyBuilder;
+import org.wickedsource.docxstamper.proxy.ProxyException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
@@ -55,7 +57,7 @@ public class DocxStamper<T> {
     typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
     typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
     typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
-    for(Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()){
+    for (Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()) {
       typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
     }
 
@@ -70,7 +72,7 @@ public class DocxStamper<T> {
     commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
     commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
             new ReplaceWithProcessor());
-    for(Map.Entry<Class<?>, ICommentProcessor> entry : config.getCommentProcessors().entrySet()){
+    for (Map.Entry<Class<?>, ICommentProcessor> entry : config.getCommentProcessors().entrySet()) {
       commentProcessorRegistry.registerCommentProcessor(entry.getKey(), entry.getValue());
     }
   }
@@ -112,7 +114,6 @@ public class DocxStamper<T> {
     try {
       WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
       stamp(document, contextRoot, out);
-      commentProcessorRegistry.reset();
     } catch (DocxStamperException e) {
       throw e;
     } catch (Exception e) {
@@ -131,14 +132,33 @@ public class DocxStamper<T> {
    */
   public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
     try {
-      replaceExpressions(document, contextRoot);
-      processComments(document, contextRoot);
+      T proxiedRoot = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
+      replaceExpressions(document, proxiedRoot);
+      processComments(document, proxiedRoot);
       document.save(out);
       commentProcessorRegistry.reset();
     } catch (DocxStamperException e) {
       throw e;
     } catch (Exception e) {
       throw new DocxStamperException(e);
+    }
+  }
+
+  private T addCustomInterfacesToContextRoot(T contextRoot, Map<Class<?>, Object> interfacesToImplementations) {
+    if (interfacesToImplementations.isEmpty()) {
+      return contextRoot;
+    }
+    try {
+      ProxyBuilder<T> proxyBuilder = new ProxyBuilder<T>()
+              .withRoot(contextRoot);
+      for (Map.Entry<Class<?>, Object> entry : interfacesToImplementations.entrySet()) {
+        Class<?> interfaceClass = entry.getKey();
+        Object implementation = entry.getValue();
+        proxyBuilder.withInterface(interfaceClass, implementation);
+      }
+      return proxyBuilder.build();
+    } catch (ProxyException e) {
+      throw new DocxStamperException("could create proxy around context root!", e);
     }
   }
 

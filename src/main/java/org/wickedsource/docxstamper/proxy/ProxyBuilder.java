@@ -1,7 +1,6 @@
 package org.wickedsource.docxstamper.proxy;
 
 import javassist.util.proxy.ProxyFactory;
-import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +14,7 @@ public class ProxyBuilder<T> {
 
 	private T root;
 
-	private Map<Class<?>, ICommentProcessor> interfacesToImplementations = new HashMap<>();
+	private Map<Class<?>, Object> interfacesToImplementations = new HashMap<>();
 
 	/**
 	 * Specifies the root object for the proxy that shall be enhanced.
@@ -36,7 +35,7 @@ public class ProxyBuilder<T> {
 	 * @param interfaceImpl  an implementation of the interface
 	 * @return this builder for chaining.
 	 */
-	public ProxyBuilder<T> withInterface(Class<?> interfaceClass, ICommentProcessor interfaceImpl) {
+	public ProxyBuilder<T> withInterface(Class<?> interfaceClass, Object interfaceImpl) {
 		this.interfacesToImplementations.put(interfaceClass, interfaceImpl);
 		return this;
 	}

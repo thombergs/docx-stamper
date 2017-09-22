@@ -26,6 +26,8 @@ public class DocxStamperConfiguration {
 
   private ITypeResolver defaultTypeResolver = new FallbackResolver();
 
+  private Map<Class<?>, Object> expressionFunctions = new HashMap<>();
+
   /**
    * The String provided as lineBreakPlaceholder will be replaces with a line break
    * when stamping a document. If no lineBreakPlaceholder is provided, no replacement
@@ -92,6 +94,17 @@ public class DocxStamperConfiguration {
   }
 
   /**
+   * Exposes all methods of a given interface to the expression language.
+   * @param interfaceClass the interface whose methods should be exposed in the expression language.
+   * @param implementation  the implementation that should be called to evaluate invocations of the interface methods
+   *                        within the expression language. Must implement the interface above.
+   */
+  public DocxStamperConfiguration exposeInterfaceToExpressionLanguage(Class<?> interfaceClass, Object implementation) {
+    this.expressionFunctions.put(interfaceClass, implementation);
+    return this;
+  }
+
+  /**
    * Creates a {@link DocxStamper} instance configured with this configuration.
    */
   public DocxStamper build() {
@@ -127,4 +140,7 @@ public class DocxStamperConfiguration {
     return lineBreakPlaceholder;
   }
 
+  public Map<Class<?>, Object> getExpressionFunctions() {
+    return expressionFunctions;
+  }
 }
