@@ -88,13 +88,13 @@ To include docx-stamper in your project, you can use the following maven coordin
 ```
 
 ## Changelog
-* 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.1.0)
+* 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.1.0+is%3Aclosed)
   * API Break: All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
   * API Break: Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
     configure CommentProcessors and TypeResolvers via `DocxStamperConfiguration` now.
   * `DocxStamperConfiguration` can now be used as a Builder for `DocxStamper` objects.
-* 1.0.12 (2017-09-08) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.12)
-* 1.0.11 (2017-06-09) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.11)
+* 1.0.12 (2017-09-08) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.12+is%3Aclosed)
+* 1.0.11 (2017-06-09) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.11+is%3Aclosed)
 * 1.0.10 (2017-04-03) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.10+is%3Aclosed)
 * 1.0.9 (2017-03-18) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.9+is%3Aclosed)
 * 1.0.8 (2017-02-24) - [minor feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.8+is%3Aclosed)
