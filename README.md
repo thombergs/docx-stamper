@@ -16,7 +16,7 @@ out.close();
 ```
 
 ## Replacing Expressions in a .docx Template
-The main feature of docx-stamper is **replacement of expressions** within the text of the template document. Simply add expressions like `${person.name}` or `${person.name.equals("Homer") ? "Duff" : "Budweiser"}` in the text of your .docx template and provide a context object against which the expression can be resolved. docx-stamper will try to keep the original formatting of the text in the template intact. You can use the full feature set of [Spring Expression Language](http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html).
+The main feature of docx-stamper is **replacement of expressions** within the text of the template document. Simply add expressions like `${person.name}` or `${person.name.equals("Homer") ? "Duff" : "Budweiser"}` in the text of your .docx template and provide a context object against which the expression can be resolved. docx-stamper will try to keep the original formatting of the text in the template intact. You can use the full feature set of [Spring Expression Language](http://docs.spring.io/spring/docs/current/spring-framework-reference/html/expressions.html) (SpEL).
 
 The value an expression resolves to may be of the following types:
 
@@ -34,6 +34,18 @@ ITypeResolver typeResolver = ...;              // instance of your own ITypeReso
 Class<?> type ...;                             // class of expression values your resolver handles
 DocxStamper stamper = new DocxStamperConfiguration()
   .addTypeResolver(type, typeResolver)
+  .build();
+```
+
+## Customizing the SpEL Evaluation Context
+
+If you want to take more control over the evaluation of expressions, you can implement a [EvaluationContextConfigurer](src/main/java/org/wickedsource/docxstamper/api/EvaluationContextConfigurer.java)
+and customize Springs `StandardEvaluationContext` to your needs. You can register an `EvaluationContextConfigurer` like this:
+
+```java 
+EvaluationContextConfigurer configurer = ...;
+DocxStamper stamper = new DocxStamperConfiguration()
+  .setEvaluationContextConfigurer(configurer)
   .build();
 ```
 
