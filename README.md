@@ -55,7 +55,8 @@ ICommentProcessor commentProcessor = ...;      // instance of your own ICommentP
 Class<?> interfaceClass = ...;                 // class of the interface that defines the methods that are
                                                // exposed into the expression language
 DocxStamper stamper = new DocxStamperConfiguration()
-  .addCommentProcessor(interfaceClass, commentProcessor);
+  .addCommentProcessor(interfaceClass, commentProcessor)
+  .build();
 ```
 For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](http://thombergs.github.io/docx-stamper/apidocs/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.html).
 
@@ -89,8 +90,8 @@ To include docx-stamper in your project, you can use the following maven coordin
 
 ## Changelog
 * 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.1.0+is%3Aclosed)
-  * API Break: All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
-  * API Break: Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
+  * *API Break:* All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
+  * *API Break:* Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
     configure CommentProcessors and TypeResolvers via `DocxStamperConfiguration` now.
   * `DocxStamperConfiguration` can now be used as a Builder for `DocxStamper` objects.
 * 1.0.12 (2017-09-08) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aopen+is%3Aissue+milestone%3A1.0.12+is%3Aclosed)
