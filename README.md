@@ -49,6 +49,30 @@ DocxStamper stamper = new DocxStamperConfiguration()
   .build();
 ```
 
+## Adding custom functions to the Expression Language
+
+If you want to create custom functions (for different number formats or different date formats, for example), you can register functions
+which can then be used in the expression language. The following code for example adds a function `toUppercase(String)`
+which can be used within the .docx document to uppercase a String:
+
+```java
+DocxStamper stamper = new DocxStamperConfiguration()
+  .exposeInterfaceToExpressionLanguage(UppercaseFunction.class, new UppercaseFunctionImpl());
+  .build();
+
+public interface UppercaseFunction {
+  String toUppercase(String string);
+}
+
+public static class UppercaseFunctionImpl implements UppercaseFunction {
+  @Override
+  public String toUppercase(String string) {
+    return string.toUpperCase();
+  }
+}
+```
+
+
 ## Conditional Display and Repeating of Elements
 Besides replacing expressions, docx-stamper can **process comments on paragraphs of text** in the template .docx document and do manipulations on the template based on these comments. By default, you can use the following expressions in comments:
 
@@ -101,6 +125,7 @@ To include docx-stamper in your project, you can use the following maven coordin
 ```
 
 ## Changelog
+* 1.2.0 (2017-09-26) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.0+is%3Aclosed)
 * 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.1.0+is%3Aclosed)
   * *API Break:* All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
   * *API Break:* Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
