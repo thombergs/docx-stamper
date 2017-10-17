@@ -23,6 +23,8 @@ public class CustomExpressionFunctionTest extends AbstractDocx4jTest {
     WordprocessingMLPackage document = stampAndLoad(template, context, config);
     P nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
     Assert.assertEquals("In this paragraph, a custom expression function is used to uppercase a String: HOMER SIMPSON.", new ParagraphWrapper(nameParagraph).getText());
+    P commentedParagraph = (P) document.getMainDocumentPart().getContent().get(3);
+    Assert.assertEquals("To test that custom functions work together with comment expressions, we toggle visibility of this paragraph with a comment expression.", new ParagraphWrapper(commentedParagraph).getText());
   }
 
   public interface UppercaseFunction {

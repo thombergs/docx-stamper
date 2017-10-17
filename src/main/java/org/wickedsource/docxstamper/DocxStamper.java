@@ -19,7 +19,6 @@ import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
 import org.wickedsource.docxstamper.proxy.ProxyBuilder;
-import org.wickedsource.docxstamper.proxy.ProxyException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
@@ -132,9 +131,9 @@ public class DocxStamper<T> {
    */
   public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
     try {
-      T proxiedRoot = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
-      replaceExpressions(document, proxiedRoot);
-      processComments(document, proxiedRoot);
+      ProxyBuilder<T> proxyBuilder = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
+      replaceExpressions(document, proxyBuilder);
+      processComments(document, proxyBuilder);
       document.save(out);
       commentProcessorRegistry.reset();
     } catch (DocxStamperException e) {
@@ -144,30 +143,26 @@ public class DocxStamper<T> {
     }
   }
 
-  private T addCustomInterfacesToContextRoot(T contextRoot, Map<Class<?>, Object> interfacesToImplementations) {
+  private ProxyBuilder<T> addCustomInterfacesToContextRoot(T contextRoot, Map<Class<?>, Object> interfacesToImplementations) {
+    ProxyBuilder<T> proxyBuilder = new ProxyBuilder<T>()
+            .withRoot(contextRoot);
     if (interfacesToImplementations.isEmpty()) {
-      return contextRoot;
+      return proxyBuilder;
     }
-    try {
-      ProxyBuilder<T> proxyBuilder = new ProxyBuilder<T>()
-              .withRoot(contextRoot);
-      for (Map.Entry<Class<?>, Object> entry : interfacesToImplementations.entrySet()) {
-        Class<?> interfaceClass = entry.getKey();
-        Object implementation = entry.getValue();
-        proxyBuilder.withInterface(interfaceClass, implementation);
-      }
-      return proxyBuilder.build();
-    } catch (ProxyException e) {
-      throw new DocxStamperException("could create proxy around context root!", e);
+    for (Map.Entry<Class<?>, Object> entry : interfacesToImplementations.entrySet()) {
+      Class<?> interfaceClass = entry.getKey();
+      Object implementation = entry.getValue();
+      proxyBuilder.withInterface(interfaceClass, implementation);
     }
+    return proxyBuilder;
   }
 
-  private void replaceExpressions(WordprocessingMLPackage document, T contextRoot) {
-    placeholderReplacer.resolveExpressions(document, contextRoot);
+  private void replaceExpressions(WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
+    placeholderReplacer.resolveExpressions(document, proxyBuilder);
   }
 
-  private void processComments(final WordprocessingMLPackage document, final T contextRoot) {
-    commentProcessorRegistry.runProcessors(document, contextRoot);
+  private void processComments(final WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
+    commentProcessorRegistry.runProcessors(document, proxyBuilder);
   }
 
 }
