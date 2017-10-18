@@ -125,6 +125,7 @@ To include docx-stamper in your project, you can use the following maven coordin
 ```
 
 ## Changelog
+* 1.2.1 (2017-10-18) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.1+is%3Aclosed)
 * 1.2.0 (2017-09-26) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.0+is%3Aclosed)
 * 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.1.0+is%3Aclosed)
   * *API Break:* All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
