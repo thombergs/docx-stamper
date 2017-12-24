@@ -14,14 +14,28 @@ public class Image {
 
     private String altText;
 
+    private Integer maxWidth;
+
     public Image(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         IOUtils.copy(in, out);
         this.imageBytes = out.toByteArray();
     }
 
+    public Image(InputStream in, Integer maxWidth) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        IOUtils.copy(in, out);
+        this.imageBytes = out.toByteArray();
+        this.maxWidth = maxWidth;
+    }
+
     public Image(byte[] imageBytes) {
         this.imageBytes = imageBytes;
+    }
+
+    public Image(byte[] imageBytes, Integer maxWidth) {
+        this.imageBytes = imageBytes;
+        this.maxWidth = maxWidth;
     }
 
     public String getFilename() {
@@ -46,5 +60,13 @@ public class Image {
 
     public void setImageBytes(byte[] imageBytes) {
         this.imageBytes = imageBytes;
+    }
+
+    public Integer getMaxWidth() {
+        return maxWidth;
+    }
+
+    public void setMaxWidth(Integer maxWidth) {
+        this.maxWidth = maxWidth;
     }
 }
