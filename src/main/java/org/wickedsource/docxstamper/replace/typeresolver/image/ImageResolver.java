@@ -24,13 +24,13 @@ public class ImageResolver implements ITypeResolver {
             // TODO: adding the same image twice will put the image twice into the docx-zip file. make the second
             //       addition of the same image a reference instead.
             Image img = (Image) image;
-            return createRunWithImage(document, img.getImageBytes(), img.getFilename(), img.getAltText());
+            return createRunWithImage(document, img.getImageBytes(), img.getFilename(), img.getAltText(), img.getMaxWidth());
         } catch (Exception e) {
             throw new DocxStamperException("Error while adding image to document!", e);
         }
     }
 
-    public static R createRunWithImage(WordprocessingMLPackage wordMLPackage, byte[] bytes, String filenameHint, String altText) throws Exception {
+    public static R createRunWithImage(WordprocessingMLPackage wordMLPackage, byte[] bytes, String filenameHint, String altText, Integer maxWidth) throws Exception {
         BinaryPartAbstractImage imagePart = BinaryPartAbstractImage.createImagePart(wordMLPackage, bytes);
 
         // creating random ids assuming they are unique
@@ -44,8 +44,14 @@ public class ImageResolver implements ITypeResolver {
             altText = "dummyAltText";
         }
 
-        Inline inline = imagePart.createImageInline(filenameHint, altText,
-                id1, id2, false);
+        Inline inline;
+        if (maxWidth == null) {
+            inline = imagePart.createImageInline(filenameHint, altText,
+                    id1, id2, false);
+        } else {
+            inline = imagePart.createImageInline(filenameHint, altText,
+                    id1, id2, false, maxWidth);
+        }
 
         // Now add the inline in w:p/w:r/w:drawing
         org.docx4j.wml.ObjectFactory factory = new org.docx4j.wml.ObjectFactory();

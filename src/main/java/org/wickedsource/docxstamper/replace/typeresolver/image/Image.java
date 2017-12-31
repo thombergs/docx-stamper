@@ -6,6 +6,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+/**
+ * This class describes an image which will be inserted into document.
+ */
 public class Image {
 
     private byte[] imageBytes;
@@ -14,14 +17,42 @@ public class Image {
 
     private String altText;
 
+    private Integer maxWidth;
+
+    /**
+     * @param in - content of the image as InputStream
+     */
     public Image(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         IOUtils.copy(in, out);
         this.imageBytes = out.toByteArray();
     }
 
+    /**
+     * @param in - content of the image as InputStream
+     * @param maxWidth - max width of the image in twip
+     */
+    public Image(InputStream in, Integer maxWidth) throws IOException {
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        IOUtils.copy(in, out);
+        this.imageBytes = out.toByteArray();
+        this.maxWidth = maxWidth;
+    }
+
+    /**
+     * @param imageBytes - content of the image as array of the bytes
+     */
     public Image(byte[] imageBytes) {
         this.imageBytes = imageBytes;
+    }
+
+    /**
+     * @param imageBytes - content of the image as array of the bytes
+     * @param maxWidth - max width of the image in twip
+     */
+    public Image(byte[] imageBytes, Integer maxWidth) {
+        this.imageBytes = imageBytes;
+        this.maxWidth = maxWidth;
     }
 
     public String getFilename() {
@@ -46,5 +77,12 @@ public class Image {
 
     public void setImageBytes(byte[] imageBytes) {
         this.imageBytes = imageBytes;
+    }
+
+    /**
+     * @return max width of the image in twip, if it is specified, or null.
+     */
+    public Integer getMaxWidth() {
+        return maxWidth;
     }
 }
