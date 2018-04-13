@@ -1,11 +1,12 @@
 package org.wickedsource.docxstamper.util;
 
+import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.replace.IndexedRun;
 import org.wickedsource.docxstamper.util.RunUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -122,8 +123,27 @@ public class ParagraphWrapper {
                 }
             }
 
-            // add replacement run between first and last run
-            this.paragraph.getContent().add(firstRun.getIndexInParent() + 1, replacement);
+            if (replacement instanceof Collection) {
+                // implementation wants to insert multiple document elements (e.g. content from
+                // another document)
+                ContentAccessor parent = (ContentAccessor) this.paragraph.getParent();
+                Collection<?> parts = (Collection<?>) replacement;
+                int i = 0, j = parent.getContent().indexOf(this.paragraph);
+                for (Object part : parts) {
+                    if (part instanceof R) {
+                        // we're adding a collection of runs
+                        this.paragraph.getContent().add(firstRun.getIndexInParent() + ++i, part);
+                    } else {
+                        // remove placeholder paragraph (this.paragraph)
+                        parent.getContent().remove(paragraph);
+                        // and replace with content
+                        parent.getContent().add(j++, part);
+                    }
+                }
+            } else {
+                // add replacement run between first and last run
+                this.paragraph.getContent().add(firstRun.getIndexInParent() + 1, replacement);
+            }
 
             recalculateRuns();
         }

@@ -35,8 +35,12 @@ public abstract class CoordinatesWalker {
             walkContent(headerPart.getContent());
         }
 
-        // walk through elements in main document part
-        walkContent(document.getMainDocumentPart().getContent());
+        // walk through elements in main document part.
+        //
+        // walk a copy of the document content list to avoid a comod exception in the event that a
+        // custom ITypeResolver wants to insert top-level element(s) like a paragraph or table
+        // (e.g. content from another document)
+        walkContent(new ArrayList<>(document.getMainDocumentPart().getContent()));
 
         // walk through elements in headers
         List<Relationship> footerRelationships = getRelationshipsOfType(document, Namespaces.FOOTER);
