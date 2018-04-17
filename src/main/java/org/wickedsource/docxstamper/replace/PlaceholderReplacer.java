@@ -111,7 +111,11 @@ public class PlaceholderReplacer<T> {
     if (replacementObject instanceof R) {
       RunUtil.applyParagraphStyle(p.getParagraph(), (R) replacementObject);
     }
-    p.replace(placeholder, replacementObject);
+    try {
+        p.replace(placeholder, replacementObject);
+    } catch (DocxStamperException e) {
+        throw new DocxStamperException("Failed to replace expression " + placeholder + ".", e);
+    }
   }
 
 }

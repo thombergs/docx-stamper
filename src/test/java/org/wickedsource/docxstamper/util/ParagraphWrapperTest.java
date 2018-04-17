@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.replace;
+package org.wickedsource.docxstamper.util;
 
 import org.junit.Assert;
 import org.junit.Test;
