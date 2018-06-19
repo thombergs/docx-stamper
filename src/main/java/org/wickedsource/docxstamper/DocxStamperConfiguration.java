@@ -22,6 +22,8 @@ public class DocxStamperConfiguration {
 
   private boolean leaveEmptyOnExpressionError = false;
 
+  private boolean replaceNullValues = false;
+
   private Map<Class<?>, ICommentProcessor> commentProcessors = new HashMap<>();
 
   private Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
@@ -116,6 +118,17 @@ public class DocxStamperConfiguration {
   }
 
   /**
+   * Indicates if expressions that resolve to null must be replaced be passing null to {{@link FallbackResolver}} or
+   * the expression must be leaved as is without replacing it with a value
+   * @param replaceNullValues true to replace null value expression with resolved value, false to leave the expression as is
+   */
+  public DocxStamperConfiguration replaceNullValues(boolean replaceNullValues) {
+    this.replaceNullValues = replaceNullValues;
+    return this;
+  }
+
+
+  /**
    * Creates a {@link DocxStamper} instance configured with this configuration.
    */
   public DocxStamper build() {
@@ -149,6 +162,10 @@ public class DocxStamperConfiguration {
 
   public boolean isLeaveEmptyOnExpressionError() {
     return leaveEmptyOnExpressionError;
+  }
+
+  public boolean isReplaceNullValues() {
+    return replaceNullValues;
   }
 
   String getLineBreakPlaceholder() {

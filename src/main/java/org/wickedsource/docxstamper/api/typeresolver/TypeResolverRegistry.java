@@ -45,4 +45,8 @@ public class TypeResolverRegistry {
     public void setDefaultResolver(ITypeResolver defaultResolver) {
         this.defaultResolver = defaultResolver;
     }
+
+    public ITypeResolver getDefaultResolver() {
+        return defaultResolver;
+    }
 }
