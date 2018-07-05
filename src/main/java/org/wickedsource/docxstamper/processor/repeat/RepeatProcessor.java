@@ -7,6 +7,7 @@ import org.docx4j.wml.Tr;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
@@ -23,8 +24,9 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     private PlaceholderReplacer<Object> placeholderReplacer;
 
-    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry) {
+    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver) {
         this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+        this.placeholderReplacer.setExpressionResolver(expressionResolver);
     }
 
     @Override
