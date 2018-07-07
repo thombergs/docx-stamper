@@ -42,6 +42,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     private void repeatRows(final WordprocessingMLPackage document) {
         for (TableRowCoordinates rCoords : tableRowsToRepeat.keySet()) {
             List<Object> expressionContexts = tableRowsToRepeat.get(rCoords);
+            int index = rCoords.getIndex();
             for (final Object expressionContext : expressionContexts) {
                 Tr rowClone = XmlUtils.deepCopy(rCoords.getRow());
                 DocumentWalker walker = new BaseDocumentWalker(rowClone) {
@@ -51,7 +52,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
                     }
                 };
                 walker.walk();
-                rCoords.getParentTableCoordinates().getTable().getContent().add(rowClone);
+                rCoords.getParentTableCoordinates().getTable().getContent().add(++index, rowClone);
             }
             rCoords.getParentTableCoordinates().getTable().getContent().remove(rCoords.getRow());
             // TODO: remove "repeatTableRow"-comment from cloned rows!
