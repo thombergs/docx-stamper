@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.api.coordinates;
+package org.wickedsource.docxstamper.walk.coordinates;
 
 public abstract class AbstractCoordinates {
 
