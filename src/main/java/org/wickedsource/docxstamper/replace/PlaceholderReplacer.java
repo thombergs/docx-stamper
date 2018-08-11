@@ -36,6 +36,8 @@ public class PlaceholderReplacer<T> {
 
   private String lineBreakPlaceholder;
 
+  private boolean leaveEmptyOnExpressionError = false;
+
   public PlaceholderReplacer(TypeResolverRegistry typeResolverRegistry) {
     this.typeResolverRegistry = typeResolverRegistry;
   }
@@ -43,6 +45,14 @@ public class PlaceholderReplacer<T> {
   public PlaceholderReplacer(TypeResolverRegistry typeResolverRegistry, String lineBreakPlaceholder) {
     this.typeResolverRegistry = typeResolverRegistry;
     this.lineBreakPlaceholder = lineBreakPlaceholder;
+  }
+
+  public boolean isLeaveEmptyOnExpressionError() {
+    return leaveEmptyOnExpressionError;
+  }
+
+  public void setLeaveEmptyOnExpressionError(boolean leaveEmptyOnExpressionError) {
+    this.leaveEmptyOnExpressionError = leaveEmptyOnExpressionError;
   }
 
   public void setExpressionResolver(ExpressionResolver expressionResolver) {
@@ -89,6 +99,10 @@ public class PlaceholderReplacer<T> {
                 "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
                 placeholder, expressionContext.getClass(), e.getMessage()));
         logger.trace("Reason for skipping expression:", e);
+
+        if(isLeaveEmptyOnExpressionError()) {
+          replace(paragraphWrapper,placeholder,null);
+        }
       }
     }
     if (this.lineBreakPlaceholder != null) {
