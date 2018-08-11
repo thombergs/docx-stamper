@@ -127,7 +127,6 @@ public class DocxStamperConfiguration {
     return this;
   }
 
-
   /**
    * Creates a {@link DocxStamper} instance configured with this configuration.
    */

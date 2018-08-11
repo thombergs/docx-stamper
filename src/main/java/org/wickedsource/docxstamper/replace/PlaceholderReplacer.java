@@ -60,7 +60,7 @@ public class PlaceholderReplacer<T> {
   public void setReplaceNullValues(boolean replaceNullValues) {
     this.replaceNullValues = replaceNullValues;
   }
-
+  
   public void setExpressionResolver(ExpressionResolver expressionResolver) {
     this.expressionResolver = expressionResolver;
   }
