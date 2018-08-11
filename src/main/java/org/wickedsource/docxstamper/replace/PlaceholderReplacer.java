@@ -36,6 +36,10 @@ public class PlaceholderReplacer<T> {
 
   private String lineBreakPlaceholder;
 
+  private boolean leaveEmptyOnExpressionError = false;
+
+  private boolean replaceNullValues = false;
+
   public PlaceholderReplacer(TypeResolverRegistry typeResolverRegistry) {
     this.typeResolverRegistry = typeResolverRegistry;
   }
@@ -45,6 +49,18 @@ public class PlaceholderReplacer<T> {
     this.lineBreakPlaceholder = lineBreakPlaceholder;
   }
 
+  public boolean isLeaveEmptyOnExpressionError() {
+    return leaveEmptyOnExpressionError;
+  }
+
+  public void setLeaveEmptyOnExpressionError(boolean leaveEmptyOnExpressionError) {
+    this.leaveEmptyOnExpressionError = leaveEmptyOnExpressionError;
+  }
+
+  public void setReplaceNullValues(boolean replaceNullValues) {
+    this.replaceNullValues = replaceNullValues;
+  }
+  
   public void setExpressionResolver(ExpressionResolver expressionResolver) {
     this.expressionResolver = expressionResolver;
   }
@@ -83,12 +99,21 @@ public class PlaceholderReplacer<T> {
           Object replacementObject = resolver.resolve(document, replacement);
           replace(paragraphWrapper, placeholder, replacementObject);
           logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
+        } else if(replaceNullValues) {
+            ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
+            Object replacementObject = resolver.resolve(document, replacement);
+            replace(paragraphWrapper, placeholder, replacementObject);
+            logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
         }
       } catch (SpelEvaluationException | SpelParseException e) {
         logger.warn(String.format(
                 "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
                 placeholder, expressionContext.getClass(), e.getMessage()));
         logger.trace("Reason for skipping expression:", e);
+
+        if(isLeaveEmptyOnExpressionError()) {
+          replace(paragraphWrapper,placeholder,null);
+        }
       }
     }
     if (this.lineBreakPlaceholder != null) {

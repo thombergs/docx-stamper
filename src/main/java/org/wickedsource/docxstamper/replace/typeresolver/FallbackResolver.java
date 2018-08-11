@@ -8,7 +8,10 @@ public class FallbackResolver extends AbstractToTextResolver<Object> {
 
     @Override
     protected String resolveStringForObject(Object object) {
-        return String.valueOf(object);
+        if(object!=null)
+            return String.valueOf(object);
+        else
+            return "";
     }
 
 }
