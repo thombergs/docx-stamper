@@ -14,7 +14,9 @@ import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
+import org.wickedsource.docxstamper.processor.repeat.IParagraphRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
+import org.wickedsource.docxstamper.processor.repeat.ParagraphRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
@@ -68,6 +70,7 @@ public class DocxStamper<T> {
     commentProcessorRegistry.setExpressionResolver(expressionResolver);
     commentProcessorRegistry.setFailOnInvalidExpression(config.isFailOnUnresolvedExpression());
     commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry));
+    commentProcessorRegistry.registerCommentProcessor(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry));
     commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
     commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
             new ReplaceWithProcessor());
