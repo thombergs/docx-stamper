@@ -1,7 +1,6 @@
-package org.wickedsource.docxstamper.replace;
+package org.wickedsource.docxstamper.util;
 
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.util.RunUtil;
 
 public class IndexedRun {
 

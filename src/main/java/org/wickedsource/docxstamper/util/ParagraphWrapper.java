@@ -1,12 +1,16 @@
 package org.wickedsource.docxstamper.util;
 
+import java.io.StringWriter;
+import org.docx4j.TextUtils;
+import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.replace.IndexedRun;
-import org.wickedsource.docxstamper.util.RunUtil;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import com.google.common.collect.Lists;
 
 /**
  * A "Run" defines a region of text within a docx document with a common set of properties. Word processors are
@@ -84,27 +88,21 @@ public class ParagraphWrapper {
 
             if (placeholderSpansCompleteRun) {
                 this.paragraph.getContent().remove(run.getRun());
-                this.paragraph.getContent().add(run.getIndexInParent(), replacement);
-                recalculateRuns();
+                addReplacement(run, replacement);
             } else if (placeholderAtStartOfRun) {
                 run.replace(matchStartIndex, matchEndIndex, "");
-                this.paragraph.getContent().add(run.getIndexInParent(), replacement);
-                recalculateRuns();
+                addReplacement(run, replacement);
             } else if (placeholderAtEndOfRun) {
                 run.replace(matchStartIndex, matchEndIndex, "");
-                this.paragraph.getContent().add(run.getIndexInParent() + 1, replacement);
-                recalculateRuns();
+                addReplacement(run, 1, replacement);
             } else if (placeholderWithinRun) {
                 String runText = RunUtil.getText(run.getRun());
                 int startIndex = runText.indexOf(placeholder);
                 int endIndex = startIndex + placeholder.length();
                 R run1 = RunUtil.create(runText.substring(0, startIndex), this.paragraph);
                 R run2 = RunUtil.create(runText.substring(endIndex), this.paragraph);
-                this.paragraph.getContent().add(run.getIndexInParent(), run2);
-                this.paragraph.getContent().add(run.getIndexInParent(), replacement);
-                this.paragraph.getContent().add(run.getIndexInParent(), run1);
+                addReplacement(run, Lists.newArrayList(run1, replacement, run2));
                 this.paragraph.getContent().remove(run.getRun());
-                recalculateRuns();
             }
 
         } else {
@@ -123,9 +121,75 @@ public class ParagraphWrapper {
             }
 
             // add replacement run between first and last run
-            this.paragraph.getContent().add(firstRun.getIndexInParent() + 1, replacement);
+            addReplacement(firstRun, 1, replacement);
 
-            recalculateRuns();
+        }
+        recalculateRuns();
+    }
+    
+    /**
+     * @param run the (first) affected run
+     * @param replacement the docx4j element(s) to replace the expression
+     */
+    private void addReplacement(IndexedRun run, Object replacement) {
+        addReplacement(run, 0, replacement);
+    }
+
+    /**
+     * @param run the (first) affected run
+     * @param offset offset relative to the given run to add the replacement
+     * @param replacement the docx4j element(s) to replace the expression
+     */
+    private void addReplacement(IndexedRun run, int offset, Object replacement) {
+        if (replacement instanceof Collection) {
+            addReplacement(run, offset, (Collection<?>) replacement);
+        } else {
+            addReplacement(run, offset, Lists.newArrayList(replacement));
+        }
+    }
+
+    /**
+     * @param run the (first) affected run
+     * @param replacement the docx4j element(s) to replace the expression
+     */
+    private void addReplacement(IndexedRun run, Collection<?> replacement) {
+        addReplacement(run, 0, replacement);
+    }
+    /**
+     * @param run the (first) affected run
+     * @param offset offset relative to the given run to add the replacement
+     * @param replacement docx4j element(s) to replace the expression
+     */
+    private void addReplacement(IndexedRun run, int offset, Collection<?> replacement) {
+        // multiple docx4j elements (multiple runs and/or possibly content from a separate document)
+        ContentAccessor parent = (ContentAccessor) this.paragraph.getParent();
+        int thisParagraphIndex = parent.getContent().indexOf(this.paragraph);
+        int i = offset, j = thisParagraphIndex;
+        for (Object part : replacement) {
+            if (part instanceof R) {
+                // we're adding a collection of runs; add them to this paragraph
+                this.paragraph.getContent().add(run.getIndexInParent() + i++, part);
+            } else {
+                // element such as table or another paragraph - add as a sibling of this paragraph
+                parent.getContent().add(j++, part);
+            }
+        }
+        if (j > thisParagraphIndex) {
+            String text;
+            try {
+                StringWriter sw = new StringWriter();
+                TextUtils.extractText(paragraph, sw);
+                text = sw.toString();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            if (!text.trim().isEmpty()) {
+                throw new DocxStamperException("Template placeholder expressions to be replaced"
+                        + " with anything other than a simple text run should be in their own"
+                        + " paragraph.");
+            }
+            // replacement added as sibling(s) and this (placeholder) paragraph is now empty
+            parent.getContent().remove(paragraph);
         }
     }
 
