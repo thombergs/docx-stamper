@@ -7,6 +7,7 @@ import org.docx4j.wml.Tr;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
@@ -23,8 +24,9 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     private PlaceholderReplacer<Object> placeholderReplacer;
 
-    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry) {
+    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver) {
         this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+        this.placeholderReplacer.setExpressionResolver(expressionResolver);
     }
 
     @Override
@@ -40,6 +42,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     private void repeatRows(final WordprocessingMLPackage document) {
         for (TableRowCoordinates rCoords : tableRowsToRepeat.keySet()) {
             List<Object> expressionContexts = tableRowsToRepeat.get(rCoords);
+            int index = rCoords.getIndex();
             for (final Object expressionContext : expressionContexts) {
                 Tr rowClone = XmlUtils.deepCopy(rCoords.getRow());
                 DocumentWalker walker = new BaseDocumentWalker(rowClone) {
@@ -49,7 +52,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
                     }
                 };
                 walker.walk();
-                rCoords.getParentTableCoordinates().getTable().getContent().add(rowClone);
+                rCoords.getParentTableCoordinates().getTable().getContent().add(++index, rowClone);
             }
             rCoords.getParentTableCoordinates().getTable().getContent().remove(rCoords.getRow());
             // TODO: remove "repeatTableRow"-comment from cloned rows!
