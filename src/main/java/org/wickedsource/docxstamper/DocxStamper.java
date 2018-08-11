@@ -66,6 +66,7 @@ public class DocxStamper<T> {
     placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
     placeholderReplacer.setExpressionResolver(expressionResolver);
     placeholderReplacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
+    placeholderReplacer.setReplaceNullValues(config.isReplaceNullValues());
 
     commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
     commentProcessorRegistry.setExpressionResolver(expressionResolver);
