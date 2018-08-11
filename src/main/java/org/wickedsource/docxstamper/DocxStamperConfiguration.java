@@ -109,8 +109,9 @@ public class DocxStamperConfiguration {
   }
 
   /**
-   * If an error is caught evaluating expression replace expression with empty string instead of leave original expression
-   * @param leaveEmpty true to replace expression with empty string when an error is caught while evaluating
+   * If an error is caught while evaluating an expression the expression will be replaced with an empty string instead
+   * of leaving the original expression in the document.
+   * @param leaveEmpty true to replace expressions with empty string when an error is caught while evaluating
    */
   public DocxStamperConfiguration leaveEmptyOnExpressionError(boolean leaveEmpty) {
     this.leaveEmptyOnExpressionError = leaveEmpty;
@@ -118,9 +119,8 @@ public class DocxStamperConfiguration {
   }
 
   /**
-   * Indicates if expressions that resolve to null must be replaced be passing null to {{@link FallbackResolver}} or
-   * the expression must be leaved as is without replacing it with a value
-   * @param replaceNullValues true to replace null value expression with resolved value, false to leave the expression as is
+   * Indicates if expressions that resolve to null should be processed.
+   * @param replaceNullValues true to replace null value expression with resolved value (which is null), false to leave the expression as is
    */
   public DocxStamperConfiguration replaceNullValues(boolean replaceNullValues) {
     this.replaceNullValues = replaceNullValues;
