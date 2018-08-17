@@ -1,7 +1,35 @@
-before_install:
- - chmod +x mvnw
-
 language: java
+install: true
 
-jdk:
-  - oraclejdk8
+sudo: false
+addons:
+  apt:
+    packages:
+      - oracle-java8-installer
+
+before_install:
+  - chmod +x gradlew
+
+stages:
+  - name: build
+#  - name: snapshot
+#     only publish snapshots from "master" branch and not in pull requests
+#    if: branch = master AND type IN (push)
+  - name: release
+    # only publish releases from "release" branch and not in pull requests
+    if: branch = release AND type IN (push)
+
+jobs:
+  include:
+
+    # run gradle build
+    - stage: build
+      script: ./gradlew build
+
+    # publish snapshot to oss.jfrog.org
+#    - stage: snapshot
+#      script: ./gradlew artifactoryPublish -x test -Dsnapshot=true -Dbintray.user=$BINTRAY_USER -Dbintray.key=$BINTRAY_KEY -Dbuild.number=$TRAVIS_BUILD_NUMBER
+
+    # release a new stable version to bintray
+    - stage: release
+      script: ./gradlew bintrayUpload -x test -Dbintray.user=$BINTRAY_USER -Dbintray.key=$BINTRAY_KEY -Dbuild.number=$TRAVIS_BUILD_NUMBER

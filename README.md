@@ -117,14 +117,25 @@ If you want to have a look at the .docx templates used in the tests, have a look
 To include docx-stamper in your project, you can use the following maven coordinates in your dependency management system:
 
 ```xml
+<repositories>
+    <repository>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com/</url>
+    </repository>
+</repositories>
+
 <dependency>
     <groupId>org.wickedsource</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.2.2</version>
+    <version>1.3.0</version>
 </dependency>
 ```
 
 ## Changelog
+* 1.3.0 (2018-08-11) - feature release
+  * **Releases will only be available on jcenter from now on. Add the jcenter repository to your build!**
+  * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.3.0+is%3Aclosed)
+  * [pull requests](https://github.com/thombergs/docx-stamper/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+milestone%3A1.3.0+)
 * 1.2.2 (2017-12-31) - [minor feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.2+is%3Aclosed)
 * 1.2.1 (2017-10-18) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.1+is%3Aclosed)
 * 1.2.0 (2017-09-26) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.0+is%3Aclosed)
