@@ -1,7 +1,5 @@
 package org.wickedsource.docxstamper.util;
 
-import java.io.IOException;
-
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -9,6 +7,8 @@ import org.docx4j.wml.R;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.AbstractDocx4jTest;
+
+import java.io.IOException;
 
 public class RunUtilTest extends AbstractDocx4jTest {
 

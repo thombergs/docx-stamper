@@ -5,7 +5,6 @@ import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.R;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.util.IndexedRun;
 import org.wickedsource.docxstamper.util.RunUtil;
 
 public class IndexedRunTest {

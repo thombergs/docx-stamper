@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.util;
+package org.wickedsource.docxstamper.replace;
 
 import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.util.RunUtil;
