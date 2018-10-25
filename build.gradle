@@ -24,7 +24,7 @@ ext{
 dependencies {
     compile('commons-io:commons-io:2.5')
     compile('org.javassist:javassist:3.21.0-GA')
-    compile('org.docx4j:docx4j:3.3.0')
+    compile('org.docx4j:docx4j:6.0.1')
     compile('org.springframework:spring-expression:4.3.6.RELEASE')
     testCompile('junit:junit:4.4')
 }
