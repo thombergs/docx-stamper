@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.replace;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.docx4j.jaxb.Context;
@@ -39,6 +40,8 @@ public class PlaceholderReplacer<T> {
   private boolean leaveEmptyOnExpressionError = false;
 
   private boolean replaceNullValues = false;
+
+  private List<EmptyErrorReplacement> emptyErrorReplacements = new ArrayList<>();
 
   public PlaceholderReplacer(TypeResolverRegistry typeResolverRegistry) {
     this.typeResolverRegistry = typeResolverRegistry;
@@ -111,13 +114,22 @@ public class PlaceholderReplacer<T> {
                 placeholder, expressionContext.getClass(), e.getMessage()));
         logger.trace("Reason for skipping expression:", e);
 
+        //We save error expressions for latter replace. This is needed for repeatTableRow because expressions inside repeatTableRow are
+        //child expression related to row context. And if are evaluated now with global context they aren't found and throw expression not found error.
+        //We need to store and replace after comment processors are evaluated. Then if still not replaced it's a true error expression
         if(isLeaveEmptyOnExpressionError()) {
-          replace(paragraphWrapper,placeholder,null);
+          emptyErrorReplacements.add(new EmptyErrorReplacement(paragraphWrapper,placeholder));
         }
       }
     }
     if (this.lineBreakPlaceholder != null) {
       replaceLineBreaks(paragraphWrapper);
+    }
+  }
+
+  public void applyLeaveEmptyErrorExpressions() {
+    for(EmptyErrorReplacement replacement : emptyErrorReplacements) {
+      replace(replacement.getParagraphWrapper(),replacement.getPlaceholder(),null);
     }
   }
 
@@ -139,4 +151,22 @@ public class PlaceholderReplacer<T> {
     p.replace(placeholder, replacementObject);
   }
 
+}
+
+class EmptyErrorReplacement {
+  private final ParagraphWrapper paragraphWrapper;
+  private final String placeholder;
+
+  public EmptyErrorReplacement(ParagraphWrapper paragraphWrapper, String placeholder) {
+    this.paragraphWrapper = paragraphWrapper;
+    this.placeholder = placeholder;
+  }
+
+  public ParagraphWrapper getParagraphWrapper() {
+    return paragraphWrapper;
+  }
+
+  public String getPlaceholder() {
+    return placeholder;
+  }
 }

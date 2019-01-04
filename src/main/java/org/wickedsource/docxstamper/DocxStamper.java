@@ -139,6 +139,7 @@ public class DocxStamper<T> {
       ProxyBuilder<T> proxyBuilder = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
       replaceExpressions(document, proxyBuilder);
       processComments(document, proxyBuilder);
+      postProcess();
       document.save(out);
       commentProcessorRegistry.reset();
     } catch (DocxStamperException e) {
@@ -168,6 +169,12 @@ public class DocxStamper<T> {
 
   private void processComments(final WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
     commentProcessorRegistry.runProcessors(document, proxyBuilder);
+  }
+
+  private void postProcess() {
+    if(placeholderReplacer.isLeaveEmptyOnExpressionError()) {
+      placeholderReplacer.applyLeaveEmptyErrorExpressions();
+    }
   }
 
 }
