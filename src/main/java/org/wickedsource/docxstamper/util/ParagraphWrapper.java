@@ -2,11 +2,15 @@ package org.wickedsource.docxstamper.util;
 
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
+import org.docx4j.wml.RPr;
 import org.wickedsource.docxstamper.replace.IndexedRun;
-import org.wickedsource.docxstamper.util.RunUtil;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A "Run" defines a region of text within a docx document with a common set of properties. Word processors are
@@ -148,12 +152,45 @@ public class ParagraphWrapper {
         return getText(this.runs);
     }
 
+    /**
+     * Returns the aggregated text over all runs.
+     *
+     * @return the text of all runs.
+     */
+    public List<Map<String, RPr>> getPlaceholderAndStyle() {
+        return getPlaceholderAndStyle(this.runs);
+    }
+
     private String getText(List<IndexedRun> runs) {
         StringBuilder builder = new StringBuilder();
         for (IndexedRun run : runs) {
             builder.append(RunUtil.getText(run.getRun()));
         }
         return builder.toString();
+    }
+
+    private List<Map<String, RPr>> getPlaceholderAndStyle(List<IndexedRun> runs) {
+        List<Map<String, RPr>> runWithStyle = new ArrayList<>();
+        Map<String, RPr> placeholderRpr = new HashMap<>();
+        StringBuilder builder = new StringBuilder();
+        for (IndexedRun run : runs) {
+            builder.append(RunUtil.getText(run.getRun()));
+            Pattern p = Pattern.compile("\\$\\{.*?}");
+            Matcher m = p.matcher(builder.toString());
+            RPr rPr = new RPr();
+            String placeholder = "";
+
+            while (m.find()) {
+                rPr = run.getRun().getRPr();
+                placeholder = m.group(0);
+            }
+            if (!"".equals(placeholder)) {
+                placeholderRpr.put(placeholder, rPr);
+            }
+        }
+        runWithStyle.add(placeholderRpr);
+
+        return runWithStyle;
     }
 
     /**
