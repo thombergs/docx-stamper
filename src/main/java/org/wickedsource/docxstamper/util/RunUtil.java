@@ -65,7 +65,7 @@ public class RunUtil {
      * @param run the Run to which the style should be applied.
      */
     public static void applyRunStyle(RPr rPr, R run) {
-        if (rPr.getRStyle() != null) {
+        if (rPr != null) {
             RPr runProperties = new RPr();
             StyleUtil.apply(rPr, runProperties);
             run.setRPr(runProperties);

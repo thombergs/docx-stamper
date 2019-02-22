@@ -23,9 +23,10 @@ import org.wickedsource.docxstamper.util.RunUtil;
 import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public class PlaceholderReplacer<T> {
 
@@ -94,28 +95,28 @@ public class PlaceholderReplacer<T> {
     public void resolveExpressionsForParagraph(P p, T expressionContext, WordprocessingMLPackage document) {
         ParagraphWrapper paragraphWrapper = new ParagraphWrapper(p);
         List<String> placeholders = expressionUtil.findVariableExpressions(paragraphWrapper.getText());
-        List<Map<String, RPr>> placeholdersAndStyle = paragraphWrapper.getPlaceholderAndStyle();
-        RPr rPr = new RPr();
+        LinkedHashMap<String, RPr> placeholdersAndStyle = paragraphWrapper.getPlaceholderAndStyle();
+        int i = 0;
+        RPr rPr;
         for (String placeholder : placeholders) {
 
-            Stream<RPr> rPrStream = placeholdersAndStyle.stream().map(m -> m.entrySet().stream()
-                    .filter(map -> map.getKey().equals(placeholder))
+            List<RPr> collect = placeholdersAndStyle.entrySet().stream()
+                    .filter(m -> m.getKey().replaceAll("_.*", "").equals(placeholder))
                     .map(Map.Entry::getValue)
-                    .findFirst().get());
-
-            rPr = rPrStream.findFirst().get();
+                    .collect(Collectors.toList());
+            rPr = collect.get(i);
 
             try {
                 Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
                 if (replacement != null) {
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
-                    replaceRstyle(paragraphWrapper, placeholder, replacementObject, rPr);
+                    replaceRstyle(paragraphWrapper, placeholder, rPr, replacementObject);
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 } else if (replaceNullValues) {
                     ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
                     Object replacementObject = resolver.resolve(document, replacement);
-                    replaceRstyle(paragraphWrapper, placeholder, replacementObject, rPr);
+                    replaceRstyle(paragraphWrapper, placeholder, rPr, replacementObject);
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 }
             } catch (SpelEvaluationException | SpelParseException e) {
@@ -128,17 +129,20 @@ public class PlaceholderReplacer<T> {
                     replaceRstyle(paragraphWrapper, placeholder, null, rPr);
                 }
             }
+
+            i++;
         }
         if (this.lineBreakPlaceholder != null) {
-            replaceLineBreaks(paragraphWrapper, rPr);
+            replaceLineBreaks(paragraphWrapper);
         }
+
     }
 
-    private void replaceLineBreaks(ParagraphWrapper paragraphWrapper, RPr rPr) {
+    private void replaceLineBreaks(ParagraphWrapper paragraphWrapper) {
         Br lineBreak = Context.getWmlObjectFactory().createBr();
         R run = RunUtil.create(lineBreak);
         while (paragraphWrapper.getText().contains(this.lineBreakPlaceholder)) {
-            replaceRstyle(paragraphWrapper, this.lineBreakPlaceholder, run, rPr);
+            replace(paragraphWrapper, this.lineBreakPlaceholder, run);
         }
     }
 
@@ -153,12 +157,13 @@ public class PlaceholderReplacer<T> {
         p.replace(placeholder, replacementObject);
     }
 
-    public void replaceRstyle(ParagraphWrapper p, String placeholder, Object replacementObject, RPr rPr) {
+    private void replaceRstyle(ParagraphWrapper p, String placeholder, RPr rPr, Object replacementObject) {
         if (replacementObject == null) {
             replacementObject = RunUtil.create("");
         }
         if (replacementObject instanceof R) {
             RunUtil.applyRunStyle(rPr, (R) replacementObject);
+
         }
         p.replace(placeholder, replacementObject);
     }

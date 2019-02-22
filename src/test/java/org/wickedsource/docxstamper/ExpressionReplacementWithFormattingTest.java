@@ -24,6 +24,10 @@ public class ExpressionReplacementWithFormattingTest extends AbstractDocx4jTest 
         assertItalicStyle((R) ((P) document.getMainDocumentPart().getContent().get(3)).getContent().get(1));
         assertBoldStyle((R) ((P) document.getMainDocumentPart().getContent().get(5)).getContent().get(1));
 
+        assertItalicStyle((R) ((P) document.getMainDocumentPart().getContent().get(6)).getContent().get(4));
+        assertsuperscriptStyle((R) ((P) document.getMainDocumentPart().getContent().get(6)).getContent().get(10));
+        assertRedColor((R) ((P) document.getMainDocumentPart().getContent().get(6)).getContent().get(12));
+
     }
 
     private void assertBoldStyle(R run) {
@@ -34,5 +38,12 @@ public class ExpressionReplacementWithFormattingTest extends AbstractDocx4jTest 
         Assert.assertTrue("expected Run to be styled italic!", run.getRPr().getI().isVal());
     }
 
+    private void assertsuperscriptStyle(R run) {
+        Assert.assertEquals("expected Run to be styled superscript!", "superscript", (run.getRPr().getVertAlign().getVal().value()));
+    }
+
+    private void assertRedColor(R run) {
+        Assert.assertEquals("expected Run to be styled superscript!", "CE181E", run.getRPr().getColor().getVal());
+    }
 
 }

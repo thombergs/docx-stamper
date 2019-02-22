@@ -6,9 +6,8 @@ import org.docx4j.wml.RPr;
 import org.wickedsource.docxstamper.replace.IndexedRun;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -153,11 +152,11 @@ public class ParagraphWrapper {
     }
 
     /**
-     * Returns the aggregated text over all runs.
+     * Returns each Placeholder and its run.
      *
-     * @return the text of all runs.
+     * @return the placeholder and its run as linkedHashMap
      */
-    public List<Map<String, RPr>> getPlaceholderAndStyle() {
+    public LinkedHashMap<String, RPr> getPlaceholderAndStyle() {
         return getPlaceholderAndStyle(this.runs);
     }
 
@@ -169,28 +168,30 @@ public class ParagraphWrapper {
         return builder.toString();
     }
 
-    private List<Map<String, RPr>> getPlaceholderAndStyle(List<IndexedRun> runs) {
-        List<Map<String, RPr>> runWithStyle = new ArrayList<>();
-        Map<String, RPr> placeholderRpr = new HashMap<>();
+    private LinkedHashMap<String, RPr> getPlaceholderAndStyle(List<IndexedRun> runs) {
+        LinkedHashMap<String, RPr> placeholderRpr = new LinkedHashMap<>();
         StringBuilder builder = new StringBuilder();
+
         for (IndexedRun run : runs) {
             builder.append(RunUtil.getText(run.getRun()));
             Pattern p = Pattern.compile("\\$\\{.*?}");
             Matcher m = p.matcher(builder.toString());
             RPr rPr = new RPr();
             String placeholder = "";
-
-            while (m.find()) {
+            int index = 0;
+            while (m.find(index)) {
+                builder = new StringBuilder();
                 rPr = run.getRun().getRPr();
-                placeholder = m.group(0);
+                placeholder = m.group();
+                index = m.end();
             }
             if (!"".equals(placeholder)) {
-                placeholderRpr.put(placeholder, rPr);
+                placeholderRpr.put(placeholder+"_"+run.getStartIndex(), rPr);
             }
-        }
-        runWithStyle.add(placeholderRpr);
 
-        return runWithStyle;
+        }
+
+        return placeholderRpr;
     }
 
     /**
