@@ -116,7 +116,7 @@ public class PlaceholderReplacer<T> {
                 } else if (replaceNullValues) {
                     ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
                     Object replacementObject = resolver.resolve(document, replacement);
-                    replaceRstyle(paragraphWrapper, placeholder, rPr, replacementObject);
+                    replace(paragraphWrapper, placeholder, replacementObject);
                     logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s", placeholder, resolver.getClass()));
                 }
             } catch (SpelEvaluationException | SpelParseException e) {
@@ -126,7 +126,7 @@ public class PlaceholderReplacer<T> {
                 logger.trace("Reason for skipping expression:", e);
 
                 if (isLeaveEmptyOnExpressionError()) {
-                    replaceRstyle(paragraphWrapper, placeholder, null, rPr);
+                    replace(paragraphWrapper, placeholder, null);
                 }
             }
 
