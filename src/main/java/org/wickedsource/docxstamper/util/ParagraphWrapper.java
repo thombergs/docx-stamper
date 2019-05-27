@@ -179,16 +179,17 @@ public class ParagraphWrapper {
             RPr rPr = new RPr();
             String placeholder = "";
             int index = 0;
+            int placeolderInRun = 0;
             while (m.find(index)) {
                 builder = new StringBuilder();
                 rPr = run.getRun().getRPr();
                 placeholder = m.group();
                 index = m.end();
+                placeolderInRun++;
+                if (!"".equals(placeholder)) {
+                    placeholderRpr.put(placeholder + "_" + run.getStartIndex()+ placeolderInRun, rPr);
+                }
             }
-            if (!"".equals(placeholder)) {
-                placeholderRpr.put(placeholder+"_"+run.getStartIndex(), rPr);
-            }
-
         }
 
         return placeholderRpr;

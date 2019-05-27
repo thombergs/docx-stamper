@@ -152,7 +152,6 @@ public class PlaceholderReplacer<T> {
         }
         if (replacementObject instanceof R) {
             RunUtil.applyParagraphStyle(p.getParagraph(), (R) replacementObject);
-
         }
         p.replace(placeholder, replacementObject);
     }
@@ -163,7 +162,6 @@ public class PlaceholderReplacer<T> {
         }
         if (replacementObject instanceof R) {
             RunUtil.applyRunStyle(rPr, (R) replacementObject);
-
         }
         p.replace(placeholder, replacementObject);
     }
