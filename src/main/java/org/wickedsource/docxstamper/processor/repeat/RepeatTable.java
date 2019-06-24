@@ -77,7 +77,7 @@ public class RepeatTable extends BaseCommentProcessor implements IRepeatTable {
                 content.add(++index, new P());
 
             }
-            content.remove(rCoords.getTable().getParent());
+            content.remove(rCoords.getIndex());
             // TODO: remove "repeatTableRow"-comment from cloned rows!
         }
     }

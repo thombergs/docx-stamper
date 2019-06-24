@@ -54,7 +54,7 @@ public class DocxStamper<T> {
   private void initFields() {
     typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
     typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
-    typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
+    typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("yyyy.MM.dd"));
     for (Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()) {
       typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
     }
