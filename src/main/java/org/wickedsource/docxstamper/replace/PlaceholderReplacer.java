@@ -115,11 +115,9 @@ public class PlaceholderReplacer<T> {
                         placeholder, expressionContext.getClass(), e.getMessage()));
                 logger.trace("Reason for skipping expression:", e);
 
-                if (isLeaveEmptyOnExpressionError()) {
-                    ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
-                    Object replacementObject = resolver.resolve(document, "");
-                    replace(paragraphWrapper, placeholder, replacementObject);
-                }
+                ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
+                Object replacementObject = resolver.resolve(document, "");
+                replace(paragraphWrapper, placeholder, replacementObject);
             }
         }
         if (this.lineBreakPlaceholder != null) {
