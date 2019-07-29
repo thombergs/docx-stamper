@@ -9,6 +9,7 @@ import org.docx4j.wml.Tbl;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ElemObject;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
@@ -54,13 +55,14 @@ public class RepeatTable extends BaseCommentProcessor implements IRepeatTable {
             } else {
                 content = ((ContentAccessor) rCoords.getTable().getParent()).getContent();
             }
+            int i = 1;
             for (final Object expressionContext : expressionContexts) {
                 Tbl tblClone = XmlUtils.deepCopy(rCoords.getTable());
-
+                ElemObject elemObject = new ElemObject(i, true);
                 DocumentWalker walker = new BaseDocumentWalker(tblClone) {
                     @Override
                     protected void onParagraph(P paragraph) {
-                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
+                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document, elemObject);
                     }
                 };
 
@@ -75,7 +77,7 @@ public class RepeatTable extends BaseCommentProcessor implements IRepeatTable {
                     content.add(++index, tblClone);
                 }
                 content.add(++index, new P());
-
+                i++;
             }
             content.remove(rCoords.getIndex());
             // TODO: remove "repeatTableRow"-comment from cloned rows!

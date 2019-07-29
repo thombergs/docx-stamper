@@ -77,26 +77,26 @@ public abstract class CoordinatesWalker {
             elementIndex++;
         }
     }
-    
-    private void walkParagraph(ParagraphCoordinates paragraphCoordinates){
-    	int rowIndex = 0;
-    	List<CommentWrapper> commentsToDelete = new ArrayList<>();
-    	for (Object contentElement : paragraphCoordinates.getParagraph().getContent()){
-    		 if (XmlUtils.unwrap(contentElement) instanceof R) {
-    			 R run = (R) contentElement;
-    			 RunCoordinates runCooridnates = new RunCoordinates(run, rowIndex);
-    			 CommentWrapper commentToDelete = onRun(runCooridnates, paragraphCoordinates);
-    			 if (commentToDelete != null)
-    				 commentsToDelete.add(commentToDelete);
-    		 }
-    	}
-    	for (CommentWrapper cw : commentsToDelete)
-    		CommentUtil.deleteComment(cw);
-    	// we run the paragraph afterwards so that the comments inside work before the whole paragraph comments
-    	onParagraph(paragraphCoordinates);
+
+    private void walkParagraph(ParagraphCoordinates paragraphCoordinates) {
+        int rowIndex = 0;
+        List<CommentWrapper> commentsToDelete = new ArrayList<>();
+        for (Object contentElement : paragraphCoordinates.getParagraph().getContent()) {
+            if (XmlUtils.unwrap(contentElement) instanceof R) {
+                R run = (R) contentElement;
+                RunCoordinates runCooridnates = new RunCoordinates(run, rowIndex);
+                CommentWrapper commentToDelete = onRun(runCooridnates, paragraphCoordinates);
+                if (commentToDelete != null)
+                    commentsToDelete.add(commentToDelete);
+            }
+        }
+        for (CommentWrapper cw : commentsToDelete)
+            CommentUtil.deleteComment(cw);
+        // we run the paragraph afterwards so that the comments inside work before the whole paragraph comments
+        onParagraph(paragraphCoordinates);
 
     }
-    
+
     private void walkTable(TableCoordinates tableCoordinates) {
         onTable(tableCoordinates);
         int rowIndex = 0;
@@ -144,7 +144,7 @@ public abstract class CoordinatesWalker {
     protected abstract void onParagraph(ParagraphCoordinates paragraphCoordinates);
 
     protected abstract CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates);
-    
+
     protected abstract void onTable(TableCoordinates tableCoordinates);
 
     protected abstract void onTableCell(TableCellCoordinates tableCellCoordinates);

@@ -17,6 +17,7 @@ import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.el.ElemObject;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.proxy.ProxyBuilder;
@@ -36,227 +37,227 @@ import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
  */
 public class CommentProcessorRegistry {
 
-  private Logger logger = LoggerFactory.getLogger(CommentProcessorRegistry.class);
+    private Logger logger = LoggerFactory.getLogger(CommentProcessorRegistry.class);
 
-  private Map<ICommentProcessor, Class<?>> commentProcessorInterfaces = new HashMap<>();
+    private Map<ICommentProcessor, Class<?>> commentProcessorInterfaces = new HashMap<>();
 
-  private List<ICommentProcessor> commentProcessors = new ArrayList<>();
+    private List<ICommentProcessor> commentProcessors = new ArrayList<>();
 
-  private ExpressionResolver expressionResolver = new ExpressionResolver();
+    private ExpressionResolver expressionResolver = new ExpressionResolver();
 
-  private ExpressionUtil expressionUtil = new ExpressionUtil();
+    private ExpressionUtil expressionUtil = new ExpressionUtil();
 
-  private PlaceholderReplacer placeholderReplacer;
+    private PlaceholderReplacer placeholderReplacer;
 
-  private boolean failOnInvalidExpression = true;
+    private boolean failOnInvalidExpression = true;
 
-  public CommentProcessorRegistry(PlaceholderReplacer placeholderReplacer) {
-    this.placeholderReplacer = placeholderReplacer;
-  }
-
-  public void setExpressionResolver(ExpressionResolver expressionResolver) {
-    this.expressionResolver = expressionResolver;
-  }
-
-  public void registerCommentProcessor(Class<?> interfaceClass,
-                                       ICommentProcessor commentProcessor) {
-    this.commentProcessorInterfaces.put(commentProcessor, interfaceClass);
-    this.commentProcessors.add(commentProcessor);
-  }
-
-  /**
-   * Lets each registered ICommentProcessor have a run on the specified docx
-   * document. At the end of the document the commit method is called for each
-   * ICommentProcessor. The ICommentProcessors are run in the order they were
-   * registered.
-   *
-   * @param document    the docx document over which to run the registered ICommentProcessors.
-   * @param proxyBuilder a builder for a proxy around the context root object to customize its interface
-   * @param <T>         type of the contextRoot object.
-   */
-  public <T> void runProcessors(final WordprocessingMLPackage document, final ProxyBuilder<T> proxyBuilder) {
-    final Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
-
-    CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
-
-      @Override
-      protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
-        runProcessorsOnParagraphComment(document, comments, proxyBuilder, paragraphCoordinates);
-        runProcessorsOnInlineContent(proxyBuilder, paragraphCoordinates);
-      }
-
-      @Override
-      protected CommentWrapper onRun(RunCoordinates runCoordinates,
-                                     ParagraphCoordinates paragraphCoordinates) {
-        return runProcessorsOnRunComment(document, comments, proxyBuilder, runCoordinates,
-                paragraphCoordinates);
-      }
-
-    };
-    walker.walk();
-
-    for (ICommentProcessor processor : commentProcessors) {
-      processor.commitChanges(document);
+    public CommentProcessorRegistry(PlaceholderReplacer placeholderReplacer) {
+        this.placeholderReplacer = placeholderReplacer;
     }
 
-  }
+    public void setExpressionResolver(ExpressionResolver expressionResolver) {
+        this.expressionResolver = expressionResolver;
+    }
 
-  /**
-   * Finds all processor expressions within the specified paragraph and tries
-   * to evaluate it against all registered {@link ICommentProcessor}s.
-   *
-   * @param proxyBuilder         a builder for a proxy around the context root object to customize its interface
-   * @param paragraphCoordinates the paragraph to process.
-   * @param <T>                  type of the context root object
-   */
-  private <T> void runProcessorsOnInlineContent(ProxyBuilder<T> proxyBuilder,
-                                                ParagraphCoordinates paragraphCoordinates) {
+    public void registerCommentProcessor(Class<?> interfaceClass,
+                                         ICommentProcessor commentProcessor) {
+        this.commentProcessorInterfaces.put(commentProcessor, interfaceClass);
+        this.commentProcessors.add(commentProcessor);
+    }
 
-    ParagraphWrapper paragraph = new ParagraphWrapper(paragraphCoordinates.getParagraph());
-    List<String> processorExpressions = expressionUtil
-            .findProcessorExpressions(paragraph.getText());
+    /**
+     * Lets each registered ICommentProcessor have a run on the specified docx
+     * document. At the end of the document the commit method is called for each
+     * ICommentProcessor. The ICommentProcessors are run in the order they were
+     * registered.
+     *
+     * @param document     the docx document over which to run the registered ICommentProcessors.
+     * @param proxyBuilder a builder for a proxy around the context root object to customize its interface
+     * @param <T>          type of the contextRoot object.
+     */
+    public <T> void runProcessors(final WordprocessingMLPackage document, final ProxyBuilder<T> proxyBuilder) {
+        final Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
 
-    for (String processorExpression : processorExpressions) {
-      String strippedExpression = expressionUtil.stripExpression(processorExpression);
+        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
 
-      for (final ICommentProcessor processor : commentProcessors) {
-        Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
-        proxyBuilder.withInterface(commentProcessorInterface, processor);
-        processor.setCurrentParagraphCoordinates(paragraphCoordinates);
-      }
+            @Override
+            protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
+                runProcessorsOnParagraphComment(document, comments, proxyBuilder, paragraphCoordinates);
+                runProcessorsOnInlineContent(proxyBuilder, paragraphCoordinates);
+            }
 
-      try {
-        T contextRootProxy = proxyBuilder.build();
-        expressionResolver.resolveExpression(strippedExpression, contextRootProxy);
-        placeholderReplacer.replace(paragraph, processorExpression, null);
-        logger.debug(String.format(
-                "Processor expression '%s' has been successfully processed by a comment processor.",
-                processorExpression));
-      } catch (SpelEvaluationException | SpelParseException e) {
-        if (failOnInvalidExpression) {
-          throw new UnresolvedExpressionException(strippedExpression, e);
-        } else {
-          logger.warn(String.format(
-                  "Skipping processor expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
-                  processorExpression, e.getMessage()));
-          logger.trace("Reason for skipping processor expression: ", e);
+            @Override
+            protected CommentWrapper onRun(RunCoordinates runCoordinates,
+                                           ParagraphCoordinates paragraphCoordinates) {
+                return runProcessorsOnRunComment(document, comments, proxyBuilder, runCoordinates,
+                        paragraphCoordinates);
+            }
+
+        };
+        walker.walk();
+
+        for (ICommentProcessor processor : commentProcessors) {
+            processor.commitChanges(document);
         }
-      } catch (ProxyException e) {
-        throw new DocxStamperException("Could not create a proxy around context root object", e);
-      }
-    }
-  }
 
-
-  /**
-   * Takes the first comment on the specified paragraph and tries to evaluate
-   * the string within the comment against all registered
-   * {@link ICommentProcessor}s.
-   *
-   * @param document             the word document.
-   * @param comments             the comments within the document.
-   * @param proxyBuilder          a builder for a proxy around the context root object to customize its interface
-   * @param paragraphCoordinates the paragraph whose comments to evaluate.
-   * @param <T>                  the type of the context root object.
-   */
-  private <T> void runProcessorsOnParagraphComment(final WordprocessingMLPackage document,
-                                                   final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
-                                                   ParagraphCoordinates paragraphCoordinates) {
-    Comments.Comment comment = CommentUtil
-            .getCommentFor(paragraphCoordinates.getParagraph(), document);
-    if (comment == null) {
-      // no comment to process
-      return;
     }
 
-    String commentString = CommentUtil.getCommentString(comment);
+    /**
+     * Finds all processor expressions within the specified paragraph and tries
+     * to evaluate it against all registered {@link ICommentProcessor}s.
+     *
+     * @param proxyBuilder         a builder for a proxy around the context root object to customize its interface
+     * @param paragraphCoordinates the paragraph to process.
+     * @param <T>                  type of the context root object
+     */
+    private <T> void runProcessorsOnInlineContent(ProxyBuilder<T> proxyBuilder,
+                                                  ParagraphCoordinates paragraphCoordinates) {
 
-    for (final ICommentProcessor processor : commentProcessors) {
-      Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
-      proxyBuilder.withInterface(commentProcessorInterface, processor);
-      processor.setCurrentParagraphCoordinates(paragraphCoordinates);
-    }
+        ParagraphWrapper paragraph = new ParagraphWrapper(paragraphCoordinates.getParagraph());
+        List<String> processorExpressions = expressionUtil
+                .findProcessorExpressions(paragraph.getText());
 
-    CommentWrapper commentWrapper = comments.get(comment.getId());
+        for (String processorExpression : processorExpressions) {
+            String strippedExpression = expressionUtil.stripExpression(processorExpression);
 
-    try {
-      T contextRootProxy = proxyBuilder.build();
-      expressionResolver.resolveExpression(commentString, contextRootProxy);
-      CommentUtil.deleteComment(commentWrapper);
-      logger.debug(
-              String.format("Comment '%s' has been successfully processed by a comment processor.",
-                      commentString));
-    } catch (SpelEvaluationException | SpelParseException e) {
-      if (failOnInvalidExpression) {
-        throw new UnresolvedExpressionException(commentString, e);
-      } else {
-        logger.warn(String.format(
-                "Skipping comment expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
-                commentString, e.getMessage()));
-        logger.trace("Reason for skipping comment: ", e);
-      }
-    } catch (ProxyException e) {
-      throw new DocxStamperException("Could not create a proxy around context root object", e);
-    }
+            for (final ICommentProcessor processor : commentProcessors) {
+                Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
+                proxyBuilder.withInterface(commentProcessorInterface, processor);
+                processor.setCurrentParagraphCoordinates(paragraphCoordinates);
+            }
 
-  }
-
-  private <T> CommentWrapper runProcessorsOnRunComment(final WordprocessingMLPackage document,
-                                                       final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder, RunCoordinates runCoordinates,
-                                                       ParagraphCoordinates paragraphCoordinates) {
-    Comments.Comment comment = CommentUtil.getCommentAround(runCoordinates.getRun(), document);
-    if (comment == null) {
-      // no comment to process
-      return null;
-    }
-
-    String commentString = CommentUtil.getCommentString(comment);
-
-    for (final ICommentProcessor processor : commentProcessors) {
-      Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
-      proxyBuilder.withInterface(commentProcessorInterface, processor);
-      processor.setCurrentParagraphCoordinates(paragraphCoordinates);
-      processor.setCurrentRunCoordinates(runCoordinates);
-    }
-
-    try {
-      T contextRootProxy = proxyBuilder.build();
-      CommentWrapper commentWrapper = comments.get(comment.getId());
-
-      try {
-        expressionResolver.resolveExpression(commentString, contextRootProxy);
-        logger.debug(
-                String.format("Comment '%s' has been successfully processed by a comment processor.",
-                        commentString));
-        return commentWrapper;
-      } catch (SpelEvaluationException | SpelParseException e) {
-        if (failOnInvalidExpression) {
-          throw new UnresolvedExpressionException(commentString, e);
-        } else {
-          logger.warn(String.format(
-                  "Skipping comment expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
-                  commentString, e.getMessage()));
-          logger.trace("Reason for skipping comment: ", e);
+            try {
+                T contextRootProxy = proxyBuilder.build();
+                expressionResolver.resolveExpression(strippedExpression, contextRootProxy, new ElemObject());
+                placeholderReplacer.replace(paragraph, processorExpression, null);
+                logger.debug(String.format(
+                        "Processor expression '%s' has been successfully processed by a comment processor.",
+                        processorExpression));
+            } catch (SpelEvaluationException | SpelParseException e) {
+                if (failOnInvalidExpression) {
+                    throw new UnresolvedExpressionException(strippedExpression, e);
+                } else {
+                    logger.warn(String.format(
+                            "Skipping processor expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
+                            processorExpression, e.getMessage()));
+                    logger.trace("Reason for skipping processor expression: ", e);
+                }
+            } catch (ProxyException e) {
+                throw new DocxStamperException("Could not create a proxy around context root object", e);
+            }
         }
-      }
-    } catch (ProxyException e) {
-      throw new DocxStamperException("Could not create a proxy around context root object", e);
     }
 
-    return null;
-  }
 
-  public boolean isFailOnInvalidExpression() {
-    return failOnInvalidExpression;
-  }
+    /**
+     * Takes the first comment on the specified paragraph and tries to evaluate
+     * the string within the comment against all registered
+     * {@link ICommentProcessor}s.
+     *
+     * @param document             the word document.
+     * @param comments             the comments within the document.
+     * @param proxyBuilder         a builder for a proxy around the context root object to customize its interface
+     * @param paragraphCoordinates the paragraph whose comments to evaluate.
+     * @param <T>                  the type of the context root object.
+     */
+    private <T> void runProcessorsOnParagraphComment(final WordprocessingMLPackage document,
+                                                     final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
+                                                     ParagraphCoordinates paragraphCoordinates) {
+        Comments.Comment comment = CommentUtil
+                .getCommentFor(paragraphCoordinates.getParagraph(), document);
+        if (comment == null) {
+            // no comment to process
+            return;
+        }
 
-  public void setFailOnInvalidExpression(boolean failOnInvalidExpression) {
-    this.failOnInvalidExpression = failOnInvalidExpression;
-  }
+        String commentString = CommentUtil.getCommentString(comment);
 
-  public void reset() {
-    for (ICommentProcessor processor : commentProcessors) {
-      processor.reset();
+        for (final ICommentProcessor processor : commentProcessors) {
+            Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
+            proxyBuilder.withInterface(commentProcessorInterface, processor);
+            processor.setCurrentParagraphCoordinates(paragraphCoordinates);
+        }
+
+        CommentWrapper commentWrapper = comments.get(comment.getId());
+
+        try {
+            T contextRootProxy = proxyBuilder.build();
+            expressionResolver.resolveExpression(commentString, contextRootProxy, new ElemObject());
+            CommentUtil.deleteComment(commentWrapper);
+            logger.debug(
+                    String.format("Comment '%s' has been successfully processed by a comment processor.",
+                            commentString));
+        } catch (SpelEvaluationException | SpelParseException e) {
+            if (failOnInvalidExpression) {
+                throw new UnresolvedExpressionException(commentString, e);
+            } else {
+                logger.warn(String.format(
+                        "Skipping comment expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
+                        commentString, e.getMessage()));
+                logger.trace("Reason for skipping comment: ", e);
+            }
+        } catch (ProxyException e) {
+            throw new DocxStamperException("Could not create a proxy around context root object", e);
+        }
+
     }
-  }
+
+    private <T> CommentWrapper runProcessorsOnRunComment(final WordprocessingMLPackage document,
+                                                         final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder, RunCoordinates runCoordinates,
+                                                         ParagraphCoordinates paragraphCoordinates) {
+        Comments.Comment comment = CommentUtil.getCommentAround(runCoordinates.getRun(), document);
+        if (comment == null) {
+            // no comment to process
+            return null;
+        }
+
+        String commentString = CommentUtil.getCommentString(comment);
+
+        for (final ICommentProcessor processor : commentProcessors) {
+            Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
+            proxyBuilder.withInterface(commentProcessorInterface, processor);
+            processor.setCurrentParagraphCoordinates(paragraphCoordinates);
+            processor.setCurrentRunCoordinates(runCoordinates);
+        }
+
+        try {
+            T contextRootProxy = proxyBuilder.build();
+            CommentWrapper commentWrapper = comments.get(comment.getId());
+
+            try {
+                expressionResolver.resolveExpression(commentString, contextRootProxy, new ElemObject());
+                logger.debug(
+                        String.format("Comment '%s' has been successfully processed by a comment processor.",
+                                commentString));
+                return commentWrapper;
+            } catch (SpelEvaluationException | SpelParseException e) {
+                if (failOnInvalidExpression) {
+                    throw new UnresolvedExpressionException(commentString, e);
+                } else {
+                    logger.warn(String.format(
+                            "Skipping comment expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
+                            commentString, e.getMessage()));
+                    logger.trace("Reason for skipping comment: ", e);
+                }
+            }
+        } catch (ProxyException e) {
+            throw new DocxStamperException("Could not create a proxy around context root object", e);
+        }
+
+        return null;
+    }
+
+    public boolean isFailOnInvalidExpression() {
+        return failOnInvalidExpression;
+    }
+
+    public void setFailOnInvalidExpression(boolean failOnInvalidExpression) {
+        this.failOnInvalidExpression = failOnInvalidExpression;
+    }
+
+    public void reset() {
+        for (ICommentProcessor processor : commentProcessors) {
+            processor.reset();
+        }
+    }
 }

@@ -8,6 +8,7 @@ import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ElemObject;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 
@@ -54,13 +55,16 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
 
             List<P> paragraphsToAdd = new ArrayList<>();
+            int i = 1;
             for (final Object expressionContext : expressionContexts) {
+                ElemObject elemObject = new ElemObject(i, true);
                 for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
                     P pClone = XmlUtils.deepCopy(paragraphToClone);
-                    placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
+                    placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document, elemObject);
 
                     paragraphsToAdd.add(pClone);
                 }
+                i++;
             }
 
             Object parent = rCoords.getParagraph().getParent();
@@ -101,7 +105,7 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
             if (parent instanceof ContentAccessor) {
                 ContentAccessor contentAccessor = (ContentAccessor) parent;
                 int index = contentAccessor.getContent().indexOf(paragraph);
-                for (int i = index + 1; i < contentAccessor.getContent().size() && !foundEnd; i ++) {
+                for (int i = index + 1; i < contentAccessor.getContent().size() && !foundEnd; i++) {
                     Object next = contentAccessor.getContent().get(i);
 
                     if (next instanceof CommentRangeEnd && ((CommentRangeEnd) next).getId().equals(commentId)) {

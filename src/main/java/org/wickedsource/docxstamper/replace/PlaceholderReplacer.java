@@ -15,6 +15,7 @@ import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ElemObject;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.proxy.ProxyBuilder;
@@ -78,7 +79,7 @@ public class PlaceholderReplacer<T> {
             CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
                 @Override
                 protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
-                    resolveExpressionsForParagraph(paragraphCoordinates.getParagraph(), expressionContext, document);
+                    resolveExpressionsForParagraph(paragraphCoordinates.getParagraph(), expressionContext, document, new ElemObject());
                 }
             };
             walker.walk();
@@ -88,12 +89,12 @@ public class PlaceholderReplacer<T> {
     }
 
     @SuppressWarnings("unchecked")
-    public void resolveExpressionsForParagraph(P p, T expressionContext, WordprocessingMLPackage document) {
+    public void resolveExpressionsForParagraph(P p, T expressionContext, WordprocessingMLPackage document, ElemObject elemObject) {
         ParagraphWrapper paragraphWrapper = new ParagraphWrapper(p);
         List<String> placeholders = expressionUtil.findVariableExpressions(paragraphWrapper.getText());
         for (String placeholder : placeholders) {
             try {
-                Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
+                Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext, elemObject);
                 if (replacement != null) {
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     Object replacementObject = resolver.resolve(document, replacement);
@@ -114,10 +115,11 @@ public class PlaceholderReplacer<T> {
                         "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
                         placeholder, expressionContext.getClass(), e.getMessage()));
                 logger.trace("Reason for skipping expression:", e);
-
-                ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
-                Object replacementObject = resolver.resolve(document, "");
-                replace(paragraphWrapper, placeholder, replacementObject);
+                if (elemObject.isEach()) {
+                    ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
+                    Object replacementObject = resolver.resolve(document, "");
+                    replace(paragraphWrapper, placeholder, replacementObject);
+                }
             }
         }
         if (this.lineBreakPlaceholder != null) {
@@ -143,4 +145,18 @@ public class PlaceholderReplacer<T> {
         p.replace(placeholder, replacementObject);
     }
 
+    public void endProcessors(WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
+        try {
+            final T expressionContext = proxyBuilder.build();
+            CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
+                @Override
+                protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
+                    resolveExpressionsForParagraph(paragraphCoordinates.getParagraph(), expressionContext, document, new ElemObject(null, true));
+                }
+            };
+            walker.walk();
+        } catch (ProxyException e) {
+            throw new DocxStamperException("could not create proxy around context root!", e);
+        }
+    }
 }

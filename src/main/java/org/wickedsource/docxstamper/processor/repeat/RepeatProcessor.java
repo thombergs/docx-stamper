@@ -7,6 +7,7 @@ import org.docx4j.wml.Tr;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ElemObject;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
@@ -43,16 +44,19 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
         for (TableRowCoordinates rCoords : tableRowsToRepeat.keySet()) {
             List<Object> expressionContexts = tableRowsToRepeat.get(rCoords);
             int index = rCoords.getIndex();
+            int i = 1;
             for (final Object expressionContext : expressionContexts) {
                 Tr rowClone = XmlUtils.deepCopy(rCoords.getRow());
+                ElemObject elemObject = new ElemObject(i, true);
                 DocumentWalker walker = new BaseDocumentWalker(rowClone) {
                     @Override
                     protected void onParagraph(P paragraph) {
-                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
+                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document, elemObject);
                     }
                 };
                 walker.walk();
                 rCoords.getParentTableCoordinates().getTable().getContent().add(++index, rowClone);
+                i++;
             }
             rCoords.getParentTableCoordinates().getTable().getContent().remove(rCoords.getRow());
             // TODO: remove "repeatTableRow"-comment from cloned rows!
