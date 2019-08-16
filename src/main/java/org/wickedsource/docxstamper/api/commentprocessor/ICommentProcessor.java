@@ -3,6 +3,7 @@ package org.wickedsource.docxstamper.api.commentprocessor;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.util.CommentWrapper;
 
 /**
  * <p>
@@ -66,6 +67,17 @@ public interface ICommentProcessor {
      * @param coordinates coordinates of the currently processed run within the template.
      */
     void setCurrentRunCoordinates(RunCoordinates coordinates);
+
+
+    /**
+     * Passes the comment range wrapper that is currently being processed
+     * (i.e. the start and end of comment that in the .docx template.
+     * This method is always called BEFORE the custom methods of the custom comment
+     * processor interface are called.
+     *
+     *  @param commentWrapper of the currently processed comment within the template.
+     */
+    void setCurrentCommentWrapper(CommentWrapper commentWrapper);
 
     /**
      * Resets all state in the comment processor so that it can be re-used in another stamping process.

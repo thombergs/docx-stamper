@@ -1,10 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Date;
-import java.util.Map;
-
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
@@ -14,10 +9,7 @@ import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
-import org.wickedsource.docxstamper.processor.repeat.IParagraphRepeatProcessor;
-import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
-import org.wickedsource.docxstamper.processor.repeat.ParagraphRepeatProcessor;
-import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
+import org.wickedsource.docxstamper.processor.repeat.*;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
 import org.wickedsource.docxstamper.proxy.ProxyBuilder;
@@ -26,6 +18,11 @@ import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
+
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * <p>
@@ -73,6 +70,7 @@ public class DocxStamper<T> {
     commentProcessorRegistry.setFailOnInvalidExpression(config.isFailOnUnresolvedExpression());
     commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry, expressionResolver));
     commentProcessorRegistry.registerCommentProcessor(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry));
+    commentProcessorRegistry.registerCommentProcessor(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(typeResolverRegistry));
     commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
     commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
             new ReplaceWithProcessor());
@@ -137,8 +135,8 @@ public class DocxStamper<T> {
   public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
     try {
       ProxyBuilder<T> proxyBuilder = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
-      replaceExpressions(document, proxyBuilder);
       processComments(document, proxyBuilder);
+      replaceExpressions(document, proxyBuilder);
       document.save(out);
       commentProcessorRegistry.reset();
     } catch (DocxStamperException e) {
