@@ -2,14 +2,12 @@ package org.wickedsource.docxstamper.processor.repeat;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.CommentRangeEnd;
-import org.docx4j.wml.CommentRangeStart;
-import org.docx4j.wml.ContentAccessor;
-import org.docx4j.wml.P;
+import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
@@ -21,7 +19,7 @@ import java.util.Map;
 
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
 
-    private Map<CommentWrapper, DocPartToRepeat> partsToRepeat = new HashMap<>();
+    private Map<CommentWrapper, List<Object>> partsToRepeat = new HashMap<>();
     private PlaceholderReplacer<Object> placeholderReplacer;
 
     public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry) {
@@ -30,26 +28,28 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     @Override
     public void repeatDocPart(List<Object> objects) {
-        CommentWrapper commentWrapper = getCurrentCommentWrapper();
-        List<Object> elements = getObjectsInsideComment(commentWrapper);
-
-        partsToRepeat.put(commentWrapper, new DocPartToRepeat(objects, elements));
+        partsToRepeat.put(getCurrentCommentWrapper(), objects);
     }
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
         for (CommentWrapper commentWrapper : partsToRepeat.keySet()) {
-            DocPartToRepeat docPartToRepeat = partsToRepeat.get(commentWrapper);
-            List<Object> expressionContexts = docPartToRepeat.getData();
-            List<Object> elementsForRepeat = docPartToRepeat.getDocElements();
+            List<Object> expressionContexts = partsToRepeat.get(commentWrapper);
 
-            ContentAccessor insertTarget = (ContentAccessor) commentWrapper.getCommentRangeEnd().getParent();
-            int startInsertIndex = insertTarget.getContent().indexOf(commentWrapper.getCommentRangeEnd());
+            CommentRangeStart start = commentWrapper.getCommentRangeStart();
+
+            ContentAccessor gcp = findGreatestCommonParent(commentWrapper.getCommentRangeEnd(), (ContentAccessor) start.getParent());
+            List<Object> repeatElements = getRepeatElements(commentWrapper, gcp);
+            int insertIndex = gcp.getContent().indexOf(repeatElements.stream().findFirst().orElse(null));
+
+            CommentUtil.deleteComment(commentWrapper); // for deep copy without comment
 
             for (final Object expressionContext : expressionContexts) {
-                for (int j=0; j < elementsForRepeat.size(); j++) {
-                    Object elClone = XmlUtils.deepCopy(elementsForRepeat.get(j));
-                    if (XmlUtils.unwrap(elClone) instanceof ContentAccessor) {
+                for (final Object element : repeatElements) {
+                    Object elClone = XmlUtils.unwrap(XmlUtils.deepCopy(element));
+                    if (elClone instanceof P) {
+                        placeholderReplacer.resolveExpressionsForParagraph((P) elClone, expressionContext, document);
+                    } else if (elClone instanceof ContentAccessor) {
                         DocumentWalker walker = new BaseDocumentWalker((ContentAccessor)elClone) {
                             @Override
                             protected void onParagraph(P paragraph) {
@@ -58,20 +58,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                         };
                         walker.walk();
                     }
-                    insertTarget.getContent().add(startInsertIndex + j, elClone);
+                    gcp.getContent().add(insertIndex++, elClone);
                 }
             }
-
-            for (Object element : elementsForRepeat) {
-                ContentAccessor elementParent = (ContentAccessor) ((Child) element).getParent();
-                for (int i=0; i < elementParent.getContent().size(); i++) {
-                    Object unwrapedObject = XmlUtils.unwrap(elementParent.getContent().get(i));
-                    if (element.equals(unwrapedObject)) {
-                        elementParent.getContent().remove(i);
-                        break;
-                    }
-                }
-            }
+            gcp.getContent().removeAll(repeatElements);
         }
     }
 
@@ -80,63 +70,50 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         partsToRepeat = new HashMap<>();
     }
 
-    private static List<Object> getObjectsInsideComment(CommentWrapper commentWrapper) {
-        CommentRangeStart start = commentWrapper.getCommentRangeStart();
-        ContentAccessor parent = (ContentAccessor) start.getParent();
-        return recursiveFindCommentElements(commentWrapper.getCommentRangeEnd(), parent, parent.getContent().indexOf(start));
-    }
-
-    private static List<Object> recursiveFindCommentElements(CommentRangeEnd commentRangeEnd, ContentAccessor contentAccessor, int lastCheckedIndex) {
-        List<Object> elements = new ArrayList<>();
-        for (int i = lastCheckedIndex + 1; i < contentAccessor.getContent().size(); i++) {
-            Object object = XmlUtils.unwrap(contentAccessor.getContent().get(i));
-            if (commentRangeEnd.equals(object)
-                || (object instanceof ContentAccessor
-                    && findCommentEndInsideContent(commentRangeEnd, (ContentAccessor) object))) {
-                return elements;
+    private static List<Object> getRepeatElements(CommentWrapper commentWrapper, ContentAccessor greatestCommonParent) {
+        List<Object> repeatElements = new ArrayList<>();
+        boolean startFound = false;
+        for (Object element : greatestCommonParent.getContent()){
+            if (!startFound
+                    && depthElementSearch(commentWrapper.getCommentRangeStart(), element)) {
+                startFound = true;
             }
-            elements.add(object);
-        }
-        if (contentAccessor instanceof Child) {
-            Object parent = ((Child)contentAccessor).getParent();
-            if (parent instanceof ContentAccessor) {
-                ContentAccessor parentContentAccessor = (ContentAccessor) parent;
-                elements = recursiveFindCommentElements(commentRangeEnd, parentContentAccessor,
-                        parentContentAccessor.getContent().indexOf(contentAccessor));
-                elements.add(0, contentAccessor);
-                return elements;
+            if (startFound) {
+                repeatElements.add(element);
+
+                if (depthElementSearch(commentWrapper.getCommentRangeEnd(), element)) {
+                    break;
+                }
             }
         }
-        return elements;
+        return repeatElements;
     }
 
-    private static boolean findCommentEndInsideContent(CommentRangeEnd searchTarget, ContentAccessor content) {
-        for (Object object : content.getContent()) {
-            if (searchTarget.equals(object)) {
-                return true;
-            } else if (object instanceof ContentAccessor
-                    && findCommentEndInsideContent(searchTarget, (ContentAccessor) object)) {
-                return true;
+    private static ContentAccessor findGreatestCommonParent(Object targetSearch, ContentAccessor searchFrom) {
+        if (depthElementSearch(targetSearch, searchFrom)) {
+            if (searchFrom instanceof Tr) { // if it's Tr - need add new line to table
+                return (ContentAccessor) ((Tr) searchFrom).getParent();
+            } else if (searchFrom instanceof Tc) { // if it's Tc - need add new cell to row
+                return (ContentAccessor) ((Tc) searchFrom).getParent();
+            }
+            return searchFrom;
+        }
+        return findGreatestCommonParent(targetSearch, (ContentAccessor) ((Child) searchFrom).getParent());
+    }
+
+    private static boolean depthElementSearch(Object searchTarget, Object content) {
+        content = XmlUtils.unwrap(content);
+        if (searchTarget.equals(content)) {
+            return true;
+        } else if (content instanceof ContentAccessor) {
+            for (Object object : ((ContentAccessor)content).getContent()) {
+                Object unwrappedObject = XmlUtils.unwrap(object);
+                if (searchTarget.equals(unwrappedObject)
+                        || depthElementSearch(searchTarget, unwrappedObject)) {
+                    return true;
+                }
             }
         }
         return false;
-    }
-
-    private static class DocPartToRepeat {
-        private List<Object> data;
-        private List<Object> docElements;
-
-        DocPartToRepeat(List<Object> data, List<Object> docElements) {
-            this.data = data;
-            this.docElements = docElements;
-        }
-
-        List<Object> getData() {
-            return data;
-        }
-
-        List<Object> getDocElements() {
-            return docElements;
-        }
     }
 }
