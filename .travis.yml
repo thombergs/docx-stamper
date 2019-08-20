@@ -1,11 +1,9 @@
 language: java
 install: true
+jdk:
+  - oraclejdk8
 
 sudo: false
-addons:
-  apt:
-    packages:
-      - openjdk-8-jre-headless
 
 before_install:
   - chmod +x gradlew
