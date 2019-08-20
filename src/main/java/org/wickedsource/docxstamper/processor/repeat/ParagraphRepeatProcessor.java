@@ -10,6 +10,7 @@ import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.util.CommentUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
         toRepeat.paragraphs = paragraphs;
 
         pToRepeat.put(paragraphCoordinates, toRepeat);
+        CommentUtil.deleteComment(getCurrentCommentWrapper());
     }
 
     @Override

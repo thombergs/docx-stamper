@@ -11,6 +11,7 @@ import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
@@ -55,7 +56,6 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
                 rCoords.getParentTableCoordinates().getTable().getContent().add(++index, rowClone);
             }
             rCoords.getParentTableCoordinates().getTable().getContent().remove(rCoords.getRow());
-            // TODO: remove "repeatTableRow"-comment from cloned rows!
         }
     }
 
@@ -68,6 +68,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
             throw new CommentProcessingException("Paragraph is not within a table!", pCoords);
         }
         tableRowsToRepeat.put(getCurrentParagraphCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates(), objects);
+        CommentUtil.deleteComment(getCurrentCommentWrapper());
     }
 
 }
