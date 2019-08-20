@@ -5,7 +5,7 @@ sudo: false
 addons:
   apt:
     packages:
-      - oracle-java8-installer
+      - openjdk-8-jre-headless
 
 before_install:
   - chmod +x gradlew
