@@ -2,7 +2,7 @@ plugins {
     id "java"
     id "java-library"
     id "com.jfrog.artifactory" version "4.5.4"
-    id "com.jfrog.bintray" version "1.7.3"
+    id "com.jfrog.bintray" version "1.8.1"
     id "maven-publish"
 }
 
