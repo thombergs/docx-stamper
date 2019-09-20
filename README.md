@@ -132,6 +132,19 @@ To include docx-stamper in your project, you can use the following maven coordin
 </dependency>
 ```
 
+Note that as of version 1.4.0 you have to provide the dependency to your version of Docx4J yourself:
+
+```xml
+<dependency>
+    <groupId>org.docx4j</groupId>
+    <artifactId>docx4j</artifactId>
+    <version>6.1.2</version>
+</dependency>
+```
+
+This way, you can choose which version of Docx4J you want to use instead having it dictated by DocxStamper. Look into
+the [.travis.yml](.travis.yml) file to see against which versions of Docx4J DocxStamper has been tested.
+
 ## Changelog
 * 1.3.0 (2018-08-11) - feature release
   * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.3.0+is%3Aclosed)
