@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper.util.walk;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.coordinates.*;
-import org.wickedsource.docxstamper.util.CommentWrapper;
 
 public abstract class BaseCoordinatesWalker extends CoordinatesWalker {
 
@@ -31,7 +30,7 @@ public abstract class BaseCoordinatesWalker extends CoordinatesWalker {
     }
     
     @Override
-	protected CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
-		return null;
+	protected void onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
+
 	}
 }

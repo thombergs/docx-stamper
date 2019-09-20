@@ -1,27 +1,22 @@
 package org.wickedsource.docxstamper.util;
 
-import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.PartName;
 import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
-import org.docx4j.wml.CommentRangeEnd;
-import org.docx4j.wml.CommentRangeStart;
-import org.docx4j.wml.Comments;
-import org.docx4j.wml.ContentAccessor;
-import org.docx4j.wml.P;
-import org.docx4j.wml.R;
+import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
+
+import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Map;
 
 public class CommentUtil {
 
@@ -172,11 +167,15 @@ public class CommentUtil {
 		// TODO: also delete comment from comments.xml
 	}
 
-	private static void deleteCommentReference(ContentAccessor parent,
+	private static boolean deleteCommentReference(ContentAccessor parent,
 			BigInteger commentId) {
-		int index = 0;
-		Integer indexToDelete = null;
-		for (Object contentObject : parent.getContent()) {
+		for (int i = 0; i < parent.getContent().size(); i++) {
+			Object contentObject = XmlUtils.unwrap(parent.getContent().get(i));
+			if (contentObject instanceof ContentAccessor) {
+				if (deleteCommentReference((ContentAccessor) contentObject, commentId)) {
+					return true;
+				}
+			}
 			if (contentObject instanceof R) {
 				for (Object runContentObject : ((R) contentObject).getContent()) {
 					Object unwrapped = XmlUtils.unwrap(runContentObject);
@@ -184,17 +183,14 @@ public class CommentUtil {
 						BigInteger foundCommentId = ((R.CommentReference) unwrapped)
 								.getId();
 						if (foundCommentId.equals(commentId)) {
-							indexToDelete = index;
-							break;
+							parent.getContent().remove(i);
+							return true;
 						}
 					}
 				}
 			}
-			index++;
 		}
-		if (indexToDelete != null) {
-			parent.getContent().remove(indexToDelete.intValue());
-		}
+		return false;
 	}
 
 	public static Map<BigInteger, CommentWrapper> getComments(

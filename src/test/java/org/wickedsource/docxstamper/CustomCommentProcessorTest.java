@@ -1,10 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
@@ -12,6 +7,12 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.util.CommentWrapper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CustomCommentProcessorTest extends AbstractDocx4jTest {
 
@@ -53,6 +54,11 @@ public class CustomCommentProcessorTest extends AbstractDocx4jTest {
 
         @Override
         public void setCurrentRunCoordinates(RunCoordinates coordinates) {
+
+        }
+
+        @Override
+        public void setCurrentCommentWrapper(CommentWrapper commentWrapper) {
 
         }
 
