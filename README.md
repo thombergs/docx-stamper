@@ -128,7 +128,7 @@ To include docx-stamper in your project, you can use the following maven coordin
 <dependency>
     <groupId>org.wickedsource.docx-stamper</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
@@ -142,8 +142,8 @@ Note that as of version 1.4.0 you have to provide the dependency to your version
 </dependency>
 ```
 
-This way, you can choose which version of Docx4J you want to use instead having it dictated by DocxStamper. Look into
-the [.travis.yml](.travis.yml) file to see against which versions of Docx4J DocxStamper has been tested.
+This way, you can choose which version of Docx4J you want to use instead having it dictated by docx-stamper. Look into
+the [.travis.yml](.travis.yml) file to see against which versions of Docx4J docx-stamper has been tested.
 
 ## Changelog
 * 1.3.0 (2018-08-11) - feature release
