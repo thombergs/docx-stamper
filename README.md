@@ -146,6 +146,9 @@ This way, you can choose which version of Docx4J you want to use instead having 
 the [.travis.yml](.travis.yml) file to see against which versions of Docx4J docx-stamper has been tested.
 
 ## Changelog
+* 1.4.0 (2019-09-20) - feature release
+  * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.4.0+is%3Aclosed)
+  * [pull requests](https://github.com/thombergs/docx-stamper/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+milestone%3A1.4.0+)
 * 1.3.0 (2018-08-11) - feature release
   * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.3.0+is%3Aclosed)
   * [pull requests](https://github.com/thombergs/docx-stamper/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+milestone%3A1.3.0+)
