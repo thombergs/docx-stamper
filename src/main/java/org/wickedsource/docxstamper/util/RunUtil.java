@@ -34,7 +34,7 @@ public class RunUtil {
                         text = text.trim();
                     }
                     result += text;
-                }else if (element.getValue() instanceof R.Tab){
+                } else if (element.getValue() instanceof R.Tab) {
                     result += "\t";
                 }
             } else if (content instanceof Text) {
@@ -56,6 +56,19 @@ public class RunUtil {
             StyleUtil.apply(p.getPPr().getRPr(), runProperties);
             run.setRPr(runProperties);
         }
+    }
+
+    /**
+     * Applies the style of the given run to the given content object (if the content object is a Run).
+     *
+     * @param rPr the run whose style to use.
+     * @param run the Run to which the style should be applied.
+     */
+    public static void applyRunStyle(RPr rPr, R run) {
+        RPr runProperties = new RPr();
+        StyleUtil.apply(rPr, runProperties);
+        run.setRPr(runProperties);
+
     }
 
     /**
@@ -87,10 +100,11 @@ public class RunUtil {
 
     /**
      * Creates a new run with the given object as content.
+     *
      * @param content the content of the run.
      * @return the newly created run.
      */
-    public static R create(Object content){
+    public static R create(Object content) {
         R run = factory.createR();
         run.getContent().add(content);
         return run;

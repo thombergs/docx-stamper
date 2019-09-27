@@ -2,11 +2,14 @@ package org.wickedsource.docxstamper.util;
 
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
+import org.docx4j.wml.RPr;
 import org.wickedsource.docxstamper.replace.IndexedRun;
-import org.wickedsource.docxstamper.util.RunUtil;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A "Run" defines a region of text within a docx document with a common set of properties. Word processors are
@@ -148,12 +151,47 @@ public class ParagraphWrapper {
         return getText(this.runs);
     }
 
+    /**
+     * Returns each Placeholder and its run.
+     *
+     * @return the placeholder and its run as linkedHashMap
+     */
+    public LinkedHashMap<String, RPr> getPlaceholderAndStyle() {
+        return getPlaceholderAndStyle(this.runs);
+    }
+
     private String getText(List<IndexedRun> runs) {
         StringBuilder builder = new StringBuilder();
         for (IndexedRun run : runs) {
             builder.append(RunUtil.getText(run.getRun()));
         }
         return builder.toString();
+    }
+
+    private LinkedHashMap<String, RPr> getPlaceholderAndStyle(List<IndexedRun> runs) {
+        LinkedHashMap<String, RPr> placeholderRpr = new LinkedHashMap<>();
+        StringBuilder builder = new StringBuilder();
+
+        for (IndexedRun run : runs) {
+            builder.append(RunUtil.getText(run.getRun()));
+            Pattern p = Pattern.compile("\\$\\{.*?}");
+            Matcher m = p.matcher(builder.toString());
+            RPr rPr = new RPr();
+            String placeholder = "";
+            int index = 0;
+            while (m.find(index)) {
+                builder = new StringBuilder();
+                rPr = run.getRun().getRPr();
+                placeholder = m.group();
+                index = m.end();
+            }
+            if (!"".equals(placeholder)) {
+                placeholderRpr.put(placeholder+"_"+run.getStartIndex(), rPr);
+            }
+
+        }
+
+        return placeholderRpr;
     }
 
     /**
