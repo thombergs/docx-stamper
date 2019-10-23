@@ -1,7 +1,9 @@
 package org.wickedsource.docxstamper.util;
 
+import org.docx4j.model.styles.StyleUtil;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
+import org.docx4j.wml.RPr;
 import org.wickedsource.docxstamper.replace.IndexedRun;
 import org.wickedsource.docxstamper.util.RunUtil;
 
@@ -71,6 +73,12 @@ public class ParagraphWrapper {
         }
         int matchEndIndex = matchStartIndex + placeholder.length() - 1;
         List<IndexedRun> affectedRuns = getAffectedRuns(matchStartIndex, matchEndIndex);
+
+        if (replacement instanceof R && ((R) replacement).getRPr() == null) {
+            RPr runProperties = new RPr();
+            StyleUtil.apply(affectedRuns.get(0).getRun().getRPr(), runProperties);
+            ((R) replacement).setRPr(runProperties);
+        }
 
         boolean singleRun = affectedRuns.size() == 1;
 
