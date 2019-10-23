@@ -133,9 +133,6 @@ public class PlaceholderReplacer<T> {
     if (replacementObject == null) {
       replacementObject = RunUtil.create("");
     }
-    if (replacementObject instanceof R) {
-      RunUtil.applyParagraphStyle(p.getParagraph(), (R) replacementObject);
-    }
     p.replace(placeholder, replacementObject);
   }
 
