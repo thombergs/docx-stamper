@@ -1,7 +1,5 @@
 package org.wickedsource.docxstamper.util.walk;
 
-import java.io.IOException;
-
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
@@ -9,7 +7,8 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.api.coordinates.*;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
-import org.wickedsource.docxstamper.util.CommentWrapper;
+
+import java.io.IOException;
 
 public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 
@@ -25,9 +24,8 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
         CoordinatesWalker walker = new CoordinatesWalker(document) {
 
         	@Override
-			protected CommentWrapper onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
+			protected void onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
 				// TODO Auto-generated method stub
-				return null;
 			}
         	
             @Override

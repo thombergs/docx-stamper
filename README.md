@@ -82,6 +82,7 @@ Besides replacing expressions, docx-stamper can **process comments on paragraphs
 | `displayTableRowIf(boolean)`      | The table row surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
 | `displayTableIf(boolean)`      | The whole table surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
 | `repeatTableRow(List<Object>)`      | The table row surrounding the commented paragraph is copied once for each object in the passed-in list. Expressions found in the cells of the table row are evaluated against the object from the list.
+| `repeatDocPart(List<Object>)`      | Repeats the part of the document surrounded by the comment. The document part is copied once for each object in the passed-in list. Expressions found in the elements of the document part are evaluated against the object from the list. Can be used instead repeatTableRow and repeatParagraph if you want to repeat more than table rows and paragraphs.
 | `replaceWordWith(expression)`         | Replaces the commented word (must be a single word!) with the value of the given expression. |
 
 If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](src/main/java/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.java). To register you comment processor to docx-stamper, use the following code:
@@ -127,11 +128,27 @@ To include docx-stamper in your project, you can use the following maven coordin
 <dependency>
     <groupId>org.wickedsource.docx-stamper</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
+Note that as of version 1.4.0 you have to provide the dependency to your version of Docx4J yourself:
+
+```xml
+<dependency>
+    <groupId>org.docx4j</groupId>
+    <artifactId>docx4j</artifactId>
+    <version>6.1.2</version>
+</dependency>
+```
+
+This way, you can choose which version of Docx4J you want to use instead having it dictated by docx-stamper. Look into
+the [.travis.yml](.travis.yml) file to see against which versions of Docx4J docx-stamper has been tested.
+
 ## Changelog
+* 1.4.0 (2019-09-20) - feature release
+  * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.4.0+is%3Aclosed)
+  * [pull requests](https://github.com/thombergs/docx-stamper/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+milestone%3A1.4.0+)
 * 1.3.0 (2018-08-11) - feature release
   * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.3.0+is%3Aclosed)
   * [pull requests](https://github.com/thombergs/docx-stamper/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+milestone%3A1.3.0+)

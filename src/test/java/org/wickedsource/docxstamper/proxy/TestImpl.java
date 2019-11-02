@@ -4,6 +4,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.util.CommentWrapper;
 
 public class TestImpl implements ITestInterface, ICommentProcessor {
 
@@ -25,6 +26,11 @@ public class TestImpl implements ITestInterface, ICommentProcessor {
 	@Override
 	public void setCurrentRunCoordinates(RunCoordinates coordinates) {
 		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void setCurrentCommentWrapper(CommentWrapper commentWrapper) {
 
 	}
 

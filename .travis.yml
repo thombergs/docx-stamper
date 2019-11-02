@@ -1,11 +1,9 @@
 language: java
 install: true
+jdk:
+  - openjdk8
 
 sudo: false
-addons:
-  apt:
-    packages:
-      - oracle-java8-installer
 
 before_install:
   - chmod +x gradlew
@@ -24,7 +22,9 @@ jobs:
 
     # run gradle build
     - stage: build
-      script: ./gradlew build
+      script:
+        - ./gradlew build -Ddocx4j.version=6.1.2
+        - ./gradlew build -Ddocx4j.version=6.0.1
 
     # publish snapshot to oss.jfrog.org
 #    - stage: snapshot

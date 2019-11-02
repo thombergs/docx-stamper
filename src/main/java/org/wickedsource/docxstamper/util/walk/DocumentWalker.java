@@ -28,6 +28,12 @@ public abstract class DocumentWalker {
             } else if (unwrappedObject instanceof Tc) {
                 Tc cell = (Tc) unwrappedObject;
                 walkTableCell(cell);
+            } else if (unwrappedObject instanceof CommentRangeStart) {
+                CommentRangeStart commentRangeStart = (CommentRangeStart) unwrappedObject;
+                onCommentRangeStart(commentRangeStart);
+            } else if (unwrappedObject instanceof CommentRangeEnd) {
+                CommentRangeEnd commentRangeEnd = (CommentRangeEnd) unwrappedObject;
+                onCommentRangeEnd(commentRangeEnd);
             }
         }
     }
