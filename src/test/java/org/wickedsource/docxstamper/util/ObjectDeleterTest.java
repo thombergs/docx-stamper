@@ -1,5 +1,10 @@
 package org.wickedsource.docxstamper.util;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -10,13 +15,8 @@ import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
-import org.wickedsource.docxstamper.util.ParagraphWrapper;
-import org.wickedsource.docxstamper.util.walk.*;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 public class ObjectDeleterTest extends AbstractDocx4jTest {
 
