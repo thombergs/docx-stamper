@@ -27,6 +27,17 @@ public class ObjectDeleter {
         if (paragraphCoordinates.getParentTableCellCoordinates() == null) {
             // global paragraph
             int indexToDelete = paragraphCoordinates.getIndex() - objectsDeletedFromMainDocument;
+
+            // detect repeatDocPart error
+            if (document.getMainDocumentPart().getContent().get(indexToDelete) != paragraphCoordinates.getParagraph()) {
+              var index = document.getMainDocumentPart().getContent().indexOf(paragraphCoordinates.getParagraph());
+              if (index < 0) {
+                return;
+              }
+              objectsDeletedFromMainDocument = paragraphCoordinates.getIndex() - index;
+              indexToDelete = paragraphCoordinates.getIndex() - objectsDeletedFromMainDocument;
+            }
+
             document.getMainDocumentPart().getContent().remove(indexToDelete);
             objectsDeletedFromMainDocument++;
         } else {
