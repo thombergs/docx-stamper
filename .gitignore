@@ -6,3 +6,6 @@ settings.xml
 /.DS_Store
 /.project
 /.gradle/
+/bin/
+/build/
+/.settings/
