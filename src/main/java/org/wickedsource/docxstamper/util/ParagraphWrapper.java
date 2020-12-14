@@ -1,12 +1,10 @@
 package org.wickedsource.docxstamper.util;
 
-import org.docx4j.wml.P;
-import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.replace.IndexedRun;
-import org.wickedsource.docxstamper.util.RunUtil;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 
 /**
  * A "Run" defines a region of text within a docx document with a common set of properties. Word processors are
