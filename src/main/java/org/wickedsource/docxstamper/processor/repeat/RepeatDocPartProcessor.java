@@ -5,6 +5,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
@@ -22,8 +23,9 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     private Map<CommentWrapper, List<Object>> partsToRepeat = new HashMap<>();
     private PlaceholderReplacer<Object> placeholderReplacer;
 
-    public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry) {
+    public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver) {
         this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+        this.placeholderReplacer.setExpressionResolver(expressionResolver);
     }
 
     @Override
