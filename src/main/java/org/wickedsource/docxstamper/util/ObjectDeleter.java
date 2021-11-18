@@ -7,15 +7,16 @@ import org.docx4j.wml.Tc;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
-
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ObjectDeleter {
 
     private WordprocessingMLPackage document;
 
-    private int objectsDeletedFromMainDocument = 0;
+    private List<Integer> deletedObjectsIndexes = new ArrayList<>(10);
 
     private Map<ContentAccessor, Integer> deletedObjectsPerParent = new HashMap<>();
 
@@ -26,9 +27,9 @@ public class ObjectDeleter {
     public void deleteParagraph(ParagraphCoordinates paragraphCoordinates) {
         if (paragraphCoordinates.getParentTableCellCoordinates() == null) {
             // global paragraph
-            int indexToDelete = paragraphCoordinates.getIndex() - objectsDeletedFromMainDocument;
+            int indexToDelete = getOffset(paragraphCoordinates.getIndex());
             document.getMainDocumentPart().getContent().remove(indexToDelete);
-            objectsDeletedFromMainDocument++;
+            deletedObjectsIndexes.add(paragraphCoordinates.getIndex());
         } else {
             // paragraph within a table cell
             Tc parentCell = paragraphCoordinates.getParentTableCellCoordinates().getCell();
@@ -47,15 +48,33 @@ public class ObjectDeleter {
             TableCellUtil.addEmptyParagraph(cell);
         }
         deletedObjectsPerParent.put(cell, objectsDeletedFromParent + 1);
-        // TODO: find out why border lines are removed in some cells after having deleted a paragraph
+        // TODO: find out why border lines are removed in some cells after having
+        // deleted a paragraph
+    }
+
+    /**
+     * Get new index of element to be deleted, taking into account previously
+     * deleted elements
+     *
+     * @param initialIndex initial index of the element to be deleted
+     * @return the index of the item to be removed
+     */
+    private int getOffset(final int initialIndex) {
+        int newIndex = initialIndex;
+        for (Integer deletedIndex : this.deletedObjectsIndexes) {
+            if (initialIndex > deletedIndex) {
+                newIndex--;
+            }
+        }
+        return newIndex;
     }
 
     public void deleteTable(TableCoordinates tableCoordinates) {
         if (tableCoordinates.getParentTableCellCoordinates() == null) {
             // global table
-            int indexToDelete = tableCoordinates.getIndex() - objectsDeletedFromMainDocument;
+            int indexToDelete = getOffset(tableCoordinates.getIndex());
             document.getMainDocumentPart().getContent().remove(indexToDelete);
-            objectsDeletedFromMainDocument++;
+            deletedObjectsIndexes.add(tableCoordinates.getIndex());
         } else {
             // nested table within an table cell
             Tc parentCell = tableCoordinates.getParentTableCellCoordinates().getCell();

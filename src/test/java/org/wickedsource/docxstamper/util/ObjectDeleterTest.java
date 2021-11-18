@@ -10,9 +10,8 @@ import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
-import org.wickedsource.docxstamper.util.ParagraphWrapper;
-import org.wickedsource.docxstamper.util.walk.*;
-
+import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
+import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
