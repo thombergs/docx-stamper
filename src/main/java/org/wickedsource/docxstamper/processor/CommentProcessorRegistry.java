@@ -130,6 +130,7 @@ public class CommentProcessorRegistry {
         Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
         proxyBuilder.withInterface(commentProcessorInterface, processor);
         processor.setCurrentParagraphCoordinates(paragraphCoordinates);
+        processor.setProxyBuilder(proxyBuilder);
       }
 
       try {
@@ -203,6 +204,7 @@ public class CommentProcessorRegistry {
       processor.setCurrentParagraphCoordinates(paragraphCoordinates);
       processor.setCurrentRunCoordinates(runCoordinates);
       processor.setCurrentCommentWrapper(commentWrapper);
+      processor.setProxyBuilder(proxyBuilder);
     }
 
     try {

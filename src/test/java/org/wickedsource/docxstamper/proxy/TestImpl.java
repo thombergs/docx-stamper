@@ -35,6 +35,11 @@ public class TestImpl implements ITestInterface, ICommentProcessor {
 	}
 
 	@Override
+	public void setProxyBuilder(ProxyBuilder proxyBuilder) {
+
+	}
+
+	@Override
 	public void reset() {
 
 	}
