@@ -4,6 +4,9 @@ import org.docx4j.wml.CommentRangeEnd;
 import org.docx4j.wml.CommentRangeStart;
 import org.docx4j.wml.Comments;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class CommentWrapper {
 
     private Comments.Comment comment;
@@ -11,6 +14,8 @@ public class CommentWrapper {
     private CommentRangeStart commentRangeStart;
 
     private CommentRangeEnd commentRangeEnd;
+
+    private Set<CommentWrapper> children = new HashSet();
 
     public CommentWrapper(Comments.Comment comment, CommentRangeStart commentRangeStart, CommentRangeEnd commentRangeEnd) {
         this.comment = comment;
@@ -33,6 +38,10 @@ public class CommentWrapper {
         return commentRangeEnd;
     }
 
+    public Set<CommentWrapper> getChildren() {
+        return children;
+    }
+
     void setComment(Comments.Comment comment) {
         this.comment = comment;
     }
@@ -43,5 +52,9 @@ public class CommentWrapper {
 
     void setCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
         this.commentRangeEnd = commentRangeEnd;
+    }
+
+    void setChildren(Set<CommentWrapper> children) {
+        this.children = children;
     }
 }
