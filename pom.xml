@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>linkyard</groupId>
+    <artifactId>docx-stamper</artifactId>
+    <version>1.4.1-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>docx-stamper</name>
+    <properties>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+    </properties>
+    <description>Docx-stamper is a Java template engine for docx documents. This is a maintenance fork from
+        https://github.com/thombergs/docx-stamper.
+    </description>
+    <url>https://github.com/bflorat/docx-stamper</url>
+    <scm>
+        <url>https://github.com/bflorat/docx-stamper</url>
+        <developerConnection>scm:git:https://github.com/bflorat/docx-stamper.git</developerConnection>
+        <connection>https://github.com/bflorat/docx-stamper.git</connection>
+    </scm>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>http://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <email>tom.hombergs@gmail.com</email>
+            <name>Tom Hombergs</name>
+            <url>http://wickedsource.org</url>
+        </developer>
+        <developer>
+            <email>bertrand@florat.net</email>
+            <name>Bertrand Florat</name>
+            <url>https://florat.net</url>
+        </developer>
+    </developers>
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+   
+    <dependencies>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.21.0-GA</version>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>4.3.6.RELEASE</version>
+        </dependency>
+
+
+        <!-- For unknown reason, we need this deps to avoid "docx4j Couldn't get [Content_Types].xml from ZipFile" errors
+         See https://stackoverflow.com/questions/31093454/docx4j-couldnt-get-content-types-xml-from-zipfile -->
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>docx4j-JAXB-MOXy</artifactId>
+            <version>11.2.9</version>
+        </dependency>
+
+        <!-- Required when running with a recent JRE as jaxb has been dropped from Java 9 -->
+        <dependency>
+            <groupId>jakarta.xml.bind</groupId>
+            <artifactId>jakarta.xml.bind-api</artifactId>
+            <version>2.3.2</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
+
+</project>
+
