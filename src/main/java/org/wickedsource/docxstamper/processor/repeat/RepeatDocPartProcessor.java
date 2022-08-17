@@ -7,6 +7,7 @@ import org.jvnet.jaxb2_commons.ppp.Child;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
+import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
@@ -22,10 +23,14 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     private Map<CommentWrapper, List<Object>> partsToRepeat = new HashMap<>();
     private PlaceholderReplacer<Object> placeholderReplacer;
+    private CommentProcessorRegistry commentProcessorRegistry;
 
     public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver) {
         this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
         this.placeholderReplacer.setExpressionResolver(expressionResolver);
+
+        this.commentProcessorRegistry = new CommentProcessorRegistry(this.placeholderReplacer);
+        this.commentProcessorRegistry.setExpressionResolver(expressionResolver);
     }
 
     @Override
@@ -47,12 +52,19 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
             CommentUtil.deleteComment(commentWrapper); // for deep copy without comment
 
             for (final Object expressionContext : expressionContexts) {
+                for (final CommentWrapper comment : commentWrapper.getChildren()) {
+                    System.out.println(comment);
+                    // TODO : link the comment to the right repeatElement
+                    // and then apply comment resolvers to it
+                    // comment.getCommentRangeStart().parent.parent... -> until matching one of the elements in the list
+                }
+
                 for (final Object element : repeatElements) {
                     Object elClone = XmlUtils.unwrap(XmlUtils.deepCopy(element));
                     if (elClone instanceof P) {
                         placeholderReplacer.resolveExpressionsForParagraph((P) elClone, expressionContext, document);
                     } else if (elClone instanceof ContentAccessor) {
-                        DocumentWalker walker = new BaseDocumentWalker((ContentAccessor)elClone) {
+                        DocumentWalker walker = new BaseDocumentWalker((ContentAccessor) elClone) {
                             @Override
                             protected void onParagraph(P paragraph) {
                                 placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
@@ -75,7 +87,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     private static List<Object> getRepeatElements(CommentWrapper commentWrapper, ContentAccessor greatestCommonParent) {
         List<Object> repeatElements = new ArrayList<>();
         boolean startFound = false;
-        for (Object element : greatestCommonParent.getContent()){
+        for (Object element : greatestCommonParent.getContent()) {
             if (!startFound
                     && depthElementSearch(commentWrapper.getCommentRangeStart(), element)) {
                 startFound = true;
@@ -108,7 +120,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         if (searchTarget.equals(content)) {
             return true;
         } else if (content instanceof ContentAccessor) {
-            for (Object object : ((ContentAccessor)content).getContent()) {
+            for (Object object : ((ContentAccessor) content).getContent()) {
                 Object unwrappedObject = XmlUtils.unwrap(object);
                 if (searchTarget.equals(unwrappedObject)
                         || depthElementSearch(searchTarget, unwrappedObject)) {
