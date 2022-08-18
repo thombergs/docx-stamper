@@ -58,23 +58,26 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     public void commitChanges(WordprocessingMLPackage document) {
         int count = 0;
 
+        List<Object> changes = new ArrayList<>();
+
         for (CommentWrapper commentWrapper : subContexts.keySet()) {
             List<Object> expressionContexts = subContexts.get(commentWrapper);
             WordprocessingMLPackage subTemplate = subTemplates.get(commentWrapper);
 
             for (Object subContext : expressionContexts) {
-                // TODO : generate sub doc and insert content back in the document
                 DocxStamper<Object> stamper = new DocxStamper<>(config);
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 stamper.stamp(subTemplate, subContext, output);
                 try {
                     WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
+                    changes.addAll(subDocument.getMainDocumentPart().getContent());
                     subDocument.save(new File("subdoc-" + count + ".docx"));
                 } catch (Exception e) {
                     System.out.println(e);
                 }
                 count++;
             }
+            // TODO : insert changes back in the document in the right place and remove comment
         }
     }
 
