@@ -11,9 +11,8 @@ import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
-import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
-import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,7 +20,9 @@ import java.util.Map;
 
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
 
-    private Map<CommentWrapper, List<Object>> partsToRepeat = new HashMap<>();
+    private Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
+    private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap();
+
     private PlaceholderReplacer<Object> placeholderReplacer;
     private CommentProcessorRegistry commentProcessorRegistry;
 
@@ -34,54 +35,55 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     }
 
     @Override
-    public void repeatDocPart(List<Object> objects) {
-        partsToRepeat.put(getCurrentCommentWrapper(), objects);
+    public void repeatDocPart(List<Object> contexts) {
+        CommentWrapper currentCommentWrapper = getCurrentCommentWrapper();
+        subContexts.put(currentCommentWrapper, contexts);
+        subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper));
     }
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
-        for (CommentWrapper commentWrapper : partsToRepeat.keySet()) {
-            List<Object> expressionContexts = partsToRepeat.get(commentWrapper);
+        for (CommentWrapper commentWrapper : subContexts.keySet()) {
+            List<Object> expressionContexts = subContexts.get(commentWrapper);
+            WordprocessingMLPackage subTemplate = subTemplates.get(commentWrapper);
 
             CommentRangeStart start = commentWrapper.getCommentRangeStart();
 
-            ContentAccessor gcp = findGreatestCommonParent(commentWrapper.getCommentRangeEnd(), (ContentAccessor) start.getParent());
-            List<Object> repeatElements = getRepeatElements(commentWrapper, gcp);
-            int insertIndex = gcp.getContent().indexOf(repeatElements.stream().findFirst().orElse(null));
-
-            CommentUtil.deleteComment(commentWrapper); // for deep copy without comment
-
-            for (final Object expressionContext : expressionContexts) {
-                for (final CommentWrapper comment : commentWrapper.getChildren()) {
-                    System.out.println(comment);
-                    // TODO : link the comment to the right repeatElement
-                    // and then apply comment resolvers to it
-                    // comment.getCommentRangeStart().parent.parent... -> until matching one of the elements in the list
-                }
-
-                for (final Object element : repeatElements) {
-                    Object elClone = XmlUtils.unwrap(XmlUtils.deepCopy(element));
-                    if (elClone instanceof P) {
-                        placeholderReplacer.resolveExpressionsForParagraph((P) elClone, expressionContext, document);
-                    } else if (elClone instanceof ContentAccessor) {
-                        DocumentWalker walker = new BaseDocumentWalker((ContentAccessor) elClone) {
-                            @Override
-                            protected void onParagraph(P paragraph) {
-                                placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
-                            }
-                        };
-                        walker.walk();
-                    }
-                    gcp.getContent().add(insertIndex++, elClone);
-                }
-            }
-            gcp.getContent().removeAll(repeatElements);
+            // TODO : generate sub doc and insert content back in the document
         }
     }
 
     @Override
     public void reset() {
-        partsToRepeat = new HashMap<>();
+        subContexts = new HashMap<>();
+        subTemplates = new HashMap();
+    }
+
+    private static WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper) {
+        CommentRangeStart start = commentWrapper.getCommentRangeStart();
+
+        ContentAccessor gcp = findGreatestCommonParent(commentWrapper.getCommentRangeEnd(), (ContentAccessor) start.getParent());
+        List<Object> repeatElements = getRepeatElements(commentWrapper, gcp);
+        CommentUtil.deleteComment(commentWrapper); // for deep copy without comment
+
+        WordprocessingMLPackage document = null;
+
+        try {
+            document = WordprocessingMLPackage.createPackage();
+            document.getMainDocumentPart().getContent().addAll(repeatElements);
+            List<Comments.Comment> comments = new ArrayList<>();
+            for (CommentWrapper wrapper : commentWrapper.getChildren()) {
+                Comments.Comment comment = wrapper.getComment();
+                comments.add(comment);
+            }
+            document.save(new File("temp.docx"));
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+
+        // TODO insert child comments in the template
+
+        return document;
     }
 
     private static List<Object> getRepeatElements(CommentWrapper commentWrapper, ContentAccessor greatestCommonParent) {
