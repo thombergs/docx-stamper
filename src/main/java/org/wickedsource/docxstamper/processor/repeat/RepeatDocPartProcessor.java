@@ -1,9 +1,12 @@
 package org.wickedsource.docxstamper.processor.repeat;
 
 import org.docx4j.XmlUtils;
+import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
+import org.wickedsource.docxstamper.DocxStamper;
+import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
@@ -12,6 +15,8 @@ import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,13 +25,21 @@ import java.util.Map;
 
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
 
+    private final DocxStamperConfiguration config;
+
     private Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
     private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap();
 
-    private PlaceholderReplacer<Object> placeholderReplacer;
-    private CommentProcessorRegistry commentProcessorRegistry;
+    private final PlaceholderReplacer<Object> placeholderReplacer;
+    private final CommentProcessorRegistry commentProcessorRegistry;
 
-    public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver) {
+    private final ObjectFactory objectFactory;
+
+    public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {
+        this.config = config;
+
+        this.objectFactory = Context.getWmlObjectFactory();
+
         this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
         this.placeholderReplacer.setExpressionResolver(expressionResolver);
 
@@ -43,13 +56,25 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
+        int count = 0;
+
         for (CommentWrapper commentWrapper : subContexts.keySet()) {
             List<Object> expressionContexts = subContexts.get(commentWrapper);
             WordprocessingMLPackage subTemplate = subTemplates.get(commentWrapper);
 
-            CommentRangeStart start = commentWrapper.getCommentRangeStart();
-
-            // TODO : generate sub doc and insert content back in the document
+            for (Object subContext : expressionContexts) {
+                // TODO : generate sub doc and insert content back in the document
+                DocxStamper<Object> stamper = new DocxStamper<>(config);
+                ByteArrayOutputStream output = new ByteArrayOutputStream();
+                stamper.stamp(subTemplate, subContext, output);
+                try {
+                    WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
+                    subDocument.save(new File("subdoc-" + count + ".docx"));
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
+                count++;
+            }
         }
     }
 
@@ -71,17 +96,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         try {
             document = WordprocessingMLPackage.createPackage();
             document.getMainDocumentPart().getContent().addAll(repeatElements);
-            List<Comments.Comment> comments = new ArrayList<>();
-            for (CommentWrapper wrapper : commentWrapper.getChildren()) {
-                Comments.Comment comment = wrapper.getComment();
-                comments.add(comment);
-            }
             document.save(new File("temp.docx"));
         } catch (Exception e) {
             System.out.println(e);
         }
-
-        // TODO insert child comments in the template
 
         return document;
     }
