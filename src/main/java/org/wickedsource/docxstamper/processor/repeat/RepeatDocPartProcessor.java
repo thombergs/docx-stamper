@@ -30,6 +30,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     private Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
     private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap();
+    private Map<CommentWrapper, Integer> insertIndex = new HashMap<>();
 
     private final PlaceholderReplacer<Object> placeholderReplacer;
     private final CommentProcessorRegistry commentProcessorRegistry;
@@ -51,19 +52,23 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     @Override
     public void repeatDocPart(List<Object> contexts) {
         CommentWrapper currentCommentWrapper = getCurrentCommentWrapper();
+        ContentAccessor gcp = findGreatestCommonParent(currentCommentWrapper.getCommentRangeEnd(), (ContentAccessor) currentCommentWrapper.getCommentRangeStart().getParent());
+        List<Object> repeatElements = getRepeatElements(currentCommentWrapper, gcp);
+
         subContexts.put(currentCommentWrapper, contexts);
-        subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper));
+        insertIndex.put(currentCommentWrapper, gcp.getContent().indexOf(repeatElements.stream().findFirst().orElse(null)));
+        subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
     }
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
         int count = 0;
 
-        List<Object> changes = new ArrayList<>();
-
         for (CommentWrapper commentWrapper : subContexts.keySet()) {
             List<Object> expressionContexts = subContexts.get(commentWrapper);
             WordprocessingMLPackage subTemplate = subTemplates.get(commentWrapper);
+
+            List<Object> changes = new ArrayList<>();
 
             for (Object subContext : expressionContexts) {
                 DocxStamper<Object> stamper = new DocxStamper<>(config);
@@ -78,21 +83,21 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                 }
                 count++;
             }
-            // TODO : insert changes back in the document in the right place and remove comment
+
+            // TODO debug this part
+            ContentAccessor gcp = findInsertableParent((ContentAccessor) commentWrapper.getCommentRangeStart().getParent());
+            gcp.getContent().addAll(changes);
         }
     }
 
     @Override
     public void reset() {
         subContexts = new HashMap<>();
-        subTemplates = new HashMap();
+        subTemplates = new HashMap<>();
+        insertIndex = new HashMap<>();
     }
 
-    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper) {
-        CommentRangeStart start = commentWrapper.getCommentRangeStart();
-
-        ContentAccessor gcp = findGreatestCommonParent(commentWrapper.getCommentRangeEnd(), (ContentAccessor) start.getParent());
-        List<Object> repeatElements = getRepeatElements(commentWrapper, gcp);
+    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements) {
         CommentUtil.deleteComment(commentWrapper); // for deep copy without comment
 
         WordprocessingMLPackage document = null;
@@ -132,6 +137,17 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
             }
         }
         return repeatElements;
+    }
+
+    private static ContentAccessor findInsertableParent(ContentAccessor searchFrom) {
+        if (searchFrom instanceof Tr) { // if it's Tr - need add new line to table
+            return (ContentAccessor) ((Tr) searchFrom).getParent();
+        } else if (searchFrom instanceof Tc) { // if it's Tc - need add new cell to row
+            return (ContentAccessor) ((Tc) searchFrom).getParent();
+        } else if (searchFrom instanceof P) {
+            return (ContentAccessor) ((P) searchFrom).getParent();
+        }
+        return findInsertableParent((ContentAccessor) ((Child) searchFrom).getParent());
     }
 
     private static ContentAccessor findGreatestCommonParent(Object targetSearch, ContentAccessor searchFrom) {
