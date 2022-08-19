@@ -18,7 +18,6 @@ import org.wickedsource.docxstamper.util.CommentWrapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +28,9 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     private final DocxStamperConfiguration config;
 
     private Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
+    private Map<CommentWrapper, List<Object>> repeatElementsMap = new HashMap<>();
     private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap();
+    private Map<CommentWrapper, ContentAccessor> gcpMap = new HashMap<>();
     private Map<CommentWrapper, Integer> insertIndex = new HashMap<>();
 
     private final PlaceholderReplacer<Object> placeholderReplacer;
@@ -54,12 +55,19 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     @Override
     public void repeatDocPart(List<Object> contexts) {
         CommentWrapper currentCommentWrapper = getCurrentCommentWrapper();
-        ContentAccessor gcp = findGreatestCommonParent(currentCommentWrapper.getCommentRangeEnd(), (ContentAccessor) currentCommentWrapper.getCommentRangeStart().getParent());
+        ContentAccessor gcp = findGreatestCommonParent(
+                currentCommentWrapper.getCommentRangeEnd().getParent(),
+                (ContentAccessor) currentCommentWrapper.getCommentRangeStart().getParent()
+        );
         List<Object> repeatElements = getRepeatElements(currentCommentWrapper, gcp);
 
-        subContexts.put(currentCommentWrapper, contexts);
-        insertIndex.put(currentCommentWrapper, gcp.getContent().indexOf(repeatElements.stream().findFirst().orElse(null)));
-        subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
+        if (repeatElements.size() > 0) {
+            subContexts.put(currentCommentWrapper, contexts);
+            subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
+            gcpMap.put(currentCommentWrapper, gcp);
+            insertIndex.put(currentCommentWrapper, gcp.getContent().indexOf(repeatElements.get(0)));
+            repeatElementsMap.put(currentCommentWrapper, repeatElements);
+        }
     }
 
     private WordprocessingMLPackage copyTemplate(WordprocessingMLPackage doc) {
@@ -80,6 +88,8 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
             List<Object> changes = new ArrayList<>();
 
+            Integer index = insertIndex.get(commentWrapper);
+
             expressionContexts.forEach(subContext -> {
                 try {
                     WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
@@ -88,17 +98,17 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                     stamper.stamp(subTemplate, subContext, output);
                     WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
                     changes.addAll(subDocument.getMainDocumentPart().getContent());
-                    subDocument.save(new File("subdoc-" + count + ".docx"));
                 } catch (Exception e) {
                     System.out.println(e);
                 }
                 count++;
             });
 
-            // TODO debug this part
             if (!changes.isEmpty()) {
-                ContentAccessor gcp = findInsertableParent((ContentAccessor) commentWrapper.getCommentRangeStart().getParent());
-                gcp.getContent().addAll(changes);
+                ContentAccessor gcp = gcpMap.get(commentWrapper);
+                CommentUtil.deleteComment(commentWrapper);
+                gcp.getContent().removeAll(repeatElementsMap.get(commentWrapper));
+                gcp.getContent().addAll(index, changes);
             }
         }
     }
@@ -108,6 +118,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         subContexts = new HashMap<>();
         subTemplates = new HashMap<>();
         insertIndex = new HashMap<>();
+        gcpMap = new HashMap<>();
     }
 
     private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements) {
@@ -125,8 +136,6 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
             Comments comments = objectFactory.createComments();
             commentWrapper.getChildren().forEach(comment -> comments.getComment().add(comment.getComment()));
             commentsPart.setContents(comments);
-
-            document.save(new File("temp.docx"));
         } catch (Exception e) {
             System.out.println(e);
         }
@@ -152,23 +161,18 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         return repeatElements;
     }
 
-    private static ContentAccessor findInsertableParent(ContentAccessor searchFrom) {
-        if (searchFrom instanceof Tc) { // if it's Tc - need add new cell to row
-            return searchFrom;
-        }
-        return findInsertableParent((ContentAccessor) ((Child) searchFrom).getParent());
-    }
-
     private static ContentAccessor findGreatestCommonParent(Object targetSearch, ContentAccessor searchFrom) {
         if (depthElementSearch(targetSearch, searchFrom)) {
-            if (searchFrom instanceof Tr) { // if it's Tr - need add new line to table
-                return (ContentAccessor) ((Tr) searchFrom).getParent();
-            } else if (searchFrom instanceof Tc) { // if it's Tc - need add new cell to row
-                return (ContentAccessor) ((Tc) searchFrom).getParent();
-            }
-            return searchFrom;
+            return findInsertableParent(searchFrom);
         }
         return findGreatestCommonParent(targetSearch, (ContentAccessor) ((Child) searchFrom).getParent());
+    }
+
+    private static ContentAccessor findInsertableParent(ContentAccessor searchFrom) {
+        if (!(searchFrom instanceof Tc || searchFrom instanceof Body)) {
+            return findInsertableParent((ContentAccessor) ((Child) searchFrom).getParent());
+        }
+        return searchFrom;
     }
 
     private static boolean depthElementSearch(Object searchTarget, Object content) {
