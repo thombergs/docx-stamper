@@ -70,7 +70,7 @@ public class DocxStamper<T> {
         commentProcessorRegistry.setFailOnInvalidExpression(config.isFailOnUnresolvedExpression());
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry, expressionResolver));
         commentProcessorRegistry.registerCommentProcessor(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry, expressionResolver));
-        commentProcessorRegistry.registerCommentProcessor(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(typeResolverRegistry, expressionResolver, config));
+        commentProcessorRegistry.registerCommentProcessor(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(config));
         commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
         commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
                 new ReplaceWithProcessor());

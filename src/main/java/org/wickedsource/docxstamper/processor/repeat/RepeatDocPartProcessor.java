@@ -2,17 +2,15 @@ package org.wickedsource.docxstamper.processor.repeat;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.jaxb.Context;
+import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
 import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
 import org.wickedsource.docxstamper.DocxStamper;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
-import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
-import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
-import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
-import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
@@ -29,27 +27,15 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     private Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
     private Map<CommentWrapper, List<Object>> repeatElementsMap = new HashMap<>();
-    private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap();
+    private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap<>();
     private Map<CommentWrapper, ContentAccessor> gcpMap = new HashMap<>();
     private Map<CommentWrapper, Integer> insertIndex = new HashMap<>();
 
-    private final PlaceholderReplacer<Object> placeholderReplacer;
-    private final CommentProcessorRegistry commentProcessorRegistry;
-
     private final ObjectFactory objectFactory;
 
-    int count = 0;
-
-    public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {
+    public RepeatDocPartProcessor(DocxStamperConfiguration config) {
         this.config = config;
-
         this.objectFactory = Context.getWmlObjectFactory();
-
-        this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
-        this.placeholderReplacer.setExpressionResolver(expressionResolver);
-
-        this.commentProcessorRegistry = new CommentProcessorRegistry(this.placeholderReplacer);
-        this.commentProcessorRegistry.setExpressionResolver(expressionResolver);
     }
 
     @Override
@@ -62,23 +48,22 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         List<Object> repeatElements = getRepeatElements(currentCommentWrapper, gcp);
 
         if (repeatElements.size() > 0) {
-            subContexts.put(currentCommentWrapper, contexts);
-            subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
-            gcpMap.put(currentCommentWrapper, gcp);
-            insertIndex.put(currentCommentWrapper, gcp.getContent().indexOf(repeatElements.get(0)));
-            repeatElementsMap.put(currentCommentWrapper, repeatElements);
+            try {
+                subContexts.put(currentCommentWrapper, contexts);
+                subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
+                gcpMap.put(currentCommentWrapper, gcp);
+                insertIndex.put(currentCommentWrapper, gcp.getContent().indexOf(repeatElements.get(0)));
+                repeatElementsMap.put(currentCommentWrapper, repeatElements);
+            } catch (InvalidFormatException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    private WordprocessingMLPackage copyTemplate(WordprocessingMLPackage doc) {
-        try {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            doc.save(baos);
-            return WordprocessingMLPackage.load(new ByteArrayInputStream(baos.toByteArray()));
-        } catch (Exception e) {
-            System.out.println(e);
-            return null;
-        }
+    private WordprocessingMLPackage copyTemplate(WordprocessingMLPackage doc) throws Docx4JException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        doc.save(baos);
+        return WordprocessingMLPackage.load(new ByteArrayInputStream(baos.toByteArray()));
     }
 
     @Override
@@ -90,7 +75,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
             Integer index = insertIndex.get(commentWrapper);
 
-            expressionContexts.forEach(subContext -> {
+            for (Object subContext : expressionContexts) {
                 try {
                     WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
                     DocxStamper<Object> stamper = new DocxStamper<>(config);
@@ -98,11 +83,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                     stamper.stamp(subTemplate, subContext, output);
                     WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
                     changes.addAll(subDocument.getMainDocumentPart().getContent());
-                } catch (Exception e) {
-                    System.out.println(e);
+                } catch (Docx4JException e) {
+                    throw new RuntimeException(e);
                 }
-                count++;
-            });
+            }
 
             if (!changes.isEmpty()) {
                 ContentAccessor gcp = gcpMap.get(commentWrapper);
@@ -119,26 +103,22 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         subTemplates = new HashMap<>();
         insertIndex = new HashMap<>();
         gcpMap = new HashMap<>();
+        repeatElementsMap = new HashMap<>();
     }
 
-    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements) {
+    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements) throws InvalidFormatException {
         CommentUtil.deleteComment(commentWrapper); // for deep copy without comment
 
-        WordprocessingMLPackage document = null;
+        WordprocessingMLPackage document = WordprocessingMLPackage.createPackage();
 
-        try {
-            document = WordprocessingMLPackage.createPackage();
-            CommentsPart commentsPart = new CommentsPart();
-            document.getMainDocumentPart().addTargetPart(commentsPart);
+        CommentsPart commentsPart = new CommentsPart();
+        document.getMainDocumentPart().addTargetPart(commentsPart);
 
-            document.getMainDocumentPart().getContent().addAll(repeatElements);
+        document.getMainDocumentPart().getContent().addAll(repeatElements);
 
-            Comments comments = objectFactory.createComments();
-            commentWrapper.getChildren().forEach(comment -> comments.getComment().add(comment.getComment()));
-            commentsPart.setContents(comments);
-        } catch (Exception e) {
-            System.out.println(e);
-        }
+        Comments comments = objectFactory.createComments();
+        commentWrapper.getChildren().forEach(comment -> comments.getComment().add(comment.getComment()));
+        commentsPart.setContents(comments);
 
         return document;
     }
