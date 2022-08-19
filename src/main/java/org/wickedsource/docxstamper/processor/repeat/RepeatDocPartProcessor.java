@@ -155,8 +155,6 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     private static ContentAccessor findInsertableParent(ContentAccessor searchFrom) {
         if (searchFrom instanceof Tc) { // if it's Tc - need add new cell to row
             return searchFrom;
-        } else if (searchFrom instanceof P) {
-            return searchFrom;
         }
         return findInsertableParent((ContentAccessor) ((Child) searchFrom).getParent());
     }
