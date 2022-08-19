@@ -60,13 +60,24 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
     }
 
+    private WordprocessingMLPackage copyTemplate(WordprocessingMLPackage doc) {
+        try {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            doc.save(baos);
+            return WordprocessingMLPackage.load(new ByteArrayInputStream(baos.toByteArray()));
+        } catch (Exception e) {
+            System.out.println(e);
+            return null;
+        }
+    }
+
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
         int count = 0;
 
         for (CommentWrapper commentWrapper : subContexts.keySet()) {
             List<Object> expressionContexts = subContexts.get(commentWrapper);
-            WordprocessingMLPackage subTemplate = subTemplates.get(commentWrapper);
+            WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
 
             List<Object> changes = new ArrayList<>();
 
