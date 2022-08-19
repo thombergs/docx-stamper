@@ -3,6 +3,7 @@ package org.wickedsource.docxstamper.processor.repeat;
 import org.docx4j.XmlUtils;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
 import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
 import org.wickedsource.docxstamper.DocxStamper;
@@ -87,7 +88,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         subTemplates = new HashMap();
     }
 
-    private static WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper) {
+    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper) {
         CommentRangeStart start = commentWrapper.getCommentRangeStart();
 
         ContentAccessor gcp = findGreatestCommonParent(commentWrapper.getCommentRangeEnd(), (ContentAccessor) start.getParent());
@@ -98,7 +99,15 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
         try {
             document = WordprocessingMLPackage.createPackage();
+            CommentsPart commentsPart = new CommentsPart();
+            document.getMainDocumentPart().addTargetPart(commentsPart);
+
             document.getMainDocumentPart().getContent().addAll(repeatElements);
+
+            Comments comments = objectFactory.createComments();
+            commentWrapper.getChildren().forEach(comment -> comments.getComment().add(comment.getComment()));
+            commentsPart.setContents(comments);
+
             document.save(new File("temp.docx"));
         } catch (Exception e) {
             System.out.println(e);
