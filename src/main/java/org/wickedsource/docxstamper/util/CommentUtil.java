@@ -193,53 +193,62 @@ public class CommentUtil {
 
     public static Map<BigInteger, CommentWrapper> getComments(
             WordprocessingMLPackage document) {
-        Map<BigInteger, CommentWrapper> comments = new HashMap<>();
-        collectCommentRanges(comments, document);
-        collectComments(comments, document);
-        return comments;
+        Map<BigInteger, CommentWrapper> rootComments = new HashMap<>();
+        Map<BigInteger, CommentWrapper> allComments = new HashMap<>();
+        collectCommentRanges(rootComments, allComments, document);
+        collectComments(rootComments, allComments, document);
+        return rootComments;
     }
 
     private static void collectCommentRanges(
-            final Map<BigInteger, CommentWrapper> comments,
+            Map<BigInteger, CommentWrapper> rootComments, final Map<BigInteger, CommentWrapper> allComments,
             WordprocessingMLPackage document) {
-        Stack<BigInteger> stack = new Stack<>();
+        Stack<CommentWrapper> stack = new Stack<>();
         DocumentWalker documentWalker = new BaseDocumentWalker(
                 document.getMainDocumentPart()) {
             @Override
             protected void onCommentRangeStart(CommentRangeStart commentRangeStart) {
-                CommentWrapper commentWrapper = comments.get(commentRangeStart.getId());
+                CommentWrapper commentWrapper = allComments.get(commentRangeStart.getId());
                 if (commentWrapper == null) {
                     commentWrapper = new CommentWrapper();
-                    comments.put(commentRangeStart.getId(), commentWrapper);
-                    if (!stack.isEmpty())
-                        comments.get(stack.peek()).getChildren().add(commentWrapper);
+                    allComments.put(commentRangeStart.getId(), commentWrapper);
+                    if (stack.isEmpty()) {
+                        rootComments.put(commentRangeStart.getId(), commentWrapper);
+                    } else {
+                        stack.peek().getChildren().add(commentWrapper);
+                    }
                 }
                 commentWrapper.setCommentRangeStart(commentRangeStart);
-                stack.push(commentRangeStart.getId());
+                stack.push(commentWrapper);
             }
 
             @Override
             protected void onCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
-                CommentWrapper commentWrapper = comments.get(commentRangeEnd.getId());
+                CommentWrapper commentWrapper = allComments.get(commentRangeEnd.getId());
                 if (commentWrapper == null) {
                     throw new RuntimeException("UNEXPECTED !");
                 }
                 commentWrapper.setCommentRangeEnd(commentRangeEnd);
-                if (!stack.isEmpty() && stack.peek().equals(commentRangeEnd.getId()))
-                    stack.pop();
+                if (!stack.isEmpty()) {
+                    if (stack.peek().equals(commentWrapper)) {
+                        stack.pop();
+                    } else {
+                        throw new RuntimeException("UNEXPECTED 2 !");
+                    }
+                }
             }
         };
         documentWalker.walk();
     }
 
-    private static void collectComments(final Map<BigInteger, CommentWrapper> comments,
-                                        WordprocessingMLPackage document) {
+    private static void collectComments(final Map<BigInteger, CommentWrapper> rootComments,
+                                        Map<BigInteger, CommentWrapper> allComments, WordprocessingMLPackage document) {
         try {
             CommentsPart commentsPart = (CommentsPart) document.getParts()
                     .get(new PartName("/word/comments.xml"));
             if (commentsPart != null) {
                 for (Comments.Comment comment : commentsPart.getContents().getComment()) {
-                    CommentWrapper commentWrapper = comments.get(comment.getId());
+                    CommentWrapper commentWrapper = allComments.get(comment.getId());
                     if (commentWrapper != null) {
                         commentWrapper.setComment(comment);
                     }

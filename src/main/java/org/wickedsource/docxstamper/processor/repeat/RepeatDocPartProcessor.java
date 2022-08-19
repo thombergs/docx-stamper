@@ -37,6 +37,8 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     private final ObjectFactory objectFactory;
 
+    int count = 0;
+
     public RepeatDocPartProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {
         this.config = config;
 
@@ -73,19 +75,17 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
-        int count = 0;
-
         for (CommentWrapper commentWrapper : subContexts.keySet()) {
             List<Object> expressionContexts = subContexts.get(commentWrapper);
-            WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
 
             List<Object> changes = new ArrayList<>();
 
-            for (Object subContext : expressionContexts) {
-                DocxStamper<Object> stamper = new DocxStamper<>(config);
-                ByteArrayOutputStream output = new ByteArrayOutputStream();
-                stamper.stamp(subTemplate, subContext, output);
+            expressionContexts.forEach(subContext -> {
                 try {
+                    WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
+                    DocxStamper<Object> stamper = new DocxStamper<>(config);
+                    ByteArrayOutputStream output = new ByteArrayOutputStream();
+                    stamper.stamp(subTemplate, subContext, output);
                     WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
                     changes.addAll(subDocument.getMainDocumentPart().getContent());
                     subDocument.save(new File("subdoc-" + count + ".docx"));
@@ -93,11 +93,13 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                     System.out.println(e);
                 }
                 count++;
-            }
+            });
 
             // TODO debug this part
-            ContentAccessor gcp = findInsertableParent((ContentAccessor) commentWrapper.getCommentRangeStart().getParent());
-            gcp.getContent().addAll(changes);
+            if (!changes.isEmpty()) {
+                ContentAccessor gcp = findInsertableParent((ContentAccessor) commentWrapper.getCommentRangeStart().getParent());
+                gcp.getContent().addAll(changes);
+            }
         }
     }
 
@@ -151,12 +153,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     }
 
     private static ContentAccessor findInsertableParent(ContentAccessor searchFrom) {
-        if (searchFrom instanceof Tr) { // if it's Tr - need add new line to table
-            return (ContentAccessor) ((Tr) searchFrom).getParent();
-        } else if (searchFrom instanceof Tc) { // if it's Tc - need add new cell to row
-            return (ContentAccessor) ((Tc) searchFrom).getParent();
+        if (searchFrom instanceof Tc) { // if it's Tc - need add new cell to row
+            return searchFrom;
         } else if (searchFrom instanceof P) {
-            return (ContentAccessor) ((P) searchFrom).getParent();
+            return searchFrom;
         }
         return findInsertableParent((ContentAccessor) ((Child) searchFrom).getParent());
     }
