@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>linkyard</groupId>
+    <groupId>pro.verron</groupId>
     <artifactId>docx-stamper</artifactId>
     <version>1.4.1-SNAPSHOT</version>
     <packaging>jar</packaging>
@@ -30,6 +30,16 @@
     </licenses>
 
     <developers>
+        <developer>
+            <email>ynaciri@gmail.com</email>
+            <name>Youssouf Naciri</name>
+            <url>https://youssouf.naciri.fr</url>
+        </developer>
+        <developer>
+            <email>joseph@verron.pro</email>
+            <name>Joseph Verron</name>
+            <url>https://verron.pro</url>
+        </developer>
         <developer>
             <email>tom.hombergs@gmail.com</email>
             <name>Tom Hombergs</name>
