@@ -132,10 +132,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                 startFound = true;
             }
             if (startFound) {
+                repeatElements.add(element);
                 if (depthElementSearch(commentWrapper.getCommentRangeEnd(), element)) {
                     break;
                 }
-                repeatElements.add(element);
             }
         }
         return repeatElements;
