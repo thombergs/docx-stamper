@@ -13,6 +13,7 @@ import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
+import org.wickedsource.docxstamper.util.RunUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -88,7 +89,13 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                 }
             }
 
-            if (!changes.isEmpty()) {
+            if (changes.size() == 0 && config.getUnresolvedExpressionsDefaultValue() != null) {
+                P p = new P();
+                p.getContent().add(RunUtil.create(config.getUnresolvedExpressionsDefaultValue(), p));
+                changes.add(p);
+            }
+
+            if (changes.size() > 0 || config.isReplaceUnresolvedExpressions()) {
                 ContentAccessor gcp = gcpMap.get(commentWrapper);
                 CommentUtil.deleteComment(commentWrapper);
                 gcp.getContent().removeAll(repeatElementsMap.get(commentWrapper));

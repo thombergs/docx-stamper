@@ -56,14 +56,16 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
             ParagraphsToRepeat paragraphsToRepeat = pToRepeat.get(rCoords);
             List<Object> expressionContexts = paragraphsToRepeat.data;
 
-
             List<P> paragraphsToAdd = new ArrayList<>();
-            for (final Object expressionContext : expressionContexts) {
-                for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
-                    P pClone = XmlUtils.deepCopy(paragraphToClone);
-                    placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
 
-                    paragraphsToAdd.add(pClone);
+            if (expressionContexts != null) {
+                for (final Object expressionContext : expressionContexts) {
+                    for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
+                        P pClone = XmlUtils.deepCopy(paragraphToClone);
+                        placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
+
+                        paragraphsToAdd.add(pClone);
+                    }
                 }
             }
 
@@ -105,7 +107,7 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
             if (parent instanceof ContentAccessor) {
                 ContentAccessor contentAccessor = (ContentAccessor) parent;
                 int index = contentAccessor.getContent().indexOf(paragraph);
-                for (int i = index + 1; i < contentAccessor.getContent().size() && !foundEnd; i ++) {
+                for (int i = index + 1; i < contentAccessor.getContent().size() && !foundEnd; i++) {
                     Object next = contentAccessor.getContent().get(i);
 
                     if (next instanceof CommentRangeEnd && ((CommentRangeEnd) next).getId().equals(commentId)) {

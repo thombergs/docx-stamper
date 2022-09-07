@@ -64,6 +64,9 @@ public class DocxStamper<T> {
         placeholderReplacer.setExpressionResolver(expressionResolver);
         placeholderReplacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
         placeholderReplacer.setReplaceNullValues(config.isReplaceNullValues());
+        placeholderReplacer.setNullValuesDefault(config.getNullValuesDefault());
+        placeholderReplacer.setReplaceUnresolvedExpressions(config.isReplaceUnresolvedExpressions());
+        placeholderReplacer.setUnresolvedExpressionsDefaultValue(config.getUnresolvedExpressionsDefaultValue());
 
         commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
         commentProcessorRegistry.setExpressionResolver(expressionResolver);
