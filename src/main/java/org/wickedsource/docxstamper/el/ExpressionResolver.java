@@ -32,6 +32,8 @@ public class ExpressionResolver {
             expressionString = expressionUtil.stripExpression(expressionString);
         }
         ExpressionParser parser = new SpelExpressionParser();
+        // TODO create a custom evaluation context to allow skipping the use of a proxy to inject processor methods
+        // processors methods should be registered as methodaccessors instead of added as proxy method on the context
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext(contextRoot);
         evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
         Expression expression = parser.parseExpression(expressionString);
