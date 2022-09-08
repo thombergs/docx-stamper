@@ -15,6 +15,7 @@ import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +63,10 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     @Override
     public void repeatTableRow(List<Object> objects) {
+        if (objects == null) {
+            objects = Collections.emptyList();
+        }
+
         ParagraphCoordinates pCoords = getCurrentParagraphCoordinates();
         if (pCoords.getParentTableCellCoordinates() == null ||
                 pCoords.getParentTableCellCoordinates().getParentTableRowCoordinates() == null) {

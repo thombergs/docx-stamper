@@ -17,10 +17,7 @@ import org.wickedsource.docxstamper.util.RunUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
 
@@ -41,6 +38,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     @Override
     public void repeatDocPart(List<Object> contexts) {
+        if (contexts == null) {
+            contexts = Collections.emptyList();
+        }
+
         CommentWrapper currentCommentWrapper = getCurrentCommentWrapper();
         ContentAccessor gcp = findGreatestCommonParent(
                 currentCommentWrapper.getCommentRangeEnd().getParent(),

@@ -14,10 +14,7 @@ import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IParagraphRepeatProcessor {
 
@@ -37,6 +34,10 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
     @Override
     public void repeatParagraph(List<Object> objects) {
+        if (objects == null) {
+            objects = Collections.emptyList();
+        }
+
         ParagraphCoordinates paragraphCoordinates = getCurrentParagraphCoordinates();
 
         P paragraph = paragraphCoordinates.getParagraph();
@@ -58,14 +59,12 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
             List<P> paragraphsToAdd = new ArrayList<>();
 
-            if (expressionContexts != null) {
-                for (final Object expressionContext : expressionContexts) {
-                    for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
-                        P pClone = XmlUtils.deepCopy(paragraphToClone);
-                        placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
+            for (final Object expressionContext : expressionContexts) {
+                for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
+                    P pClone = XmlUtils.deepCopy(paragraphToClone);
+                    placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
 
-                        paragraphsToAdd.add(pClone);
-                    }
+                    paragraphsToAdd.add(pClone);
                 }
             }
 
