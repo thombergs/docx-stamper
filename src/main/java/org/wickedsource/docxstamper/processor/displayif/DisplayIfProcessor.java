@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper.processor.displayif;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
@@ -13,11 +14,16 @@ import java.util.List;
 
 public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplayIfProcessor {
 
+    private final DocxStamperConfiguration config;
     private List<ParagraphCoordinates> paragraphsToBeRemoved = new ArrayList<>();
 
     private List<TableCoordinates> tablesToBeRemoved = new ArrayList<>();
 
     private List<TableRowCoordinates> tableRowsToBeRemoved = new ArrayList<>();
+
+    public DisplayIfProcessor(DocxStamperConfiguration config) {
+        this.config = config;
+    }
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {

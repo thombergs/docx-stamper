@@ -13,7 +13,7 @@ import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
-import org.wickedsource.docxstamper.util.RunUtil;
+import org.wickedsource.docxstamper.util.ParagraphUtil;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -77,31 +77,27 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
             Integer index = insertIndex.get(commentWrapper);
 
-            for (Object subContext : expressionContexts) {
-                try {
-                    WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
-                    DocxStamper<Object> stamper = new DocxStamper<>(config);
-                    ByteArrayOutputStream output = new ByteArrayOutputStream();
-                    stamper.stamp(subTemplate, subContext, output);
-                    WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
-                    changes.addAll(subDocument.getMainDocumentPart().getContent());
-                } catch (Docx4JException e) {
-                    throw new RuntimeException(e);
+            if (expressionContexts != null) {
+                for (Object subContext : expressionContexts) {
+                    try {
+                        WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
+                        DocxStamper<Object> stamper = new DocxStamper<>(config);
+                        ByteArrayOutputStream output = new ByteArrayOutputStream();
+                        stamper.stamp(subTemplate, subContext, output);
+                        WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
+                        changes.addAll(subDocument.getMainDocumentPart().getContent());
+                    } catch (Docx4JException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
+            } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
+                changes.add(ParagraphUtil.create(config.getNullValuesDefault()));
             }
 
-            if (changes.size() == 0 && config.getUnresolvedExpressionsDefaultValue() != null) {
-                P p = new P();
-                p.getContent().add(RunUtil.create(config.getUnresolvedExpressionsDefaultValue(), p));
-                changes.add(p);
-            }
-
-            if (changes.size() > 0 || config.isReplaceUnresolvedExpressions()) {
-                ContentAccessor gcp = gcpMap.get(commentWrapper);
-                CommentUtil.deleteComment(commentWrapper);
-                gcp.getContent().removeAll(repeatElementsMap.get(commentWrapper));
-                gcp.getContent().addAll(index, changes);
-            }
+            ContentAccessor gcp = gcpMap.get(commentWrapper);
+            CommentUtil.deleteComment(commentWrapper);
+            gcp.getContent().removeAll(repeatElementsMap.get(commentWrapper));
+            gcp.getContent().addAll(index, changes);
         }
     }
 
