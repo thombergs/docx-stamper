@@ -117,7 +117,7 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.0.0-M7</version>
                 <configuration>
-                    <argLine>--add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+                    <argLine>@{argLine} --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
                 </configuration>
             </plugin>
 
@@ -151,6 +151,7 @@
                 <version>0.8.8</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
@@ -192,8 +193,8 @@
                     <failOnError>false</failOnError>
                 </configuration>
                 <reportSets>
-                    <reportSet><!-- by default, id = "default" -->
-                        <reports><!-- select non-aggregate reports -->
+                    <reportSet>
+                        <reports>
                             <report>javadoc</report>
                             <report>test-javadoc</report>
                         </reports>
@@ -241,8 +242,6 @@
             <artifactId>spring-expression</artifactId>
             <version>5.3.22</version>
         </dependency>
-
-
         <!-- For unknown reason, we need this deps to avoid "docx4j Couldn't get [Content_Types].xml from ZipFile" errors
          See https://stackoverflow.com/questions/31093454/docx4j-couldnt-get-content-types-xml-from-zipfile -->
         <dependency>
@@ -270,7 +269,5 @@
             <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
     </distributionManagement>
-
-
 </project>
 
