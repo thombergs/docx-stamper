@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.util;
 
+import org.docx4j.TextUtils;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.exceptions.InvalidFormatException;
@@ -17,7 +18,9 @@ import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 public class CommentUtil {
 
@@ -197,7 +200,49 @@ public class CommentUtil {
         Map<BigInteger, CommentWrapper> allComments = new HashMap<>();
         collectCommentRanges(rootComments, allComments, document);
         collectComments(rootComments, allComments, document);
-        return rootComments;
+        return cleanMalformedComments(rootComments);
+    }
+
+    private static Map<BigInteger, CommentWrapper> cleanMalformedComments(Map<BigInteger, CommentWrapper> rootComments) {
+        Map<BigInteger, CommentWrapper> filteredCommentEntries = new HashMap<>();
+
+        rootComments.forEach((key, comment) -> {
+            if (isCommentMalformed(comment)) {
+                logger.error(
+                        "Skipping malformed comment, missing range start and/or range end : {}",
+                        getCommentContent(comment)
+                );
+            } else {
+                filteredCommentEntries.put(key, comment);
+                comment.setChildren(cleanMalformedComments(comment.getChildren()));
+            }
+        });
+
+        return filteredCommentEntries;
+    }
+
+    private static Set<CommentWrapper> cleanMalformedComments(Set<CommentWrapper> children) {
+        return children.stream().filter(comment -> {
+            if (isCommentMalformed(comment)) {
+                logger.error(
+                        "Skipping malformed comment, missing range start and/or range end : {}",
+                        getCommentContent(comment)
+                );
+                return false;
+            }
+            comment.setChildren(cleanMalformedComments(comment.getChildren()));
+            return true;
+        }).collect(Collectors.toSet());
+    }
+
+    private static String getCommentContent(CommentWrapper comment) {
+        return comment.getComment() != null
+                ? comment.getComment().getContent().stream().map(TextUtils::getText).collect(Collectors.joining(""))
+                : "<no content>";
+    }
+
+    private static boolean isCommentMalformed(CommentWrapper comment) {
+        return comment.getCommentRangeStart() == null || comment.getCommentRangeEnd() == null || comment.getComment() == null;
     }
 
     private static void collectCommentRanges(
