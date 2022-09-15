@@ -246,7 +246,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>5.3.22</version>
+            <version>5.3.23</version>
         </dependency>
         <!-- For unknown reason, we need this deps to avoid "docx4j Couldn't get [Content_Types].xml from ZipFile" errors
          See https://stackoverflow.com/questions/31093454/docx4j-couldnt-get-content-types-xml-from-zipfile -->
