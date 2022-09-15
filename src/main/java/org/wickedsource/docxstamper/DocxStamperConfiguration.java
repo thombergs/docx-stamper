@@ -221,7 +221,7 @@ public class DocxStamperConfiguration {
         return unresolvedExpressionsDefaultValue;
     }
 
-    String getLineBreakPlaceholder() {
+    public String getLineBreakPlaceholder() {
         return lineBreakPlaceholder;
     }
 

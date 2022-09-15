@@ -28,9 +28,15 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     private final DocxStamperConfiguration config;
 
     public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {
-        this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
         this.config = config;
-        this.placeholderReplacer.setExpressionResolver(expressionResolver);
+
+        this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
+        placeholderReplacer.setExpressionResolver(expressionResolver);
+        placeholderReplacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
+        placeholderReplacer.setReplaceNullValues(config.isReplaceNullValues());
+        placeholderReplacer.setNullValuesDefault(config.getNullValuesDefault());
+        placeholderReplacer.setReplaceUnresolvedExpressions(config.isReplaceUnresolvedExpressions());
+        placeholderReplacer.setUnresolvedExpressionsDefaultValue(config.getUnresolvedExpressionsDefaultValue());
     }
 
     @Override
