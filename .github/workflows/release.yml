@@ -23,7 +23,7 @@ jobs:
           cat <(echo -e "${{ secrets.GPG_SECRET_KEY }}") | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
       - name: Publish package
-        run: mvn --batch-mode --no-transfer-progress clean deploy -Dgpg.passphrase=${{ secrets.GPG_SECRET_PASS }}
+        run: mvn -B -ntp clean deploy -P gpg -Dgpg.passphrase=${{ secrets.GPG_SECRET_PASS }}
         env:
           MAVEN_USERNAME: ${{ secrets.OSS_SONATYPE_NAME }}
           MAVEN_PASSWORD: ${{ secrets.OSS_SONATYPE_PASS }}
