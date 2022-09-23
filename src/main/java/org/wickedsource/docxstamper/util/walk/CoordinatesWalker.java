@@ -13,6 +13,7 @@ import org.wickedsource.docxstamper.api.coordinates.*;
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
+import org.wickedsource.docxstamper.util.ParagraphUtil;
 
 public abstract class CoordinatesWalker {
 
@@ -35,6 +36,9 @@ public abstract class CoordinatesWalker {
 
         // walk through elements in main document part
         walkContent(document.getMainDocumentPart().getContent());
+        
+        // walk through textboxes in main document
+        walkContent(ParagraphUtil.getAllTextBoxes(document));
 
         // walk through elements in headers
         List<Relationship> footerRelationships = getRelationshipsOfType(document, Namespaces.FOOTER);
