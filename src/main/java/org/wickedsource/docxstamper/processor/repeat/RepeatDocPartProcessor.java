@@ -13,6 +13,7 @@ import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
+import org.wickedsource.docxstamper.util.DocumentUtil;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
 
 import java.io.ByteArrayInputStream;
@@ -27,8 +28,6 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     private Map<CommentWrapper, List<Object>> repeatElementsMap = new HashMap<>();
     private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap<>();
     private Map<CommentWrapper, ContentAccessor> gcpMap = new HashMap<>();
-    private Map<CommentWrapper, Integer> insertIndex = new HashMap<>();
-
     private final ObjectFactory objectFactory;
 
     public RepeatDocPartProcessor(DocxStamperConfiguration config) {
@@ -54,7 +53,6 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                 subContexts.put(currentCommentWrapper, contexts);
                 subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
                 gcpMap.put(currentCommentWrapper, gcp);
-                insertIndex.put(currentCommentWrapper, gcp.getContent().indexOf(repeatElements.get(0)));
                 repeatElementsMap.put(currentCommentWrapper, repeatElements);
             } catch (InvalidFormatException e) {
                 throw new RuntimeException(e);
@@ -73,9 +71,8 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         for (CommentWrapper commentWrapper : subContexts.keySet()) {
             List<Object> expressionContexts = subContexts.get(commentWrapper);
 
-            List<Object> changes = new ArrayList<>();
-
-            Integer index = insertIndex.get(commentWrapper);
+            // index changes after each replacement so we need to get the insert index at the right moment.
+            Integer index = gcpMap.get(commentWrapper).getContent().indexOf(repeatElementsMap.get(commentWrapper).get(0));
 
             if (expressionContexts != null) {
                 for (Object subContext : expressionContexts) {
@@ -85,19 +82,24 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                         ByteArrayOutputStream output = new ByteArrayOutputStream();
                         stamper.stamp(subTemplate, subContext, output);
                         WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
-                        changes.addAll(subDocument.getMainDocumentPart().getContent());
+                        try {
+                            List<Object> changes = DocumentUtil.prepareDocumentForInsert(subDocument, document);
+                            document.getMainDocumentPart().getContent().addAll(index, changes);
+                            index += changes.size();
+                        } catch (Exception e) {
+                            throw new RuntimeException("Unexpected error occured ! Skipping this comment", e);
+                        }
                     } catch (Docx4JException e) {
                         throw new RuntimeException(e);
                     }
                 }
             } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-                changes.add(ParagraphUtil.create(config.getNullValuesDefault()));
+                document.getMainDocumentPart().getContent().add(index, ParagraphUtil.create(config.getNullValuesDefault()));
             }
 
             ContentAccessor gcp = gcpMap.get(commentWrapper);
             CommentUtil.deleteComment(commentWrapper);
             gcp.getContent().removeAll(repeatElementsMap.get(commentWrapper));
-            gcp.getContent().addAll(index, changes);
         }
     }
 
@@ -105,7 +107,6 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     public void reset() {
         subContexts = new HashMap<>();
         subTemplates = new HashMap<>();
-        insertIndex = new HashMap<>();
         gcpMap = new HashMap<>();
         repeatElementsMap = new HashMap<>();
     }

@@ -36,7 +36,7 @@ public class RepeatDocPartTest extends AbstractDocx4jTest {
 
         int index = 2; // skip init paragraphs
         for (Character character : context.getCharacters()) {
-            for (int j=0; j < 3; j++) { // 3 elements should be repeated
+            for (int j = 0; j < 3; j++) { // 3 elements should be repeated
                 Object object = XmlUtils.unwrap(documentContent.get(index++));
                 switch (j) {
                     case 0: {
@@ -65,7 +65,7 @@ public class RepeatDocPartTest extends AbstractDocx4jTest {
                         List<Object> runs = paragraph.getContent();
                         Assert.assertEquals(2, runs.size());
 
-                        List<Object> targetRunContent = ((R)runs.get(1)).getContent();
+                        List<Object> targetRunContent = ((R) runs.get(1)).getContent();
                         Assert.assertEquals(1, targetRunContent.size());
                         Assert.assertTrue(targetRunContent.get(0) instanceof Br);
                         break;
