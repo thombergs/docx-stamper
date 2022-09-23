@@ -264,14 +264,14 @@
         <dependency>
             <groupId>org.docx4j</groupId>
             <artifactId>docx4j-JAXB-MOXy</artifactId>
-            <version>11.2.9</version>
+            <version>11.4.8</version>
         </dependency>
 
         <!-- Required when running with a recent JRE as jaxb has been dropped from Java 9 -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
             <artifactId>jakarta.xml.bind-api</artifactId>
-            <version>2.3.2</version>
+            <version>3.0.1</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

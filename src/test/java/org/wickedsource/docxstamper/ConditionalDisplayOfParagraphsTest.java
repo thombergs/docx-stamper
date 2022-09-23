@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -14,7 +15,6 @@ import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
-import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -66,11 +66,11 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
     }
 
     private void paragraphsInTableAreRemoved(WordprocessingMLPackage document) {
-        Tbl table = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(3)).getValue();
+        Tbl table = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(3)).getValue();
         Tr row = (Tr) table.getContent().get(1);
 
-        P p1 = (P) ((Tc) ((JAXBElement) row.getContent().get(0)).getValue()).getContent().get(0);
-        P p2 = (P) ((Tc) ((JAXBElement) row.getContent().get(1)).getValue()).getContent().get(0);
+        P p1 = (P) ((Tc) ((JAXBElement<?>) row.getContent().get(0)).getValue()).getContent().get(0);
+        P p2 = (P) ((Tc) ((JAXBElement<?>) row.getContent().get(1)).getValue()).getContent().get(0);
 
         Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p1).getText());
         // since the last paragraph was removed from the cell, an empty paragraph was inserted
@@ -88,7 +88,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
         walker.walk();
 
         Tbl nestedTable = tables.get(1);
-        Tc cell = (Tc) ((JAXBElement) ((Tr) nestedTable.getContent().get(1)).getContent().get(0)).getValue();
+        Tc cell = (Tc) ((JAXBElement<?>) ((Tr) nestedTable.getContent().get(1)).getContent().get(0)).getValue();
         P p1 = (P) cell.getContent().get(0);
 
         Assert.assertEquals(1, cell.getContent().size());

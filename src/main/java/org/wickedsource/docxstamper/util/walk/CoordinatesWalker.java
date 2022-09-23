@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.util.walk;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
@@ -9,17 +10,16 @@ import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.api.coordinates.*;
+import org.wickedsource.docxstamper.util.ParagraphUtil;
 
-import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
-import org.wickedsource.docxstamper.util.ParagraphUtil;
 
 public abstract class CoordinatesWalker {
 
-    private WordprocessingMLPackage document;
+    private final WordprocessingMLPackage document;
 
-    public CoordinatesWalker(WordprocessingMLPackage document) {
+    protected CoordinatesWalker(WordprocessingMLPackage document) {
         this.document = document;
     }
 
@@ -112,7 +112,7 @@ public abstract class CoordinatesWalker {
         int cellIndex = 0;
         for (Object rowContentElement : rowCoordinates.getRow().getContent()) {
             if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
-                Tc cell = rowContentElement instanceof Tc ? (Tc) rowContentElement : (Tc) ((JAXBElement) rowContentElement).getValue();
+                Tc cell = rowContentElement instanceof Tc ? (Tc) rowContentElement : (Tc) ((JAXBElement<?>) rowContentElement).getValue();
                 TableCellCoordinates cellCoordinates = new TableCellCoordinates(cell, cellIndex, rowCoordinates);
                 walkTableCell(cellCoordinates);
             }
@@ -129,7 +129,7 @@ public abstract class CoordinatesWalker {
                 ParagraphCoordinates paragraphCoordinates = new ParagraphCoordinates(p, elementIndex, cellCoordinates);
                 onParagraph(paragraphCoordinates);
             } else if (XmlUtils.unwrap(cellContentElement) instanceof Tbl) {
-                Tbl nestedTable = (Tbl) ((JAXBElement) cellContentElement).getValue();
+                Tbl nestedTable = (Tbl) ((JAXBElement<?>) cellContentElement).getValue();
                 TableCoordinates innerTableCoordinates = new TableCoordinates(nestedTable, elementIndex, cellCoordinates);
                 walkTable(innerTableCoordinates);
             }
