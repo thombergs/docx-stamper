@@ -89,9 +89,7 @@ public class IndexedRun {
 
         if (endIndex != that.endIndex) return false;
         if (indexInParent != that.indexInParent) return false;
-        if (startIndex != that.startIndex) return false;
-
-        return true;
+        return startIndex == that.startIndex;
     }
 
     @Override

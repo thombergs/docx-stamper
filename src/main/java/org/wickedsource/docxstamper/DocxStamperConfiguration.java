@@ -30,13 +30,13 @@ public class DocxStamperConfiguration {
 
     private String nullValuesDefault = null;
 
-    private Map<Class<?>, ICommentProcessor> commentProcessors = new HashMap<>();
+    private final Map<Class<?>, ICommentProcessor> commentProcessors = new HashMap<>();
 
-    private Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
+    private final Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
 
     private ITypeResolver defaultTypeResolver = new FallbackResolver();
 
-    private Map<Class<?>, Object> expressionFunctions = new HashMap<>();
+    private final Map<Class<?>, Object> expressionFunctions = new HashMap<>();
 
     /**
      * The String provided as lineBreakPlaceholder will be replaces with a line break

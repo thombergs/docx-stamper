@@ -14,7 +14,7 @@ import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
 
 public class ProxyMethodHandlerTest {
 
-	private PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer(new TypeResolverRegistry(new FallbackResolver()));
+	private final PlaceholderReplacer placeholderReplacer = new PlaceholderReplacer(new TypeResolverRegistry(new FallbackResolver()));
 
 	@Test
 	public void proxyDelegatesToRegisteredCommentProcessors() throws Exception {

@@ -9,7 +9,7 @@ import org.wickedsource.docxstamper.util.RunUtil;
 
 public class IndexedRunTest {
 
-    private ObjectFactory factory = Context.getWmlObjectFactory();
+    private final ObjectFactory factory = Context.getWmlObjectFactory();
 
     @Test
     public void isNotTouchedByRangeBeforeStart() {

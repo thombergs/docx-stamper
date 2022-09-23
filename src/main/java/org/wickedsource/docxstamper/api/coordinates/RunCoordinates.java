@@ -4,8 +4,8 @@ import org.docx4j.wml.R;
 
 public class RunCoordinates extends AbstractCoordinates {
 
-	private R run;
-	private int index;
+	private final R run;
+	private final int index;
 
 	public RunCoordinates(R run, int index) {
 		this.run = run;

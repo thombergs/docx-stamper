@@ -24,7 +24,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     private Map<TableRowCoordinates, List<Object>> tableRowsToRepeat = new HashMap<>();
 
-    private PlaceholderReplacer<Object> placeholderReplacer;
+    private final PlaceholderReplacer<Object> placeholderReplacer;
     private final DocxStamperConfiguration config;
 
     public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {

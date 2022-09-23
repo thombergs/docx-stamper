@@ -1,9 +1,9 @@
 package org.wickedsource.docxstamper.proxy;
 
+import javassist.util.proxy.ProxyFactory;
+
 import java.util.HashMap;
 import java.util.Map;
-
-import javassist.util.proxy.ProxyFactory;
 
 /**
  * Allows an object to be wrapped by a proxy so that it will implement additional interfaces.
@@ -14,7 +14,7 @@ public class ProxyBuilder<T> {
 
   private T root;
 
-  private Map<Class<?>, Object> interfacesToImplementations = new HashMap<>();
+  private final Map<Class<?>, Object> interfacesToImplementations = new HashMap<>();
 
   /**
    * Specifies the root object for the proxy that shall be enhanced.

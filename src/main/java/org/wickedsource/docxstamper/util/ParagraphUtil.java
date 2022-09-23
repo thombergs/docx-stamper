@@ -1,7 +1,5 @@
 package org.wickedsource.docxstamper.util;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.docx4j.TraversalUtil;
 import org.docx4j.finders.ClassFinder;
 import org.docx4j.jaxb.Context;
@@ -11,9 +9,12 @@ import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class ParagraphUtil {
 
-    private static ObjectFactory objectFactory = Context.getWmlObjectFactory();
+    private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
 
     private ParagraphUtil() {
 

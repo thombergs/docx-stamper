@@ -3,7 +3,6 @@ package org.wickedsource.docxstamper.util;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.replace.IndexedRun;
-import org.wickedsource.docxstamper.util.RunUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,9 +20,9 @@ public class ParagraphWrapper {
 
     private int currentPosition = 0;
 
-    private List<IndexedRun> runs = new ArrayList<>();
+    private final List<IndexedRun> runs = new ArrayList<>();
 
-    private P paragraph;
+    private final P paragraph;
 
     public ParagraphWrapper(P paragraph) {
         this.paragraph = paragraph;

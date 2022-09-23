@@ -30,7 +30,7 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
     private Map<ParagraphCoordinates, ParagraphsToRepeat> pToRepeat = new HashMap<>();
 
-    private PlaceholderReplacer<Object> placeholderReplacer;
+    private final PlaceholderReplacer<Object> placeholderReplacer;
     private final DocxStamperConfiguration config;
 
     public ParagraphRepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {

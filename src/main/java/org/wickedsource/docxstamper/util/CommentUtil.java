@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 
 public class CommentUtil {
 
-    private static Logger logger = LoggerFactory.getLogger(CommentUtil.class);
+    private static final Logger logger = LoggerFactory.getLogger(CommentUtil.class);
 
     private CommentUtil() {
 
@@ -41,7 +41,7 @@ public class CommentUtil {
                                                     WordprocessingMLPackage document) {
         try {
             if (run instanceof Child) {
-                Child child = (Child) run;
+                Child child = run;
                 ContentAccessor parent = (ContentAccessor) child.getParent();
                 if (parent == null)
                     return null;

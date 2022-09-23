@@ -12,7 +12,7 @@ import java.io.*;
  */
 public abstract class AbstractDocx4jTest {
 
-    private Logger logger = LoggerFactory.getLogger(AbstractDocx4jTest.class);
+    private final Logger logger = LoggerFactory.getLogger(AbstractDocx4jTest.class);
 
     private File tempFile;
 

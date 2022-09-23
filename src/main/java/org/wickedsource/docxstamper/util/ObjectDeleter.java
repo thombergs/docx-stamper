@@ -7,6 +7,7 @@ import org.docx4j.wml.Tc;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,11 +15,11 @@ import java.util.Map;
 
 public class ObjectDeleter {
 
-    private WordprocessingMLPackage document;
+    private final WordprocessingMLPackage document;
 
-    private List<Integer> deletedObjectsIndexes = new ArrayList<>(10);
+    private final List<Integer> deletedObjectsIndexes = new ArrayList<>(10);
 
-    private Map<ContentAccessor, Integer> deletedObjectsPerParent = new HashMap<>();
+    private final Map<ContentAccessor, Integer> deletedObjectsPerParent = new HashMap<>();
 
     public ObjectDeleter(WordprocessingMLPackage document) {
         this.document = document;
