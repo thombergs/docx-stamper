@@ -1,6 +1,6 @@
 # docx-stamper
 
-[![Build Status](https://travis-ci.org/thombergs/docx-stamper.png?branch=master)](https://travis-ci.org/thombergs/docx-stamper)
+[![Build Status](https://github.com/verronpro/docx-stamper/actions/workflows/maven.yml/badge.svg)](https://github.com/verronpro/docx-stamper/actions/workflows/maven.yml)
 
 docx-stamper is a Java template engine for docx documents. You create a template .docx document with your favorite word processor
 and feed it to a DocxStamper instance to create a document based on the template at runtime. Example code:
@@ -20,12 +20,12 @@ The main feature of docx-stamper is **replacement of expressions** within the te
 
 The value an expression resolves to may be of the following types:
 
-| Type of expression value | Effect  |
-| ---|---|
-| java.lang.Object | The expression is replaced by the String representation of the object (`String.valueOf()`).
-| java.lang.String | The expression is replaced with the String value.|
-| java.util.Date   | The expression is replaced by a formatted Date string (by default "dd.MM.yyyy"). You can change the format string by registering your own [DateResolver](src/main/java/org/wickedsource/docxstamper/replace/typeresolver/DateResolver.java).|
-| [org.wickedsource.docxstamper...Image](src/main/java/org/wickedsource/docxstamper/replace/typeresolver/image/Image.java) | The expression is replaced with an inline image.|
+| Type of expression value                                                                                                 | Effect                                                                                                                                                                                                                                       |
+|--------------------------------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| java.lang.Object                                                                                                         | The expression is replaced by the String representation of the object (`String.valueOf()`).                                                                                                                                                  |
+| java.lang.String                                                                                                         | The expression is replaced with the String value.                                                                                                                                                                                            |
+| java.util.Date                                                                                                           | The expression is replaced by a formatted Date string (by default "dd.MM.yyyy"). You can change the format string by registering your own [DateResolver](src/main/java/org/wickedsource/docxstamper/replace/typeresolver/DateResolver.java). |
+| [org.wickedsource.docxstamper...Image](src/main/java/org/wickedsource/docxstamper/replace/typeresolver/image/Image.java) | The expression is replaced with an inline image.                                                                                                                                                                                             |
 
 If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement your own [TypeResolver](src/main/java/org/wickedsource/docxstamper/api/typeresolver/ITypeResolver.java). To register your own TypeResolver with docx-stamper, use the following code:
 
@@ -76,14 +76,14 @@ public static class UppercaseFunctionImpl implements UppercaseFunction {
 ## Conditional Display and Repeating of Elements
 Besides replacing expressions, docx-stamper can **process comments on paragraphs of text** in the template .docx document and do manipulations on the template based on these comments. By default, you can use the following expressions in comments:
 
-| Expression in .docx comment       | Effect  |
-| --------------------------------- |---------|
-| `displayParagraphIf(boolean)`     | The commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
-| `displayTableRowIf(boolean)`      | The table row surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
-| `displayTableIf(boolean)`      | The whole table surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.|
-| `repeatTableRow(List<Object>)`      | The table row surrounding the commented paragraph is copied once for each object in the passed-in list. Expressions found in the cells of the table row are evaluated against the object from the list.
-| `repeatDocPart(List<Object>)`      | Repeats the part of the document surrounded by the comment. The document part is copied once for each object in the passed-in list. Expressions found in the elements of the document part are evaluated against the object from the list. Can be used instead repeatTableRow and repeatParagraph if you want to repeat more than table rows and paragraphs.
-| `replaceWordWith(expression)`         | Replaces the commented word (must be a single word!) with the value of the given expression. |
+| Expression in .docx comment    | Effect                                                                                                                                                                                                                                                                                                                                                       |
+|--------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `displayParagraphIf(boolean)`  | The commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.                                                                                                                                                                                                                                       |
+| `displayTableRowIf(boolean)`   | The table row surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.                                                                                                                                                                                                             |
+| `displayTableIf(boolean)`      | The whole table surrounding the commented paragraph is only displayed in the resulting .docx document if the boolean condition resolves to `true`.                                                                                                                                                                                                           |
+| `repeatTableRow(List<Object>)` | The table row surrounding the commented paragraph is copied once for each object in the passed-in list. Expressions found in the cells of the table row are evaluated against the object from the list.                                                                                                                                                      |
+| `repeatDocPart(List<Object>)`  | Repeats the part of the document surrounded by the comment. The document part is copied once for each object in the passed-in list. Expressions found in the elements of the document part are evaluated against the object from the list. Can be used instead repeatTableRow and repeatParagraph if you want to repeat more than table rows and paragraphs. |
+| `replaceWordWith(expression)`  | Replaces the commented word (must be a single word!) with the value of the given expression.                                                                                                                                                                                                                                                                 |
 
 If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](src/main/java/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.java). To register you comment processor to docx-stamper, use the following code:
 
@@ -101,7 +101,7 @@ For an in-depth description of how to create a comment processor, see the javado
 The docx file format does not allow comments in Headers or Footers of a document. To be able to conditionally display content in a header or footer, simply surround the expression you would put in a comment with "#{}" and put it at the beginning of the paragraph you want to manipulate. The expression will be evaluated as it would be in a comment.
 
 ## Error Handling
-By default DocxStamper fails with an UnresolvedExpressionException if an expression within the document or within the comments cannot be resolved successfully. If you want to change this behavior, you can do the following:
+By default, DocxStamper fails with an UnresolvedExpressionException if an expression within the document or within the comments cannot be resolved successfully. If you want to change this behavior, you can do the following:
 
 ```java
 DocxStamper stamper = new DocxStamperConfiguration()
@@ -142,40 +142,7 @@ Note that as of version 1.4.0 you have to provide the dependency to your version
 </dependency>
 ```
 
-This way, you can choose which version of Docx4J you want to use instead having it dictated by docx-stamper. Look into
-the [.travis.yml](.travis.yml) file to see against which versions of Docx4J docx-stamper has been tested.
-
-## Changelog
-* 1.4.0 (2019-09-20) - feature release
-  * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.4.0+is%3Aclosed)
-  * [pull requests](https://github.com/thombergs/docx-stamper/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+milestone%3A1.4.0+)
-* 1.3.0 (2018-08-11) - feature release
-  * [issues](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.3.0+is%3Aclosed)
-  * [pull requests](https://github.com/thombergs/docx-stamper/pulls?utf8=%E2%9C%93&q=is%3Apr+is%3Aclosed+milestone%3A1.3.0+)
-* 1.2.2 (2017-12-31) - [minor feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.2+is%3Aclosed)
-* 1.2.1 (2017-10-18) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.1+is%3Aclosed)
-* 1.2.0 (2017-09-26) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.2.0+is%3Aclosed)
-* 1.1.0 (2017-09-18) - [feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.1.0+is%3Aclosed)
-  * *API Break:* All methods that configure `DocxStamper` have been moved into `DocxStamperConfiguration`.
-  * *API Break:* Methods `getCommentProcessorRegistry()` and `getTypeResolverRegistry()` have been removed from `DocxStamper`. You can
-    configure CommentProcessors and TypeResolvers via `DocxStamperConfiguration` now.
-  * `DocxStamperConfiguration` can now be used as a Builder for `DocxStamper` objects.
-* 1.0.12 (2017-09-08) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.12+is%3Aclosed)
-* 1.0.11 (2017-06-09) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.11+is%3Aclosed)
-* 1.0.10 (2017-04-03) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.10+is%3Aclosed)
-* 1.0.9 (2017-03-18) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.9+is%3Aclosed)
-* 1.0.8 (2017-02-24) - [minor feature release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.8+is%3Aclosed)
-* 1.0.7 (2017-01-30) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.7+is%3Aclosed)
-* 1.0.6 (2017-01-20) - [minor feature release](/issues?q=is%3Aissue+milestone%3A1.0.6+is%3Aclosed)
-* 1.0.5 (2017-01-09) - bugfix release
-* 1.0.4 (2016-11-20) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.4+is%3Aclosed)
-* 1.0.3 (2016-11-05) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.3+is%3Aclosed)
-* 1.0.2 (2016-10-02) - [bugfix release](https://github.com/thombergs/docx-stamper/issues?q=is%3Aissue+milestone%3A1.0.2+is%3Aclosed)
+This way, you can choose which version of Docx4J you want to use instead having it dictated by docx-stamper.
 
 ## Contribute
 If you have an issue or created a comment processor or type resolver that you think deserves to be part of the default distribution, feel free to open an issue or - even better - a pull request with your contribution.
-
-## Frequently Asked Questions
-See the [Frequently Asked Questions](/wiki/Frequently-Asked-Questions) wiki page for some answers to recurring questions.
-
-
