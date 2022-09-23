@@ -1,17 +1,19 @@
 package org.wickedsource.docxstamper.util;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.jaxb.Context;
 import org.docx4j.model.styles.StyleUtil;
 import org.docx4j.wml.*;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 
-import javax.xml.bind.JAXBElement;
 
 public class RunUtil {
 
-    private static ObjectFactory factory = Context.getWmlObjectFactory();
+    public static final String PRESERVE = "preserve";
+    private static final ObjectFactory factory = Context.getWmlObjectFactory();
 
     private RunUtil() {
-
+        throw new DocxStamperException("Utility class shouldn't be instantiated");
     }
 
     /**
@@ -21,27 +23,27 @@ public class RunUtil {
      * @return String representation of the run.
      */
     public static String getText(R run) {
-        String result = "";
+        StringBuilder result = new StringBuilder();
         for (Object content : run.getContent()) {
             if (content instanceof JAXBElement) {
-                JAXBElement element = (JAXBElement) content;
+                JAXBElement<?> element = (JAXBElement<?>) content;
                 if (element.getValue() instanceof Text) {
                     Text textObj = (Text) element.getValue();
                     String text = textObj.getValue();
-                    if (!"preserve".equals(textObj.getSpace())) {
+                    if (!PRESERVE.equals(textObj.getSpace())) {
                         // trimming text if spaces are not to be preserved (simulates behavior of Word; LibreOffice seems
                         // to ignore the "space" property and always preserves spaces)
                         text = text.trim();
                     }
-                    result += text;
+                    result.append(text);
                 }else if (element.getValue() instanceof R.Tab){
-                    result += "\t";
+                    result.append("\t");
                 }
             } else if (content instanceof Text) {
-                result += ((Text) content).getValue();
+                result.append(((Text) content).getValue());
             }
         }
-        return result;
+        return result.toString();
     }
 
     /**
@@ -67,9 +69,9 @@ public class RunUtil {
     public static void setText(R run, String text) {
         run.getContent().clear();
         Text textObj = factory.createText();
-        textObj.setSpace("preserve");
+        textObj.setSpace(PRESERVE);
         textObj.setValue(text);
-        textObj.setSpace("preserve"); // make the text preserve spaces
+        textObj.setSpace(PRESERVE); // make the text preserve spaces
         run.getContent().add(textObj);
     }
 

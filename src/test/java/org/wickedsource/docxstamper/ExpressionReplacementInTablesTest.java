@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
-import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -30,40 +30,40 @@ public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
     }
 
     private void resolvedExpressionsAreReplacedInFirstLevelTable(WordprocessingMLPackage document) {
-        Tbl table = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(1)).getValue();
+        Tbl table = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(1)).getValue();
         Tr row = (Tr) table.getContent().get(0);
-        Tc cell = (Tc) ((JAXBElement) row.getContent().get(1)).getValue();
+        Tc cell = (Tc) ((JAXBElement<?>) row.getContent().get(1)).getValue();
         P nameParagraph = (P) cell.getContent().get(0);
         Assert.assertEquals("Bart Simpson", new ParagraphWrapper(nameParagraph).getText());
     }
 
     private void unresolvedExpressionsAreNotReplacedInFirstLevelTable(WordprocessingMLPackage document) {
-        Tbl table = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(1)).getValue();
+        Tbl table = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(1)).getValue();
         Tr row = (Tr) table.getContent().get(1);
-        Tc cell = (Tc) ((JAXBElement) row.getContent().get(1)).getValue();
+        Tc cell = (Tc) ((JAXBElement<?>) row.getContent().get(1)).getValue();
         P nameParagraph = (P) cell.getContent().get(0);
         Assert.assertEquals("${foo}", new ParagraphWrapper(nameParagraph).getText());
     }
 
     private void resolvedExpressionsAreReplacedInNestedTable(WordprocessingMLPackage document) {
-        Tbl table = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(1)).getValue();
+        Tbl table = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(1)).getValue();
         Tr row = (Tr) table.getContent().get(2);
-        Tc cell = (Tc) ((JAXBElement) row.getContent().get(0)).getValue();
-        Tbl nestedTable = (Tbl) ((JAXBElement) cell.getContent().get(1)).getValue();
+        Tc cell = (Tc) ((JAXBElement<?>) row.getContent().get(0)).getValue();
+        Tbl nestedTable = (Tbl) ((JAXBElement<?>) cell.getContent().get(1)).getValue();
         Tr nestedRow = (Tr) nestedTable.getContent().get(0);
-        Tc nestedCell = (Tc) ((JAXBElement) nestedRow.getContent().get(1)).getValue();
+        Tc nestedCell = (Tc) ((JAXBElement<?>) nestedRow.getContent().get(1)).getValue();
 
         P nameParagraph = (P) nestedCell.getContent().get(0);
         Assert.assertEquals("Bart Simpson", new ParagraphWrapper(nameParagraph).getText());
     }
 
     private void unresolvedExpressionsAreNotReplacedInNestedTable(WordprocessingMLPackage document) {
-        Tbl table = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(1)).getValue();
+        Tbl table = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(1)).getValue();
         Tr row = (Tr) table.getContent().get(2);
-        Tc cell = (Tc) ((JAXBElement) row.getContent().get(0)).getValue();
-        Tbl nestedTable = (Tbl) ((JAXBElement) cell.getContent().get(1)).getValue();
+        Tc cell = (Tc) ((JAXBElement<?>) row.getContent().get(0)).getValue();
+        Tbl nestedTable = (Tbl) ((JAXBElement<?>) cell.getContent().get(1)).getValue();
         Tr nestedRow = (Tr) nestedTable.getContent().get(1);
-        Tc nestedCell = (Tc) ((JAXBElement) nestedRow.getContent().get(1)).getValue();
+        Tc nestedCell = (Tc) ((JAXBElement<?>) nestedRow.getContent().get(1)).getValue();
 
         P nameParagraph = (P) nestedCell.getContent().get(0);
         Assert.assertEquals("${foo}", new ParagraphWrapper(nameParagraph).getText());

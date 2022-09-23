@@ -1,15 +1,14 @@
 package org.wickedsource.docxstamper.util.walk;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.XmlUtils;
 import org.docx4j.wml.*;
 
-import javax.xml.bind.JAXBElement;
-
 public abstract class DocumentWalker {
 
-    private ContentAccessor contentAccessor;
+    private final ContentAccessor contentAccessor;
 
-    public DocumentWalker(ContentAccessor contentAccessor) {
+    protected DocumentWalker(ContentAccessor contentAccessor) {
         this.contentAccessor = contentAccessor;
     }
 
@@ -53,7 +52,7 @@ public abstract class DocumentWalker {
         onTableRow(row);
         for (Object rowContentElement : row.getContent()) {
             if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
-                Tc cell = rowContentElement instanceof Tc ? (Tc) rowContentElement : (Tc) ((JAXBElement) rowContentElement).getValue();
+                Tc cell = rowContentElement instanceof Tc ? (Tc) rowContentElement : (Tc) ((JAXBElement<?>) rowContentElement).getValue();
                 walkTableCell(cell);
             }
         }
@@ -66,7 +65,7 @@ public abstract class DocumentWalker {
                 P p = (P) cellContentElement;
                 walkParagraph(p);
             } else if (XmlUtils.unwrap(cellContentElement) instanceof Tbl) {
-                Tbl nestedTable = (Tbl) ((JAXBElement) cellContentElement).getValue();
+                Tbl nestedTable = (Tbl) ((JAXBElement<?>) cellContentElement).getValue();
                 walkTable(nestedTable);
             }
         }

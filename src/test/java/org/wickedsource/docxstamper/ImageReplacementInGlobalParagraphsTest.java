@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Drawing;
@@ -10,7 +11,6 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.context.ImageContext;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 
-import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,8 +25,8 @@ public class ImageReplacementInGlobalParagraphsTest extends AbstractDocx4jTest {
         InputStream template = getClass().getResourceAsStream("ImageReplacementInGlobalParagraphsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
-        Assert.assertTrue(((JAXBElement) ((R) ((P) document.getMainDocumentPart().getContent().get(2)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
-        Assert.assertTrue(((JAXBElement) ((R) ((P) document.getMainDocumentPart().getContent().get(3)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
+        Assert.assertTrue(((JAXBElement<?>) ((R) ((P) document.getMainDocumentPart().getContent().get(2)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
+        Assert.assertTrue(((JAXBElement<?>) ((R) ((P) document.getMainDocumentPart().getContent().get(3)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
 
     }
 
@@ -39,8 +39,8 @@ public class ImageReplacementInGlobalParagraphsTest extends AbstractDocx4jTest {
         InputStream template = getClass().getResourceAsStream("ImageReplacementInGlobalParagraphsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
-        Assert.assertTrue(((JAXBElement) ((R) ((P) document.getMainDocumentPart().getContent().get(2)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
-        Assert.assertTrue(((JAXBElement) ((R) ((P) document.getMainDocumentPart().getContent().get(3)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
+        Assert.assertTrue(((JAXBElement<?>) ((R) ((P) document.getMainDocumentPart().getContent().get(2)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
+        Assert.assertTrue(((JAXBElement<?>) ((R) ((P) document.getMainDocumentPart().getContent().get(3)).getContent().get(1)).getContent().get(0)).getValue() instanceof Drawing);
     }
 
 }

@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.util;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.dml.Graphic;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
@@ -8,15 +9,19 @@ import org.docx4j.openpackaging.parts.Part;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.Drawing;
 import org.docx4j.wml.R;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 
-import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class DocumentUtil {
+    private DocumentUtil() {
+        throw new DocxStamperException("Utility clases shouldn't be instantiated");
+    }
+
     /**
      * Recursively walk through the content accessor to replace embedded images and import the matching
      * files to the destination document before importing content.
@@ -70,13 +75,12 @@ public class DocumentUtil {
      */
     private static byte[] getRunDrawingData(R run, WordprocessingMLPackage document) throws Docx4JException, IOException {
         for (Object runElement : run.getContent()) {
-            if (runElement instanceof JAXBElement && ((JAXBElement) runElement).getValue() instanceof Drawing) {
-                Drawing drawing = (Drawing) ((JAXBElement) runElement).getValue();
-                byte[] imageData = getImageData(document, drawing);
-                return imageData;
+            if (runElement instanceof JAXBElement && ((JAXBElement<?>) runElement).getValue() instanceof Drawing) {
+                Drawing drawing = (Drawing) ((JAXBElement<?>) runElement).getValue();
+                return getImageData(document, drawing);
             }
         }
-        throw new RuntimeException("Run drawing not found !");
+        throw new DocxStamperException("Run drawing not found !");
     }
 
     /**
@@ -93,11 +97,10 @@ public class DocumentUtil {
         Part imageRelPart = document.getMainDocumentPart().getRelationshipsPart().getPart(imageRelId);
         // TODO : find a better way to find image rel part name in source part store
         String imageRelPartName = imageRelPart.getPartName().getName().substring(1);
-        byte[] imageData = streamToByteArray(
+        return streamToByteArray(
                 document.getSourcePartStore().getPartSize(imageRelPartName),
                 document.getSourcePartStore().loadPart(imageRelPartName)
         );
-        return imageData;
     }
 
     /**
@@ -108,7 +111,7 @@ public class DocumentUtil {
      */
     private static boolean isImageRun(R run) {
         for (Object runElement : run.getContent()) {
-            if (runElement instanceof JAXBElement && ((JAXBElement) runElement).getValue() instanceof Drawing) {
+            if (runElement instanceof JAXBElement && ((JAXBElement<?>) runElement).getValue() instanceof Drawing) {
                 return true;
             }
         }
@@ -134,14 +137,14 @@ public class DocumentUtil {
      */
     private static Graphic getInlineGraphic(Drawing drawing) {
         if (drawing.getAnchorOrInline().isEmpty()) {
-            throw new RuntimeException("Anchor or Inline is empty !");
+            throw new DocxStamperException("Anchor or Inline is empty !");
         }
         Object anchorOrInline = drawing.getAnchorOrInline().get(0);
         if (anchorOrInline instanceof Inline) {
             Inline inline = ((Inline) anchorOrInline);
             return inline.getGraphic();
         } else {
-            throw new RuntimeException("Don't know how to process anchor !");
+            throw new DocxStamperException("Don't know how to process anchor !");
         }
     }
 
@@ -155,7 +158,7 @@ public class DocumentUtil {
      */
     private static byte[] streamToByteArray(long size, InputStream is) throws IOException {
         if (size > Integer.MAX_VALUE) {
-            throw new RuntimeException("Image size exceeds maximum allowed (2GB)");
+            throw new DocxStamperException("Image size exceeds maximum allowed (2GB)");
         }
         int intSize = (int) size;
         byte[] data = new byte[intSize];

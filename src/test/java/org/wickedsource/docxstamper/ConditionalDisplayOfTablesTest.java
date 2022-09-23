@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import jakarta.xml.bind.JAXBElement;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -11,7 +12,6 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
-import javax.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -29,8 +29,8 @@ public class ConditionalDisplayOfTablesTest extends AbstractDocx4jTest {
 
     private void globalTablesAreRemoved(WordprocessingMLPackage document) {
         P p1 = (P) document.getMainDocumentPart().getContent().get(1);
-        Tbl table2 = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(3)).getValue();
-        Tbl table3 = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(5)).getValue();
+        Tbl table2 = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(3)).getValue();
+        Tbl table3 = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(5)).getValue();
         P p4 = (P) document.getMainDocumentPart().getContent().get(7);
 
         Assert.assertEquals("This paragraph stays untouched.", new ParagraphWrapper(p1).getText());
@@ -40,8 +40,8 @@ public class ConditionalDisplayOfTablesTest extends AbstractDocx4jTest {
     }
 
     private void nestedTablesAreRemoved(WordprocessingMLPackage document) {
-        Tbl outerTable = (Tbl) ((JAXBElement) document.getMainDocumentPart().getContent().get(3)).getValue();
-        Tc cell = (Tc) ((JAXBElement) ((Tr) outerTable.getContent().get(1)).getContent().get(1)).getValue();
+        Tbl outerTable = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(3)).getValue();
+        Tc cell = (Tc) ((JAXBElement<?>) ((Tr) outerTable.getContent().get(1)).getContent().get(1)).getValue();
         Assert.assertEquals("", new ParagraphWrapper((P) cell.getContent().get(0)).getText()); // empty paragraph, since the last element inside the cell was removed
     }
 
