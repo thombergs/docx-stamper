@@ -72,7 +72,8 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
             List<Object> expressionContexts = subContexts.get(commentWrapper);
 
             // index changes after each replacement so we need to get the insert index at the right moment.
-            Integer index = gcpMap.get(commentWrapper).getContent().indexOf(repeatElementsMap.get(commentWrapper).get(0));
+            ContentAccessor insertParentContentAccessor = gcpMap.get(commentWrapper);
+            Integer index = insertParentContentAccessor.getContent().indexOf(repeatElementsMap.get(commentWrapper).get(0));
 
             if (expressionContexts != null) {
                 for (Object subContext : expressionContexts) {
@@ -84,7 +85,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                         WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
                         try {
                             List<Object> changes = DocumentUtil.prepareDocumentForInsert(subDocument, document);
-                            document.getMainDocumentPart().getContent().addAll(index, changes);
+                            insertParentContentAccessor.getContent().addAll(index, changes);
                             index += changes.size();
                         } catch (Exception e) {
                             throw new RuntimeException("Unexpected error occured ! Skipping this comment", e);
@@ -94,12 +95,11 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                     }
                 }
             } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-                document.getMainDocumentPart().getContent().add(index, ParagraphUtil.create(config.getNullValuesDefault()));
+                insertParentContentAccessor.getContent().add(index, ParagraphUtil.create(config.getNullValuesDefault()));
             }
 
-            ContentAccessor gcp = gcpMap.get(commentWrapper);
             CommentUtil.deleteComment(commentWrapper);
-            gcp.getContent().removeAll(repeatElementsMap.get(commentWrapper));
+            insertParentContentAccessor.getContent().removeAll(repeatElementsMap.get(commentWrapper));
         }
     }
 
