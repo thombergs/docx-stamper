@@ -8,7 +8,7 @@ import java.util.List;
 public class ExpressionUtilTest {
 
     @Test
-    public void findsPlaceholders() throws Exception {
+    public void findsPlaceholders() {
         String text = "lorem ipsum ${placeholder1} lorem ipsum ${placeholder2}";
 
         ExpressionUtil finder = new ExpressionUtil();
@@ -20,7 +20,7 @@ public class ExpressionUtilTest {
     }
 
     @Test
-    public void findsProcessorExpressions() throws Exception {
+    public void findsProcessorExpressions() {
         String text = "lorem ipsum #{expression1} lorem ipsum #{expression2}";
 
         ExpressionUtil finder = new ExpressionUtil();
@@ -32,7 +32,7 @@ public class ExpressionUtilTest {
     }
 
     @Test
-    public void findsPlaceholdersWithError() throws Exception {
+    public void findsPlaceholdersWithError() {
         String text = "lorem ipsum ${placeholder1} ${ lorem ipsum } ${placeholder2";
 
         ExpressionUtil finder = new ExpressionUtil();

@@ -5,6 +5,7 @@ import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 
@@ -26,15 +27,23 @@ public class ObjectDeleter {
     }
 
     public void deleteParagraph(ParagraphCoordinates paragraphCoordinates) {
-        if (paragraphCoordinates.getParentTableCellCoordinates() == null) {
+        deleteTableOrParagraph(paragraphCoordinates.getIndex(), paragraphCoordinates.getParentTableCellCoordinates());
+    }
+
+    public void deleteTable(TableCoordinates tableCoordinates) {
+        deleteTableOrParagraph(tableCoordinates.getIndex(), tableCoordinates.getParentTableCellCoordinates());
+    }
+
+    private void deleteTableOrParagraph(int index, TableCellCoordinates parentTableCellCoordinates) {
+        if (parentTableCellCoordinates == null) {
             // global paragraph
-            int indexToDelete = getOffset(paragraphCoordinates.getIndex());
+            int indexToDelete = getOffset(index);
             document.getMainDocumentPart().getContent().remove(indexToDelete);
-            deletedObjectsIndexes.add(paragraphCoordinates.getIndex());
+            deletedObjectsIndexes.add(index);
         } else {
             // paragraph within a table cell
-            Tc parentCell = paragraphCoordinates.getParentTableCellCoordinates().getCell();
-            deleteFromCell(parentCell, paragraphCoordinates.getIndex());
+            Tc parentCell = parentTableCellCoordinates.getCell();
+            deleteFromCell(parentCell, index);
         }
     }
 
@@ -68,19 +77,6 @@ public class ObjectDeleter {
             }
         }
         return newIndex;
-    }
-
-    public void deleteTable(TableCoordinates tableCoordinates) {
-        if (tableCoordinates.getParentTableCellCoordinates() == null) {
-            // global table
-            int indexToDelete = getOffset(tableCoordinates.getIndex());
-            document.getMainDocumentPart().getContent().remove(indexToDelete);
-            deletedObjectsIndexes.add(tableCoordinates.getIndex());
-        } else {
-            // nested table within an table cell
-            Tc parentCell = tableCoordinates.getParentTableCellCoordinates().getCell();
-            deleteFromCell(parentCell, tableCoordinates.getIndex());
-        }
     }
 
     public void deleteTableRow(TableRowCoordinates tableRowCoordinates) {

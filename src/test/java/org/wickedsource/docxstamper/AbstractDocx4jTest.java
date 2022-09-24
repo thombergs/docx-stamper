@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
 
 /**
  * Common methods to interact with docx documents.
@@ -46,7 +47,7 @@ public abstract class AbstractDocx4jTest {
 
     protected <T> WordprocessingMLPackage stampAndLoad(InputStream template, T contextRoot, DocxStamperConfiguration config) throws IOException, Docx4JException {
         OutputStream out = getOutputStream();
-        DocxStamper stamper = new DocxStamper(config);
+        DocxStamper<T> stamper = new DocxStamper<>(config);
         stamper.stamp(template, contextRoot, out);
         InputStream in = getInputStream(out);
         return WordprocessingMLPackage.load(in);
@@ -54,20 +55,20 @@ public abstract class AbstractDocx4jTest {
 
     protected OutputStream getOutputStream() throws IOException {
         OutputStream out;
-        if (Boolean.valueOf(System.getProperty("keepOutputFile"))) {
+        if (Boolean.parseBoolean(System.getProperty("keepOutputFile"))) {
             tempFile = File.createTempFile(getClass().getSimpleName(), ".docx");
             logger.info(String.format(">>>>>>>> Saving DocxStamper output to temporary file %s <<<<<<<<", tempFile.getAbsolutePath()));
-            out = new FileOutputStream(tempFile);
+            out = Files.newOutputStream(tempFile.toPath());
         } else {
             out = new ByteArrayOutputStream();
         }
         return out;
     }
 
-    protected InputStream getInputStream(OutputStream out) throws FileNotFoundException {
+    protected InputStream getInputStream(OutputStream out) throws IOException {
         InputStream in;
-        if (Boolean.valueOf(System.getProperty("keepOutputFile"))) {
-            in = new FileInputStream(tempFile);
+        if (Boolean.parseBoolean(System.getProperty("keepOutputFile"))) {
+            in = Files.newInputStream(tempFile.toPath());
 
         } else {
             in = new ByteArrayInputStream(((ByteArrayOutputStream) out).toByteArray());

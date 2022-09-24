@@ -53,8 +53,8 @@ public class ExpressionUtil {
         if (expression == null) {
             throw new IllegalArgumentException("Cannot strip NULL expression!");
         }
-        expression = expression.replaceAll("^\\$\\{", "").replaceAll("\\}$", "");
-        expression = expression.replaceAll("^#\\{", "").replaceAll("\\}$", "");
+        expression = expression.replaceAll("^\\$\\{", "").replaceAll("}$", "");
+        expression = expression.replaceAll("^#\\{", "").replaceAll("}$", "");
         return expression;
     }
 

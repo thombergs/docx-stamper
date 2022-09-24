@@ -22,8 +22,7 @@ public class RunCoordinates extends AbstractCoordinates {
 
 	@Override
 	public String toString() {
-		String toString = String.format("run at index %d", index);
-		return toString;
+		return String.format("run at index %d", index);
 	}
 
 }

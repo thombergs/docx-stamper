@@ -172,8 +172,8 @@ public class DocxStamperConfiguration {
     /**
      * Creates a {@link DocxStamper} instance configured with this configuration.
      */
-    public DocxStamper build() {
-        return new DocxStamper(this);
+    public <T> DocxStamper<T> build() {
+        return new DocxStamper<T>(this);
     }
 
     EvaluationContextConfigurer getEvaluationContextConfigurer() {

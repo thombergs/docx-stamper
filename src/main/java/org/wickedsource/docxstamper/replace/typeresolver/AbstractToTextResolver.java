@@ -18,7 +18,6 @@ public abstract class AbstractToTextResolver<S> implements ITypeResolver<S, R> {
     @Override
     public R resolve(WordprocessingMLPackage document, S expressionResult) {
         String text = resolveStringForObject(expressionResult);
-        R run = RunUtil.create(text);
-        return run;
+        return RunUtil.create(text);
     }
 }

@@ -6,18 +6,16 @@ import org.wickedsource.docxstamper.util.ParagraphUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.RunUtil;
 
-import java.io.IOException;
-
 public class ParagraphWrapperTest {
 
     @Test
-    public void getTextReturnsAggregatedText() throws IOException {
+    public void getTextReturnsAggregatedText() {
         ParagraphWrapper aggregator = loremIpsum();
         Assert.assertEquals("lorem ipsum", aggregator.getText());
     }
 
     @Test
-    public void getRunsReturnsAddedRuns() throws IOException {
+    public void getRunsReturnsAddedRuns() {
         ParagraphWrapper aggregator = loremIpsum();
         Assert.assertEquals(3, aggregator.getRuns().size());
         Assert.assertEquals("lorem", RunUtil.getText(aggregator.getRuns().get(0)));
