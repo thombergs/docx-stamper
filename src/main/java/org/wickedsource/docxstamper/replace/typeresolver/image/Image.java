@@ -11,7 +11,7 @@ import java.io.InputStream;
  */
 public class Image {
 
-    private byte[] imageBytes;
+    private final byte[] imageBytes;
 
     private String filename;
 
@@ -59,28 +59,21 @@ public class Image {
         return filename;
     }
 
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
+    /**
+     * @return the expected alternative text to display for user that can't see the image itself
+     */
     public String getAltText() {
         return altText;
-    }
-
-    public void setAltText(String altText) {
-        this.altText = altText;
     }
 
     public byte[] getImageBytes() {
         return imageBytes;
     }
 
-    public void setImageBytes(byte[] imageBytes) {
-        this.imageBytes = imageBytes;
-    }
-
     /**
-     * @return max width of the image in twip, if it is specified, or null.
+     * The expected max width for this image
+     *
+     * @return max width in twip, or null.
      */
     public Integer getMaxWidth() {
         return maxWidth;

@@ -2,12 +2,9 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.P;
 import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;

@@ -9,9 +9,9 @@ import java.util.Date;
  */
 public class DateResolver extends AbstractToTextResolver<Date> {
 
-    private String formatString;
+    private final String formatString;
 
-    private DateFormat dateFormat;
+    private final DateFormat dateFormat;
 
     /**
      * Creates a new DateResolver.

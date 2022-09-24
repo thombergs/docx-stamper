@@ -29,7 +29,7 @@ public class TableCoordinates extends AbstractCoordinates {
     public String toString() {
         String toString = String.format("paragraph at index %d", index);
         if (parentTableCellCoordinates != null) {
-            toString = parentTableCellCoordinates.toString() + "\n" + toString;
+            toString = parentTableCellCoordinates + "\n" + toString;
         }
         return toString;
     }

@@ -24,11 +24,13 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     private Map<TableRowCoordinates, List<Object>> tableRowsToRepeat = new HashMap<>();
 
-    private PlaceholderReplacer<Object> placeholderReplacer;
-    private final DocxStamperConfiguration config;
+    private final PlaceholderReplacer<Object> placeholderReplacer;
 
-    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {
-        this.config = config;
+    public RepeatProcessor(
+            TypeResolverRegistry typeResolverRegistry,
+            ExpressionResolver expressionResolver,
+            DocxStamperConfiguration config
+    ) {
 
         this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
         placeholderReplacer.setExpressionResolver(expressionResolver);

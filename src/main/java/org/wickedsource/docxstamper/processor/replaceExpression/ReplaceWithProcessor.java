@@ -14,7 +14,7 @@ import org.wickedsource.docxstamper.util.RunUtil;
 public class ReplaceWithProcessor extends BaseCommentProcessor
         implements IReplaceWithProcessor {
 
-    private Logger logger = LoggerFactory.getLogger(ReplaceWithProcessor.class);
+    private final Logger logger = LoggerFactory.getLogger(ReplaceWithProcessor.class);
 
     private final DocxStamperConfiguration config;
 

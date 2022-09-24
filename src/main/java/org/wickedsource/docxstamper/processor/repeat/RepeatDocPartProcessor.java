@@ -73,7 +73,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
             // index changes after each replacement so we need to get the insert index at the right moment.
             ContentAccessor insertParentContentAccessor = gcpMap.get(commentWrapper);
-            Integer index = insertParentContentAccessor.getContent().indexOf(repeatElementsMap.get(commentWrapper).get(0));
+            int index = insertParentContentAccessor.getContent().indexOf(repeatElementsMap.get(commentWrapper).get(0));
 
             if (expressionContexts != null) {
                 for (Object subContext : expressionContexts) {

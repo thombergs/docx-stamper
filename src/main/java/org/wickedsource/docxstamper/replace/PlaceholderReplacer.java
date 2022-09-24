@@ -26,13 +26,13 @@ import java.util.List;
 
 public class PlaceholderReplacer<T> {
 
-    private Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
+    private final Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
 
-    private ExpressionUtil expressionUtil = new ExpressionUtil();
+    private final ExpressionUtil expressionUtil = new ExpressionUtil();
 
     private ExpressionResolver expressionResolver = new ExpressionResolver();
 
-    private TypeResolverRegistry typeResolverRegistry;
+    private final TypeResolverRegistry typeResolverRegistry;
 
     private String lineBreakPlaceholder;
 

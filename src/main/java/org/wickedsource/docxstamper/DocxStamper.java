@@ -3,7 +3,6 @@ package org.wickedsource.docxstamper;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
-import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
@@ -38,8 +37,6 @@ public class DocxStamper<T> {
 
     private CommentProcessorRegistry commentProcessorRegistry;
 
-    private TypeResolverRegistry typeResolverRegistry;
-
     private DocxStamperConfiguration config = new DocxStamperConfiguration();
 
     public DocxStamper() {
@@ -52,12 +49,10 @@ public class DocxStamper<T> {
     }
 
     private void initFields() {
-        typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
+        TypeResolverRegistry typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
         typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
         typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
-        for (Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()) {
-            typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
-        }
+        config.getTypeResolvers().forEach(typeResolverRegistry::registerTypeResolver);
 
         ExpressionResolver expressionResolver = new ExpressionResolver(config.getEvaluationContextConfigurer());
         placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
@@ -74,9 +69,8 @@ public class DocxStamper<T> {
         commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry, expressionResolver, config));
         commentProcessorRegistry.registerCommentProcessor(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry, expressionResolver, config));
         commentProcessorRegistry.registerCommentProcessor(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(config));
-        commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor(config));
-        commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
-                new ReplaceWithProcessor(config));
+        commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
+        commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class, new ReplaceWithProcessor(config));
         for (Map.Entry<Class<?>, ICommentProcessor> entry : config.getCommentProcessors().entrySet()) {
             commentProcessorRegistry.registerCommentProcessor(entry.getKey(), entry.getValue());
         }

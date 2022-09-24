@@ -1,11 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
@@ -14,11 +8,17 @@ import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
 import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 public class MultiStampTest extends AbstractDocx4jTest {
 
 	@Test
 	public void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
-		DocxStamper stamper = new DocxStamper(new DocxStamperConfiguration());
+		DocxStamper<NamesContext> stamper = new DocxStamper<>(new DocxStamperConfiguration());
 		NamesContext context = new NamesContext();
 
 		InputStream template = getClass().getResourceAsStream("MultiStampTest.docx");

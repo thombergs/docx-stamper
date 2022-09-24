@@ -38,7 +38,7 @@ public class CustomCommentProcessorTest extends AbstractDocx4jTest {
 
     public static class CustomCommentProcessor implements ICommentProcessor, ICustomCommentProcessor{
 
-        private List<ParagraphCoordinates> visitedParagraphs = new ArrayList<>();
+        private final List<ParagraphCoordinates> visitedParagraphs = new ArrayList<>();
 
         private ParagraphCoordinates currentParagraph;
 

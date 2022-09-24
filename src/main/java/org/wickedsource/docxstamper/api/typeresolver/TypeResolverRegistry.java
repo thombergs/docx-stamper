@@ -10,7 +10,7 @@ public class TypeResolverRegistry {
 
     private ITypeResolver defaultResolver;
 
-    private Map<Class<?>, ITypeResolver> typeResolversByType = new HashMap<>();
+    private final Map<Class<?>, ITypeResolver> typeResolversByType = new HashMap<>();
 
     public TypeResolverRegistry(ITypeResolver defaultResolver) {
         this.defaultResolver = defaultResolver;

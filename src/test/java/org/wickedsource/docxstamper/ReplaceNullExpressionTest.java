@@ -1,9 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -11,6 +7,10 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class ReplaceNullExpressionTest extends AbstractDocx4jTest {
 
@@ -20,7 +20,7 @@ public class ReplaceNullExpressionTest extends AbstractDocx4jTest {
     context.setName(null);
     InputStream template = getClass().getResourceAsStream("ReplaceNullExpressionTest.docx");
     OutputStream out = getOutputStream();
-    DocxStamper stamper = new DocxStamperConfiguration()
+    DocxStamper<NameContext> stamper = new DocxStamperConfiguration()
             .replaceNullValues(true)
             .build();
     stamper.stamp(template, context, out);

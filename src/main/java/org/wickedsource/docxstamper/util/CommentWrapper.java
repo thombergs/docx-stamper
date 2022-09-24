@@ -15,16 +15,7 @@ public class CommentWrapper {
 
     private CommentRangeEnd commentRangeEnd;
 
-    private Set<CommentWrapper> children = new HashSet();
-
-    public CommentWrapper(Comments.Comment comment, CommentRangeStart commentRangeStart, CommentRangeEnd commentRangeEnd) {
-        this.comment = comment;
-        this.commentRangeStart = commentRangeStart;
-        this.commentRangeEnd = commentRangeEnd;
-    }
-
-    public CommentWrapper() {
-    }
+    private Set<CommentWrapper> children = new HashSet<>();
 
     public Comments.Comment getComment() {
         return comment;

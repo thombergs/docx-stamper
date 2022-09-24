@@ -8,12 +8,10 @@ import org.wickedsource.docxstamper.AbstractDocx4jTest;
 import org.wickedsource.docxstamper.api.coordinates.*;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
-import java.io.IOException;
-
 public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 
     @Test
-    public void calculatesCorrectNestedCoordinates() throws IOException, Docx4JException {
+    public void calculatesCorrectNestedCoordinates() throws Docx4JException {
         WordprocessingMLPackage document = loadDocument("DocumentWalkerTest.docx");
 
         final Counter paragraphCount = new Counter();
@@ -23,7 +21,7 @@ public class CoordinatesWalkerTest extends AbstractDocx4jTest {
 
         CoordinatesWalker walker = new CoordinatesWalker(document) {
 
-        	@Override
+            @Override
 			protected void onRun(RunCoordinates runCoordinates, ParagraphCoordinates paragraphCoordinates) {
 				// TODO Auto-generated method stub
 			}

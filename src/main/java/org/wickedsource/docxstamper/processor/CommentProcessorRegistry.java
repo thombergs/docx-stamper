@@ -23,12 +23,7 @@ import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
 import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Allows registration of ICommentProcessor objects. Each registered
@@ -38,17 +33,17 @@ import java.util.Optional;
  */
 public class CommentProcessorRegistry {
 
-  private Logger logger = LoggerFactory.getLogger(CommentProcessorRegistry.class);
+  private final Logger logger = LoggerFactory.getLogger(CommentProcessorRegistry.class);
 
-  private Map<ICommentProcessor, Class<?>> commentProcessorInterfaces = new HashMap<>();
+  private final Map<ICommentProcessor, Class<?>> commentProcessorInterfaces = new HashMap<>();
 
-  private List<ICommentProcessor> commentProcessors = new ArrayList<>();
+  private final List<ICommentProcessor> commentProcessors = new ArrayList<>();
 
   private ExpressionResolver expressionResolver = new ExpressionResolver();
 
-  private ExpressionUtil expressionUtil = new ExpressionUtil();
+  private final ExpressionUtil expressionUtil = new ExpressionUtil();
 
-  private PlaceholderReplacer placeholderReplacer;
+  private final PlaceholderReplacer placeholderReplacer;
 
   private boolean failOnInvalidExpression = true;
 

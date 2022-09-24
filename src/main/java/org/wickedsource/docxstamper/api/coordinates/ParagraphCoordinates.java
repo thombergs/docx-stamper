@@ -1,8 +1,6 @@
 package org.wickedsource.docxstamper.api.coordinates;
 
 import org.docx4j.wml.P;
-import org.wickedsource.docxstamper.api.coordinates.AbstractCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
 
 public class ParagraphCoordinates extends AbstractCoordinates {
 
@@ -40,7 +38,7 @@ public class ParagraphCoordinates extends AbstractCoordinates {
     public String toString() {
         String toString = String.format("paragraph at index %d", index);
         if (parentTableCellCoordinates != null) {
-            toString = parentTableCellCoordinates.toString() + "\n" + toString;
+            toString = parentTableCellCoordinates + "\n" + toString;
         }
         return toString;
     }
