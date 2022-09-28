@@ -22,7 +22,7 @@
     <licenses>
         <license>
             <name>MIT License</name>
-            <url>https://opensource.org/licenses/MIT</url>
+            <url>LICENSE</url>
         </license>
     </licenses>
 
@@ -53,6 +53,44 @@
                     </plugin>
                 </plugins>
             </build>
+        </profile>
+        <profile>
+            <id>mut</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>1.9.5</version>
+                        <configuration>
+                            <jvmArgs>
+                                <jvmArg>--add-opens</jvmArg>
+                                <jvmArg>java.base/java.lang=ALL-UNNAMED</jvmArg>
+                            </jvmArgs>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <phase>pre-site</phase>
+                                <goals>
+                                    <goal>mutationCoverage</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+            <reporting>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>1.9.5</version>
+                    </plugin>
+                </plugins>
+            </reporting>
         </profile>
     </profiles>
 
@@ -143,25 +181,7 @@
                 <artifactId>maven-site-plugin</artifactId>
                 <version>3.12.1</version>
             </plugin>
-            <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-maven</artifactId>
-                <version>1.9.5</version>
-                <configuration>
-                    <jvmArgs>
-                        <jvmArg>--add-opens</jvmArg>
-                        <jvmArg>java.base/java.lang=ALL-UNNAMED</jvmArg>
-                    </jvmArgs>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>pre-site</phase>
-                        <goals>
-                            <goal>mutationCoverage</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
@@ -228,11 +248,6 @@
                         </reports>
                     </reportSet>
                 </reportSets>
-            </plugin>
-            <plugin>
-                <groupId>org.pitest</groupId>
-                <artifactId>pitest-maven</artifactId>
-                <version>1.9.5</version>
             </plugin>
         </plugins>
     </reporting>

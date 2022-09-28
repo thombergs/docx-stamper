@@ -1,0 +1,23 @@
+<project name="DOCX-Stamper">
+    <body>
+        <menu name="DOCX-Stamper">
+            <item name="Overview" href="index.html"/>
+        </menu>
+        <menu ref="reports"/>
+    </body>
+    <poweredBy>
+        <logo
+                name="verron.pro"
+                img="images/logo.png"
+                alt="verron.pro"
+                target="https//verron.pro"
+                title="verron.pro"
+                width="80%"
+        />
+    </poweredBy>
+    <skin>
+        <groupId>org.apache.maven.skins</groupId>
+        <artifactId>maven-fluido-skin</artifactId>
+        <version>1.11.1</version>
+    </skin>
+</project>
