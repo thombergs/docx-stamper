@@ -2,11 +2,11 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tr;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
+import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,16 +37,11 @@ public class MultiStampTest extends AbstractDocx4jTest {
 	}
 
 	private void assertTableRows(WordprocessingMLPackage document) {
-		final List<TableCellCoordinates> cells = new ArrayList<>();
-		CoordinatesWalker cellWalker = new BaseCoordinatesWalker(document) {
-			@Override
-			protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
-				cells.add(tableCellCoordinates);
-			}
-		};
-		cellWalker.walk();
+		final List<Tbl> tablesFromObject = DocumentUtil.getTableFromObject(document);
+		Assert.assertEquals(1, tablesFromObject.size());
 
-		Assert.assertEquals(5, cells.size());
+		final List<Tr> tableRows = DocumentUtil.getTableRowsFromObject(tablesFromObject.get(0));
+		Assert.assertEquals(5, tableRows.size());
 	}
 
 	public static class NamesContext {

@@ -100,8 +100,8 @@ public class PlaceholderReplacer<T> {
             final T expressionContext = proxyBuilder.build();
             CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
                 @Override
-                protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
-                    resolveExpressionsForParagraph(paragraphCoordinates.getParagraph(), expressionContext, document);
+                protected void onParagraph(P paragraph) {
+                    resolveExpressionsForParagraph(paragraph, expressionContext, document);
                 }
             };
             walker.walk();

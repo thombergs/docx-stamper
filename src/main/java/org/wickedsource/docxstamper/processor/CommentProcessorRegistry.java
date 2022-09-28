@@ -2,6 +2,7 @@ package org.wickedsource.docxstamper.processor;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Comments;
+import org.docx4j.wml.P;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -78,16 +79,16 @@ public class CommentProcessorRegistry {
     CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
 
       @Override
-      protected void onParagraph(ParagraphCoordinates paragraphCoordinates) {
-        runProcessorsOnParagraphComment(document, comments, proxyBuilder, paragraphCoordinates)
+      protected void onParagraph(P paragraph) {
+        runProcessorsOnParagraphComment(document, comments, proxyBuilder, paragraph)
                 .ifPresent(proceedComments::add);
-        runProcessorsOnInlineContent(proxyBuilder, paragraphCoordinates);
+        runProcessorsOnInlineContent(proxyBuilder, paragraph);
       }
 
       @Override
       protected void onRun(RunCoordinates runCoordinates,
-                                     ParagraphCoordinates paragraphCoordinates) {
-        runProcessorsOnRunComment(document, comments, proxyBuilder, paragraphCoordinates, runCoordinates)
+                                     P paragraph) {
+        runProcessorsOnRunComment(document, comments, proxyBuilder, paragraph, runCoordinates)
                 .ifPresent(proceedComments::add);
       }
 
@@ -108,15 +109,15 @@ public class CommentProcessorRegistry {
    * to evaluate it against all registered {@link ICommentProcessor}s.
    *
    * @param proxyBuilder         a builder for a proxy around the context root object to customize its interface
-   * @param paragraphCoordinates the paragraph to process.
+   * @param paragraph            the paragraph to process.
    * @param <T>                  type of the context root object
    */
   private <T> void runProcessorsOnInlineContent(ProxyBuilder<T> proxyBuilder,
-                                                ParagraphCoordinates paragraphCoordinates) {
+                                                P paragraph) {
 
-    ParagraphWrapper paragraph = new ParagraphWrapper(paragraphCoordinates.getParagraph());
+    ParagraphWrapper paragraphWrapper = new ParagraphWrapper(paragraph);
     List<String> processorExpressions = expressionUtil
-            .findProcessorExpressions(paragraph.getText());
+            .findProcessorExpressions(paragraphWrapper.getText());
 
     for (String processorExpression : processorExpressions) {
       String strippedExpression = expressionUtil.stripExpression(processorExpression);
@@ -124,13 +125,13 @@ public class CommentProcessorRegistry {
       for (final ICommentProcessor processor : commentProcessors) {
         Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
         proxyBuilder.withInterface(commentProcessorInterface, processor);
-        processor.setCurrentParagraphCoordinates(paragraphCoordinates);
+        processor.setParagraph(paragraph);
       }
 
       try {
         T contextRootProxy = proxyBuilder.build();
         expressionResolver.resolveExpression(strippedExpression, contextRootProxy);
-        placeholderReplacer.replace(paragraph, processorExpression, null);
+        placeholderReplacer.replace(paragraphWrapper, processorExpression, null);
         logger.debug(String.format(
                 "Processor expression '%s' has been successfully processed by a comment processor.",
                 processorExpression));
@@ -157,27 +158,27 @@ public class CommentProcessorRegistry {
    *
    * @param document             the word document.
    * @param comments             the comments within the document.
-   * @param proxyBuilder          a builder for a proxy around the context root object to customize its interface
-   * @param paragraphCoordinates the paragraph whose comments to evaluate.
+   * @param proxyBuilder         a builder for a proxy around the context root object to customize its interface
+   * @param paragraph            the paragraph whose comments to evaluate.
    * @param <T>                  the type of the context root object.
    */
   private <T> Optional<CommentWrapper> runProcessorsOnParagraphComment(final WordprocessingMLPackage document,
                                                    final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
-                                                   ParagraphCoordinates paragraphCoordinates) {
-    Comments.Comment comment = CommentUtil.getCommentFor(paragraphCoordinates.getParagraph(), document);
-    return runCommentProcessors(document, comments, proxyBuilder, comment, paragraphCoordinates, null);
+                                                   P paragraph) {
+    Comments.Comment comment = CommentUtil.getCommentFor(paragraph, document);
+    return runCommentProcessors(document, comments, proxyBuilder, comment, paragraph, null);
   }
 
   private <T> Optional<CommentWrapper> runProcessorsOnRunComment(final WordprocessingMLPackage document,
                                                        final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
-                                                       ParagraphCoordinates paragraphCoordinates, RunCoordinates runCoordinates) {
+                                                       P paragraph, RunCoordinates runCoordinates) {
     Comments.Comment comment = CommentUtil.getCommentAround(runCoordinates.getRun(), document);
-    return runCommentProcessors(document, comments, proxyBuilder, comment, paragraphCoordinates, runCoordinates);
+    return runCommentProcessors(document, comments, proxyBuilder, comment, paragraph, runCoordinates);
   }
 
   private <T> Optional<CommentWrapper> runCommentProcessors(final WordprocessingMLPackage document,
                                                            final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
-                                                            Comments.Comment comment, ParagraphCoordinates paragraphCoordinates,
+                                                            Comments.Comment comment, P paragraph,
                                                            RunCoordinates runCoordinates) {
 
     CommentWrapper commentWrapper = Optional.ofNullable(comment)
@@ -195,7 +196,7 @@ public class CommentProcessorRegistry {
     for (final ICommentProcessor processor : commentProcessors) {
       Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
       proxyBuilder.withInterface(commentProcessorInterface, processor);
-      processor.setCurrentParagraphCoordinates(paragraphCoordinates);
+      processor.setParagraph(paragraph);
       processor.setCurrentRunCoordinates(runCoordinates);
       processor.setCurrentCommentWrapper(commentWrapper);
     }

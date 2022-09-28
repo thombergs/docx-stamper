@@ -1,8 +1,8 @@
 package org.wickedsource.docxstamper.proxy;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.P;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
@@ -19,7 +19,7 @@ public class TestImpl implements ITestInterface, ICommentProcessor {
 	}
 
 	@Override
-	public void setCurrentParagraphCoordinates(ParagraphCoordinates coordinates) {
+	public void setParagraph(P paragraph) {
 
 	}
 

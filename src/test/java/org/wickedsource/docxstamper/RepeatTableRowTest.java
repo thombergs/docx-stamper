@@ -3,19 +3,17 @@ package org.wickedsource.docxstamper;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tc;
+import org.docx4j.wml.Tr;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
-import org.wickedsource.docxstamper.util.ParagraphWrapper;
-import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
+import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class RepeatTableRowTest extends AbstractDocx4jTest {
@@ -30,43 +28,38 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
         context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
         context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
         InputStream template = getClass().getResourceAsStream("RepeatTableRowTest.docx");
+
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
-        final List<TableRowCoordinates> rowCoords = new ArrayList<>();
-        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
-            @Override
-            protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
-                rowCoords.add(tableRowCoordinates);
-            }
-        };
-        walker.walk();
+        final List<Tbl> tablesFromObject = DocumentUtil.getTableFromObject(document);
+        Assert.assertEquals(1, tablesFromObject.size());
 
+        final List<Tr> parentTableRows = DocumentUtil.getTableRowsFromObject(tablesFromObject.get(0));
         // 1 header row + 1 row per character in list
-        Assert.assertEquals(7, rowCoords.size());
+        Assert.assertEquals(7, parentTableRows.size());
 
-
-        final List<TableCellCoordinates> cells = new ArrayList<>();
-        CoordinatesWalker cellWalker = new BaseCoordinatesWalker(document) {
-            @Override
-            protected void onTableCell(TableCellCoordinates tableCellCoordinates) {
-                cells.add(tableCellCoordinates);
-            }
-        };
-        cellWalker.walk();
-
-        Assert.assertEquals("Homer Simpson", new ParagraphWrapper((P) cells.get(2).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(3).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Marge Simpson", new ParagraphWrapper((P) cells.get(4).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Julie Kavner", new ParagraphWrapper((P) cells.get(5).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Bart Simpson", new ParagraphWrapper((P) cells.get(6).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Nancy Cartwright", new ParagraphWrapper((P) cells.get(7).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Kent Brockman", new ParagraphWrapper((P) cells.get(8).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Harry Shearer", new ParagraphWrapper((P) cells.get(9).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Disco Stu", new ParagraphWrapper((P) cells.get(10).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Hank Azaria", new ParagraphWrapper((P) cells.get(11).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Krusty the Clown", new ParagraphWrapper((P) cells.get(12).getCell().getContent().get(0)).getText());
-        Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(13).getCell().getContent().get(0)).getText());
+        Assert.assertEquals("Homer Simpson", getTextFromCell(parentTableRows, 1, 0));
+        Assert.assertEquals("Dan Castellaneta", getTextFromCell(parentTableRows, 1, 1));
+        Assert.assertEquals("Marge Simpson", getTextFromCell(parentTableRows, 2, 0));
+        Assert.assertEquals("Julie Kavner", getTextFromCell(parentTableRows, 2, 1));
+        Assert.assertEquals("Bart Simpson", getTextFromCell(parentTableRows, 3, 0));
+        Assert.assertEquals("Nancy Cartwright", getTextFromCell(parentTableRows, 3, 1));
+        Assert.assertEquals("Kent Brockman", getTextFromCell(parentTableRows, 4, 0));
+        Assert.assertEquals("Harry Shearer", getTextFromCell(parentTableRows, 4, 1));
+        Assert.assertEquals("Disco Stu", getTextFromCell(parentTableRows, 5, 0));
+        Assert.assertEquals("Hank Azaria", getTextFromCell(parentTableRows, 5, 1));
+        Assert.assertEquals("Krusty the Clown", getTextFromCell(parentTableRows, 6, 0));
+        Assert.assertEquals("Dan Castellaneta", getTextFromCell(parentTableRows, 6, 1));
     }
 
+    private String getTextFromCell(List<Tr> tableRows, int rowNumber, int cellNumber) {
+        return getTextFromCell(DocumentUtil.getTableCellsFromObject(
+                tableRows.get(rowNumber).getContent()).get(cellNumber));
+    }
 
+    private String getTextFromCell(Tc tc) {
+        List<P> paragraphsFromObject = DocumentUtil.getParagraphsFromObject(tc);
+        Assert.assertEquals(1, paragraphsFromObject.size());
+        return paragraphsFromObject.get(0).toString();
+    }
 }

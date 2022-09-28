@@ -2,16 +2,17 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.P;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tc;
+import org.docx4j.wml.Tr;
 import org.junit.Assert;
 import org.junit.Test;
-import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.context.NameContext;
-import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
+import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
@@ -23,17 +24,29 @@ public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
-        final List<TableRowCoordinates> rowCoords = new ArrayList<>();
-        CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
-            @Override
-            protected void onTableRow(TableRowCoordinates tableRowCoordinates) {
-                rowCoords.add(tableRowCoordinates);
-            }
-        };
-        walker.walk();
+        final List<Tbl> tablesFromObject = DocumentUtil.getTableFromObject(document);
+        Assert.assertEquals(2, tablesFromObject.size());
 
-        Assert.assertEquals(5, rowCoords.size());
+        final List<Tr> parentTableRows = DocumentUtil.getTableRowsFromObject(tablesFromObject.get(0));
+        // gets all the rows within the table and the nested table
+        Assert.assertEquals(5, parentTableRows.size());
+
+        final List<Tr> nestedTableRows = DocumentUtil.getTableRowsFromObject(tablesFromObject.get(1));
+        Assert.assertEquals(2, nestedTableRows.size());
+
+        final List<Tc> parentTableCells = DocumentUtil.getTableCellsFromObject(tablesFromObject.get(0));
+        // gets all the cells within the table and the nested table
+        Assert.assertEquals(5, parentTableCells.size());
+
+        Assert.assertEquals("This row stays untouched.", getTextFromCell(parentTableCells.get(0)));
+        Assert.assertEquals("This row stays untouched.", getTextFromCell(parentTableCells.get(1)));
+        Assert.assertEquals("Also works on nested Tables", getTextFromCell(parentTableCells.get(3)));
+        Assert.assertEquals("This row stays untouched.", getTextFromCell(parentTableCells.get(4)));
     }
 
-
+    private String getTextFromCell(Tc tc) {
+        List<P> paragraphsFromObject = DocumentUtil.getParagraphsFromObject(tc);
+        Assert.assertEquals(1, paragraphsFromObject.size());
+        return paragraphsFromObject.get(0).toString();
+    }
 }

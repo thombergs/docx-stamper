@@ -1,94 +1,80 @@
 package org.wickedsource.docxstamper.util;
 
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.ContentAccessor;
-import org.docx4j.wml.Tbl;
-import org.docx4j.wml.Tc;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
+import jakarta.xml.bind.JAXBElement;
+import org.docx4j.XmlUtils;
+import org.docx4j.wml.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Iterator;
 
 public class ObjectDeleter {
 
-    private final WordprocessingMLPackage document;
+    private Logger logger = LoggerFactory.getLogger(ObjectDeleter.class);
 
-    private final List<Integer> deletedObjectsIndexes = new ArrayList<>(10);
-
-    private final Map<ContentAccessor, Integer> deletedObjectsPerParent = new HashMap<>();
-
-    public ObjectDeleter(WordprocessingMLPackage document) {
-        this.document = document;
-    }
-
-    public void deleteParagraph(ParagraphCoordinates paragraphCoordinates) {
-        deleteTableOrParagraph(paragraphCoordinates.getIndex(), paragraphCoordinates.getParentTableCellCoordinates());
-    }
-
-    public void deleteTable(TableCoordinates tableCoordinates) {
-        deleteTableOrParagraph(tableCoordinates.getIndex(), tableCoordinates.getParentTableCellCoordinates());
-    }
-
-    private void deleteTableOrParagraph(int index, TableCellCoordinates parentTableCellCoordinates) {
-        if (parentTableCellCoordinates == null) {
-            // global paragraph
-            int indexToDelete = getOffset(index);
-            document.getMainDocumentPart().getContent().remove(indexToDelete);
-            deletedObjectsIndexes.add(index);
+    public void deleteObject(Object object) {
+        if (object instanceof P) {
+            deleteParagraph((P)object);
         } else {
+            Object unwrappedObject = XmlUtils.unwrap(object);
+            if (unwrappedObject instanceof Tbl) {
+                deleteTable((Tbl) unwrappedObject);
+            }
+        }
+    }
+    public void deleteParagraph(P paragraph) {
+
+        if (paragraph.getParent() instanceof Tc) {
             // paragraph within a table cell
-            Tc parentCell = parentTableCellCoordinates.getCell();
-            deleteFromCell(parentCell, index);
+            Tc parentCell = (Tc)paragraph.getParent();
+            deleteFromCell(parentCell, paragraph);
+        } else {
+            ((ContentAccessor)paragraph.getParent()).getContent().remove(paragraph);
         }
     }
 
-    private void deleteFromCell(Tc cell, int index) {
-        Integer objectsDeletedFromParent = deletedObjectsPerParent.get(cell);
-        if (objectsDeletedFromParent == null) {
-            objectsDeletedFromParent = 0;
+    public void deleteTable(Tbl table) {
+        if (table.getParent() instanceof Tc) {
+            // nested table within a table cell
+            Tc parentCell = (Tc)table.getParent();
+            deleteFromCell(parentCell, table);
+        } else {
+            // global table
+            ((ContentAccessor)table.getParent()).getContent().remove(table.getParent());
+            // iterate through the containing list to find the jaxb element that contains the table.
+            for (Iterator<Object> iterator = ((ContentAccessor)table.getParent()).getContent().listIterator(); iterator.hasNext();) {
+                Object next = iterator.next();
+                if (next instanceof JAXBElement && ((JAXBElement)next).getValue().equals(table)) {
+                    iterator.remove();
+                    break;
+                }
+            }
         }
-        index -= objectsDeletedFromParent;
-        cell.getContent().remove(index);
+    }
+
+    private void deleteFromCell(Tc cell, Tbl table) {
+        cell.getContent().remove(table);
         if (!TableCellUtil.hasAtLeastOneParagraphOrTable(cell)) {
             TableCellUtil.addEmptyParagraph(cell);
         }
-        deletedObjectsPerParent.put(cell, objectsDeletedFromParent + 1);
-        // TODO: find out why border lines are removed in some cells after having
-        // deleted a paragraph
+        // TODO: find out why border lines are removed in some cells after having deleted a paragraph
     }
 
-    /**
-     * Get new index of element to be deleted, taking into account previously
-     * deleted elements
-     *
-     * @param initialIndex initial index of the element to be deleted
-     * @return the index of the item to be removed
-     */
-    private int getOffset(final int initialIndex) {
-        int newIndex = initialIndex;
-        for (Integer deletedIndex : this.deletedObjectsIndexes) {
-            if (initialIndex > deletedIndex) {
-                newIndex--;
-            }
+    private void deleteFromCell(Tc cell, P paragraph) {
+        cell.getContent().remove(paragraph);
+        if (!TableCellUtil.hasAtLeastOneParagraphOrTable(cell)) {
+            TableCellUtil.addEmptyParagraph(cell);
         }
-        return newIndex;
+        // TODO: find out why border lines are removed in some cells after having deleted a paragraph
     }
 
-    public void deleteTableRow(TableRowCoordinates tableRowCoordinates) {
-        Tbl table = tableRowCoordinates.getParentTableCoordinates().getTable();
-        int index = tableRowCoordinates.getIndex();
-        Integer objectsDeletedFromTable = deletedObjectsPerParent.get(table);
-        if (objectsDeletedFromTable == null) {
-            objectsDeletedFromTable = 0;
+    public void deleteTableRow(Tr tableRow) {
+        if (tableRow.getParent() instanceof Tbl) {
+            Tbl table = (Tbl)tableRow.getParent();
+            table.getContent().remove(tableRow);
+        } else {
+            logger.error("Table row is not contained within a table. Unable to remove");
         }
-        index -= objectsDeletedFromTable;
-        table.getContent().remove(index);
-        deletedObjectsPerParent.put(table, objectsDeletedFromTable + 1);
     }
 
 }

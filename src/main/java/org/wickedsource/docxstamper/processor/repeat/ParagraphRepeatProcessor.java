@@ -7,13 +7,11 @@ import org.docx4j.wml.CommentRangeStart;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
-import org.wickedsource.docxstamper.util.ParagraphUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
         List<P> paragraphs;
     }
 
-    private Map<ParagraphCoordinates, ParagraphsToRepeat> pToRepeat = new HashMap<>();
+    private Map<P, ParagraphsToRepeat> pToRepeat = new HashMap<>();
 
     private final PlaceholderReplacer<Object> placeholderReplacer;
     private final DocxStamperConfiguration config;
@@ -41,44 +39,39 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
     @Override
     public void repeatParagraph(List<Object> objects) {
-        ParagraphCoordinates paragraphCoordinates = getCurrentParagraphCoordinates();
 
-        P paragraph = paragraphCoordinates.getParagraph();
+        P paragraph = getParagraph();
         List<P> paragraphs = getParagraphsInsideComment(paragraph);
 
         ParagraphsToRepeat toRepeat = new ParagraphsToRepeat();
         toRepeat.data = objects;
         toRepeat.paragraphs = paragraphs;
 
-        pToRepeat.put(paragraphCoordinates, toRepeat);
+        pToRepeat.put(paragraph, toRepeat);
         CommentUtil.deleteComment(getCurrentCommentWrapper());
     }
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
-        for (ParagraphCoordinates rCoords : pToRepeat.keySet()) {
-            ParagraphsToRepeat paragraphsToRepeat = pToRepeat.get(rCoords);
+        for (P paragraph : pToRepeat.keySet()) {
+            ParagraphsToRepeat paragraphsToRepeat = pToRepeat.get(paragraph);
             List<Object> expressionContexts = paragraphsToRepeat.data;
 
+
             List<P> paragraphsToAdd = new ArrayList<>();
+            for (final Object expressionContext : expressionContexts) {
+                for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
+                    P pClone = XmlUtils.deepCopy(paragraphToClone);
+                    placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
 
-            if (expressionContexts != null) {
-                for (final Object expressionContext : expressionContexts) {
-                    for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
-                        P pClone = XmlUtils.deepCopy(paragraphToClone);
-                        placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
-
-                        paragraphsToAdd.add(pClone);
-                    }
+                    paragraphsToAdd.add(pClone);
                 }
-            } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-                paragraphsToAdd.add(ParagraphUtil.create(config.getNullValuesDefault()));
             }
 
-            Object parent = rCoords.getParagraph().getParent();
+            Object parent = paragraph.getParent();
             if (parent instanceof ContentAccessor) {
                 ContentAccessor contentAccessor = (ContentAccessor) parent;
-                int index = contentAccessor.getContent().indexOf(rCoords.getParagraph());
+                int index = contentAccessor.getContent().indexOf(paragraph);
                 if (index >= 0) {
                     contentAccessor.getContent().addAll(index, paragraphsToAdd);
                 }

@@ -1,7 +1,7 @@
 package org.wickedsource.docxstamper.api.commentprocessor;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
+import org.docx4j.wml.P;
 import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
@@ -54,9 +54,9 @@ public interface ICommentProcessor {
      * .docx template. This method is always called BEFORE the custom methods of the custom comment processor interface
      * are called.
      *
-     * @param coordinates coordinates of the currently processed paragraph within the template.
+     * @param paragraph currently processed paragraph within the template.
      */
-    void setCurrentParagraphCoordinates(ParagraphCoordinates coordinates);
+    void setParagraph(P paragraph);
 
 
     /**

@@ -3,10 +3,10 @@ package org.wickedsource.docxstamper.processor.repeat;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
+import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProcessor {
 
-    private Map<TableRowCoordinates, List<Object>> tableRowsToRepeat = new HashMap<>();
+    private Map<Tr, List<Object>> tableRowsToRepeat = new HashMap<>();
 
     private final PlaceholderReplacer<Object> placeholderReplacer;
 
@@ -52,37 +52,34 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     }
 
     private void repeatRows(final WordprocessingMLPackage document) {
-        for (TableRowCoordinates rCoords : tableRowsToRepeat.keySet()) {
-            List<Object> expressionContexts = tableRowsToRepeat.get(rCoords);
-            int index = rCoords.getIndex();
-
-            if (expressionContexts != null) {
-                for (final Object expressionContext : expressionContexts) {
-                    Tr rowClone = XmlUtils.deepCopy(rCoords.getRow());
-                    DocumentWalker walker = new BaseDocumentWalker(rowClone) {
-                        @Override
-                        protected void onParagraph(P paragraph) {
-                            placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
-                        }
-                    };
-                    walker.walk();
-                    rCoords.getParentTableCoordinates().getTable().getContent().add(++index, rowClone);
-                }
+        for (Tr row : tableRowsToRepeat.keySet()) {
+            List<Object> expressionContexts = tableRowsToRepeat.get(row);
+            for (final Object expressionContext : expressionContexts) {
+                Tr rowClone = XmlUtils.deepCopy(row);
+                DocumentWalker walker = new BaseDocumentWalker(rowClone) {
+                    @Override
+                    protected void onParagraph(P paragraph) {
+                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
+                    }
+                };
+                walker.walk();
+                ((Tbl)row.getParent()).getContent().add(rowClone);
             }
-
-            // TODO : how to replace null values here ?
-            rCoords.getParentTableCoordinates().getTable().getContent().remove(rCoords.getRow());
+            ((Tbl)row.getParent()).getContent().remove(row);
         }
     }
 
     @Override
     public void repeatTableRow(List<Object> objects) {
-        ParagraphCoordinates pCoords = getCurrentParagraphCoordinates();
-        if (pCoords.getParentTableCellCoordinates() == null ||
-                pCoords.getParentTableCellCoordinates().getParentTableRowCoordinates() == null) {
-            throw new CommentProcessingException("Paragraph is not within a table!", pCoords);
+        P paragraph = getParagraph();
+
+        if (paragraph.getParent() instanceof Tc &&
+                ((Tc) paragraph.getParent()).getParent() instanceof Tr) {
+            tableRowsToRepeat.put((Tr)((Tc) paragraph.getParent()).getParent(), objects);
+        } else {
+            new CommentProcessingException("Paragraph is not within a table!", paragraph);
         }
-        tableRowsToRepeat.put(getCurrentParagraphCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates(), objects);
+
         CommentUtil.deleteComment(getCurrentCommentWrapper());
     }
 }
