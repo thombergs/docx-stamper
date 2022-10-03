@@ -10,7 +10,7 @@ import java.util.Iterator;
 
 public class ObjectDeleter {
 
-    private Logger logger = LoggerFactory.getLogger(ObjectDeleter.class);
+    private final Logger logger = LoggerFactory.getLogger(ObjectDeleter.class);
 
     public void deleteObject(Object object) {
         if (object instanceof P) {
@@ -23,7 +23,6 @@ public class ObjectDeleter {
         }
     }
     public void deleteParagraph(P paragraph) {
-
         if (paragraph.getParent() instanceof Tc) {
             // paragraph within a table cell
             Tc parentCell = (Tc)paragraph.getParent();
@@ -44,7 +43,7 @@ public class ObjectDeleter {
             // iterate through the containing list to find the jaxb element that contains the table.
             for (Iterator<Object> iterator = ((ContentAccessor)table.getParent()).getContent().listIterator(); iterator.hasNext();) {
                 Object next = iterator.next();
-                if (next instanceof JAXBElement && ((JAXBElement)next).getValue().equals(table)) {
+                if (next instanceof JAXBElement && ((JAXBElement<?>)next).getValue().equals(table)) {
                     iterator.remove();
                     break;
                 }

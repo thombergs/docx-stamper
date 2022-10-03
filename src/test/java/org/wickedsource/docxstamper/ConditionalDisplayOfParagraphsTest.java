@@ -20,8 +20,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     @Test
     public void processorExpressionsInCommentsAreResolved() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer");
+        NameContext context = new NameContext("Homer");
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         globalParagraphsAreRemoved(document);
@@ -31,8 +30,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     @Test
     public void inlineProcessorExpressionsAreResolved() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer");
+        NameContext context = new NameContext("Homer");
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         globalParagraphsAreRemoved(document);
@@ -42,8 +40,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     @Test
     public void unresolvedInlineProcessorExpressionsAreRemoved() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Bart");
+        NameContext context = new NameContext("Bart");
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         globalInlineProcessorExpressionIsRemoved(document);
@@ -75,7 +72,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
     private void paragraphsInNestedTablesAreRemoved(WordprocessingMLPackage document) {
 
-        final Tbl nestedTable = DocumentUtil.getTableFromObject(DocumentUtil.getTableFromObject(document).get(0)).get(0);
+        final Tbl nestedTable = DocumentUtil.extractElements(DocumentUtil.extractElements(document, Tbl.class).get(0), Tbl.class).get(0);
         Tc cell = (Tc) ((JAXBElement<?>) ((Tr) nestedTable.getContent().get(1)).getContent().get(0)).getValue();
         P p1 = (P) cell.getContent().get(0);
 

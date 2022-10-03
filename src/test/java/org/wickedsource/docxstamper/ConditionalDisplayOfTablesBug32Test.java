@@ -19,8 +19,7 @@ public class ConditionalDisplayOfTablesBug32Test extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer");
+        NameContext context = new NameContext("Homer");
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTablesBug32Test.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         globalTablesAreRemoved(document);

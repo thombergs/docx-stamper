@@ -16,8 +16,7 @@ public class ExpressionReplacementInTextBoxesTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Bart Simpson");
+        NameContext context = new NameContext("Bart Simpson");
         InputStream template = getClass().getResourceAsStream("ExpressionReplacementInTextBoxesTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         resolvedExpressionsAreReplacedInFirstLevelTextBox(document);

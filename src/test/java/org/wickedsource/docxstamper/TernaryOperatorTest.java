@@ -15,8 +15,7 @@ public class TernaryOperatorTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer");
+        NameContext context = new NameContext("Homer");
         InputStream template = getClass().getResourceAsStream("TernaryOperatorTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         P nameParagraph = (P) document.getMainDocumentPart().getContent().get(3);
@@ -27,8 +26,7 @@ public class TernaryOperatorTest extends AbstractDocx4jTest {
 
     @Test
     public void test2() throws IOException, Docx4JException {
-        NameContext context = new NameContext();
-        context.setName("Homer");
+        NameContext context = new NameContext("Homer");
         InputStream template = getClass().getResourceAsStream("TernaryOperatorTest2.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
 

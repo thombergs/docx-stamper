@@ -17,7 +17,7 @@ public class LineBreakReplacementTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
+        NameContext context = new NameContext(null);
         DocxStamperConfiguration config = new DocxStamperConfiguration();
         config.setLineBreakPlaceholder("#");
         InputStream template = getClass().getResourceAsStream("LineBreakReplacementTest.docx");

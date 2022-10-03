@@ -22,8 +22,7 @@ public class ProxyMethodHandlerTest {
 		CommentProcessorRegistry processorRegistry = new CommentProcessorRegistry(placeholderReplacer);
 		processorRegistry.registerCommentProcessor(ITestInterface.class, new TestImpl());
 
-		NameContext contextRoot = new NameContext();
-		contextRoot.setName("Tom");
+		NameContext contextRoot = new NameContext("Tom");
 		NameContext context = new ProxyBuilder<NameContext>()
 				.withRoot(contextRoot)
 				.withInterface(ITestInterface.class, new TestImpl())

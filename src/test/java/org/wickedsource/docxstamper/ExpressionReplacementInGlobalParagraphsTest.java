@@ -15,8 +15,7 @@ public class ExpressionReplacementInGlobalParagraphsTest extends AbstractDocx4jT
 
     @Test
     public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer Simpson");
+        NameContext context = new NameContext("Homer Simpson");
         InputStream template = getClass().getResourceAsStream("ExpressionReplacementInGlobalParagraphsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         resolvedExpressionsAreReplaced(document);

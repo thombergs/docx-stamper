@@ -15,8 +15,7 @@ public class TabsIndendationTest extends AbstractDocx4jTest {
 
   @Test
   public void tabsArePreserved() throws Docx4JException, IOException {
-    NameContext context = new NameContext();
-    context.setName("Homer Simpson");
+    NameContext context = new NameContext("Homer Simpson");
     InputStream template = getClass().getResourceAsStream("TabsIntendationTest.docx");
     WordprocessingMLPackage document = stampAndLoad(template, context);
 
@@ -26,8 +25,7 @@ public class TabsIndendationTest extends AbstractDocx4jTest {
 
   @Test
   public void whiteSpacesArePreserved() throws Docx4JException, IOException {
-    NameContext context = new NameContext();
-    context.setName("Homer Simpson");
+    NameContext context = new NameContext("Homer Simpson");
     InputStream template = getClass().getResourceAsStream("TabsIntendationTest.docx");
     WordprocessingMLPackage document = stampAndLoad(template, context);
 

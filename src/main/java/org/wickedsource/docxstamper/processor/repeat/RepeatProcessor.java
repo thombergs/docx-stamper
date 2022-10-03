@@ -13,12 +13,12 @@ import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
-import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProcessor {
 
@@ -52,16 +52,12 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     }
 
     private void repeatRows(final WordprocessingMLPackage document) {
-        for (Tr row : tableRowsToRepeat.keySet()) {
-            List<Object> expressionContexts = tableRowsToRepeat.get(row);
-            for (final Object expressionContext : expressionContexts) {
+        for (Entry<Tr, List<Object>> entry : tableRowsToRepeat.entrySet()) {
+            Tr row = entry.getKey();
+            List<Object> expressionContexts = entry.getValue();
+            for (Object expressionContext : expressionContexts) {
                 Tr rowClone = XmlUtils.deepCopy(row);
-                DocumentWalker walker = new BaseDocumentWalker(rowClone) {
-                    @Override
-                    protected void onParagraph(P paragraph) {
-                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
-                    }
-                };
+                DocumentWalker walker = new ParagraphResolverDocumentWalker(rowClone, expressionContext, document, this.placeholderReplacer);
                 walker.walk();
                 ((Tbl)row.getParent()).getContent().add(rowClone);
             }
@@ -73,13 +69,16 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     public void repeatTableRow(List<Object> objects) {
         P paragraph = getParagraph();
 
-        if (paragraph.getParent() instanceof Tc &&
-                ((Tc) paragraph.getParent()).getParent() instanceof Tr) {
-            tableRowsToRepeat.put((Tr)((Tc) paragraph.getParent()).getParent(), objects);
-        } else {
-            new CommentProcessingException("Paragraph is not within a table!", paragraph);
-        }
+        Object cell = paragraph.getParent();
+        if (!(cell instanceof Tc))
+            throw new CommentProcessingException("Paragraph is not within a table!", paragraph);
 
+        Object row = ((Tc) cell).getParent();
+        if (!(row instanceof Tr))
+            throw new CommentProcessingException("Paragraph is not within a table!", paragraph);
+
+        tableRowsToRepeat.put((Tr) row, objects);
         CommentUtil.deleteComment(getCurrentCommentWrapper());
     }
+
 }

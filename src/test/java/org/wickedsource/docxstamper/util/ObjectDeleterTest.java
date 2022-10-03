@@ -20,7 +20,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
         InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-globalParagraphs.docx");
         WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 
-        List<P> paragraphsFromDocument= DocumentUtil.getParagraphsFromObject(document);
+        List<P> paragraphsFromDocument = DocumentUtil.extractElements(document, P.class);
 
         ObjectDeleter deleter = new ObjectDeleter();
         deleter.deleteParagraph(paragraphsFromDocument.get(0));
@@ -38,7 +38,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
         InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-paragraphsInTableCells.docx");
         WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 
-        List<P> paragraphsFromTable = DocumentUtil.getParagraphsFromObject(DocumentUtil.getTableFromObject(document));
+        List<P> paragraphsFromTable = DocumentUtil.extractElements(DocumentUtil.extractElements(document, Tbl.class), P.class);
         Assert.assertEquals(12, paragraphsFromTable.size());
 
         ObjectDeleter deleter = new ObjectDeleter();
@@ -51,7 +51,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
         WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
 
-        List<P> paragraphsFromUpdatedTable = DocumentUtil.getParagraphsFromObject(DocumentUtil.getTableFromObject(savedDocument));
+        List<P> paragraphsFromUpdatedTable = DocumentUtil.extractElements(DocumentUtil.extractElements(savedDocument, Tbl.class), P.class);
 
         Assert.assertEquals("0 This paragraph stays.", new ParagraphWrapper(paragraphsFromUpdatedTable.get(0)).getText());
         Assert.assertEquals("", new ParagraphWrapper(paragraphsFromUpdatedTable.get(1)).getText());
@@ -66,7 +66,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
     public void deletesCorrectGlobalTables() throws Docx4JException, IOException {
         InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tables.docx");
         WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
-        List<Tbl> tablesFromDocument = DocumentUtil.getTableFromObject(document);
+        List<Tbl> tablesFromDocument = DocumentUtil.extractElements(document, Tbl.class);
 
         ObjectDeleter deleter = new ObjectDeleter();
         deleter.deleteTable(tablesFromDocument.get(1));
@@ -74,18 +74,18 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
         WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
 
-        List<Tbl> tablesFromUpdatedDocument = DocumentUtil.getTableFromObject(savedDocument);
+        List<Tbl> tablesFromUpdatedDocument = DocumentUtil.extractElements(savedDocument, Tbl.class);
 
         Assert.assertEquals(2, tablesFromUpdatedDocument.size());
 
-        List<P> paragraphsFromFirstTable= DocumentUtil.getParagraphsFromObject(tablesFromUpdatedDocument.get(0));
+        List<P> paragraphsFromFirstTable = DocumentUtil.extractElements(tablesFromUpdatedDocument.get(0), P.class);
 
         Assert.assertEquals("This", new ParagraphWrapper(paragraphsFromFirstTable.get(0)).getText());
         Assert.assertEquals("Table", new ParagraphWrapper(paragraphsFromFirstTable.get(1)).getText());
         Assert.assertEquals("Stays", new ParagraphWrapper(paragraphsFromFirstTable.get(2)).getText());
         Assert.assertEquals("!", new ParagraphWrapper(paragraphsFromFirstTable.get(3)).getText());
 
-        List<P> paragraphsFromSecondTable= DocumentUtil.getParagraphsFromObject(tablesFromUpdatedDocument.get(1));
+        List<P> paragraphsFromSecondTable = DocumentUtil.extractElements(tablesFromUpdatedDocument.get(1), P.class);
 
         Assert.assertEquals("This table stays", new ParagraphWrapper(paragraphsFromSecondTable.get(0)).getText());
     }
@@ -95,7 +95,7 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
         InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tableRows.docx");
         WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 
-        List<Tr> tableRowsFromDocument = DocumentUtil.getTableRowsFromObject(DocumentUtil.getTableFromObject(document).get(0));
+        List<Tr> tableRowsFromDocument = DocumentUtil.extractElements(DocumentUtil.extractElements(document, Tbl.class).get(0), Tr.class);
 
         ObjectDeleter deleter = new ObjectDeleter();
         deleter.deleteTableRow(tableRowsFromDocument.get(2));
@@ -103,10 +103,10 @@ public class ObjectDeleterTest extends AbstractDocx4jTest {
 
         WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
 
-        List<Tr> tableRowsFromUpdatedDocument = DocumentUtil.getTableRowsFromObject(DocumentUtil.getTableFromObject(savedDocument).get(0));
+        List<Tr> tableRowsFromUpdatedDocument = DocumentUtil.extractElements(DocumentUtil.extractElements(savedDocument, Tbl.class).get(0), Tr.class);
 
         Assert.assertEquals(3, tableRowsFromUpdatedDocument.size());
-        List<P> paragraphsFromObject = DocumentUtil.getParagraphsFromObject(tableRowsFromUpdatedDocument);
+        List<P> paragraphsFromObject = DocumentUtil.extractElements(tableRowsFromUpdatedDocument, P.class);
 
         Assert.assertEquals("This row", new ParagraphWrapper(paragraphsFromObject.get(0)).getText());
         Assert.assertEquals("Stays!", new ParagraphWrapper(paragraphsFromObject.get(1)).getText());

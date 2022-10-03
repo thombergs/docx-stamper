@@ -20,8 +20,7 @@ public class ExpressionReplacementInHeaderAndFooterTest extends AbstractDocx4jTe
 
     @Test
     public void test() throws Docx4JException, IOException {
-        NameContext context = new NameContext();
-        context.setName("Homer Simpson");
+        NameContext context = new NameContext("Homer Simpson");
         InputStream template = getClass().getResourceAsStream("ExpressionReplacementInHeaderAndFooterTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
         resolvedExpressionsAreReplacedInHeader(document);

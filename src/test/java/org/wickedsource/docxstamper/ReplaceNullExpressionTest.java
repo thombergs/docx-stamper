@@ -16,8 +16,7 @@ public class ReplaceNullExpressionTest extends AbstractDocx4jTest {
 
   @Test
   public void test() throws Docx4JException, IOException {
-    NameContext context = new NameContext();
-    context.setName(null);
+    NameContext context = new NameContext(null);
     InputStream template = getClass().getResourceAsStream("ReplaceNullExpressionTest.docx");
     OutputStream out = getOutputStream();
     DocxStamper<NameContext> stamper = new DocxStamperConfiguration()

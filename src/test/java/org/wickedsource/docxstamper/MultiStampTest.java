@@ -1,11 +1,14 @@
 package org.wickedsource.docxstamper;
 
+import org.docx4j.TextUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
+import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.Assert;
 import org.junit.Test;
+import org.wickedsource.docxstamper.context.NameContext;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
@@ -36,30 +39,43 @@ public class MultiStampTest extends AbstractDocx4jTest {
 		assertTableRows(document);
 	}
 
+	private static void assertRowContainsText(Tr row, String text) {
+		final List<Tc> cell0 = DocumentUtil.extractElements(row, Tc.class);
+		String cellContent = TextUtils.getText(cell0.get(0));
+		String message = String.format("'%s' is not contained in '%s'", text, cellContent);
+		Assert.assertTrue(message, cellContent.contains(text));
+	}
+
 	private void assertTableRows(WordprocessingMLPackage document) {
-		final List<Tbl> tablesFromObject = DocumentUtil.getTableFromObject(document);
+		final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
 		Assert.assertEquals(1, tablesFromObject.size());
 
-		final List<Tr> tableRows = DocumentUtil.getTableRowsFromObject(tablesFromObject.get(0));
+		final List<Tr> tableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
 		Assert.assertEquals(5, tableRows.size());
+
+		assertRowContainsText(tableRows.get(0), "Homer");
+		assertRowContainsText(tableRows.get(1), "Marge");
+		assertRowContainsText(tableRows.get(2), "Bart");
+		assertRowContainsText(tableRows.get(3), "Lisa");
+		assertRowContainsText(tableRows.get(4), "Maggie");
 	}
 
 	public static class NamesContext {
-		private List<String> names = new ArrayList<>();
+		private List<NameContext> names = new ArrayList<>();
 
 		public NamesContext() {
-			this.names.add("Homer");
-			this.names.add("Marge");
-			this.names.add("Bart");
-			this.names.add("Lisa");
-			this.names.add("Maggie");
+			this.names.add(new NameContext("Homer"));
+			this.names.add(new NameContext("Marge"));
+			this.names.add(new NameContext("Bart"));
+			this.names.add(new NameContext("Lisa"));
+			this.names.add(new NameContext("Maggie"));
 		}
 
-		public List<String> getNames() {
+		public List<NameContext> getNames() {
 			return names;
 		}
 
-		public void setNames(List<String> names) {
+		public void setNames(List<NameContext> names) {
 			this.names = names;
 		}
 	}

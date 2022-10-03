@@ -28,6 +28,10 @@ public class ExpressionWithSurroundingSpacesTest extends AbstractDocx4jTest {
     }
 
     static class Context {
+        private final String expressionWithLeadingAndTrailingSpace = " Expression ";
+        private final String expressionWithLeadingSpace = " Expression";
+        private final String expressionWithTrailingSpace = "Expression ";
+        private final String expressionWithoutSpaces = "Expression";
 
         public String getExpressionWithLeadingAndTrailingSpace() {
             return " Expression ";

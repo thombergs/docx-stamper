@@ -31,10 +31,10 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
 
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
-        final List<Tbl> tablesFromObject = DocumentUtil.getTableFromObject(document);
+        final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
         Assert.assertEquals(1, tablesFromObject.size());
 
-        final List<Tr> parentTableRows = DocumentUtil.getTableRowsFromObject(tablesFromObject.get(0));
+        final List<Tr> parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
         // 1 header row + 1 row per character in list
         Assert.assertEquals(7, parentTableRows.size());
 
@@ -53,12 +53,11 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
     }
 
     private String getTextFromCell(List<Tr> tableRows, int rowNumber, int cellNumber) {
-        return getTextFromCell(DocumentUtil.getTableCellsFromObject(
-                tableRows.get(rowNumber).getContent()).get(cellNumber));
+        return getTextFromCell(DocumentUtil.extractElements(tableRows.get(rowNumber).getContent(), Tc.class).get(cellNumber));
     }
 
     private String getTextFromCell(Tc tc) {
-        List<P> paragraphsFromObject = DocumentUtil.getParagraphsFromObject(tc);
+        List<P> paragraphsFromObject = DocumentUtil.extractElements(tc, P.class);
         Assert.assertEquals(1, paragraphsFromObject.size());
         return paragraphsFromObject.get(0).toString();
     }
