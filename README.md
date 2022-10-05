@@ -4,15 +4,20 @@
 
 docx-stamper is a Java template engine for docx documents. You create a template .docx document with your favorite word processor
 and feed it to a DocxStamper instance to create a document based on the template at runtime. Example code:
+
 ```java
-MyContext context = ...;                 // your own POJO against which expressions found in the template
-                                         // will be resolved
-InputStream template = ...;              // InputStream to your .docx template file
-OutputStream out = ...;                  // OutputStream in which to write the resulting .docx document
-DocxStamper stamper = new DocxStamperConfiguration()
-  .build();
-stamper.stamp(template, context, out);
-out.close();
+class Main {
+    public static void main(String... args) {
+        MyContext context = ...// your own POJO against which expressions found in the template
+        // will be resolved
+        InputStream template = ...// InputStream to your .docx template file
+        OutputStream out = ...// OutputStream in which to write the resulting .docx document
+        DocxStamper stamper = new DocxStamperConfiguration()
+                .build();
+        stamper.stamp(template, context, out);
+        out.close();
+    }
+}
 ```
 
 ## Replacing Expressions in a .docx Template
@@ -30,11 +35,15 @@ The value an expression resolves to may be of the following types:
 If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement your own [TypeResolver](src/main/java/org/wickedsource/docxstamper/api/typeresolver/ITypeResolver.java). To register your own TypeResolver with docx-stamper, use the following code:
 
 ```java
-ITypeResolver typeResolver = ...;              // instance of your own ITypeResolver implementation
-Class<?> type ...;                             // class of expression values your resolver handles
-DocxStamper stamper = new DocxStamperConfiguration()
-  .addTypeResolver(type, typeResolver)
-  .build();
+class Main {
+    public static void main(String... args) {
+        ITypeResolver typeResolver = ...// instance of your own ITypeResolver implementation
+        Class<?> type ...// class of expression values your resolver handles
+        DocxStamper stamper = new DocxStamperConfiguration()
+          .addTypeResolver(type, typeResolver)
+          .build();
+    }
+}
 ```
 
 ## Customizing the SpEL Evaluation Context
@@ -56,19 +65,16 @@ which can then be used in the expression language. The following code for exampl
 which can be used within the .docx document to uppercase a String:
 
 ```java
-DocxStamper stamper = new DocxStamperConfiguration()
-  .exposeInterfaceToExpressionLanguage(UppercaseFunction.class, new UppercaseFunctionImpl());
-  .build();
-
-public interface UppercaseFunction {
-  String toUppercase(String string);
-}
-
-public static class UppercaseFunctionImpl implements UppercaseFunction {
-  @Override
-  public String toUppercase(String string) {
-    return string.toUpperCase();
-  }
+class Main {
+    public static void main(String... args) {
+        interface UppercaseFunction {
+            String toUppercase(String string);
+        }
+        
+        DocxStamper stamper = new DocxStamperConfiguration()
+                .exposeInterfaceToExpressionLanguage(UppercaseFunction.class, String::toUppercase)
+                .build();
+    }
 }
 ```
 
@@ -88,12 +94,16 @@ Besides replacing expressions, docx-stamper can **process comments on paragraphs
 If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](src/main/java/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.java). To register you comment processor to docx-stamper, use the following code:
 
 ```java
-ICommentProcessor commentProcessor = ...;      // instance of your own ICommentProcessor implementation
-Class<?> interfaceClass = ...;                 // class of the interface that defines the methods that are
-                                               // exposed into the expression language
-DocxStamper stamper = new DocxStamperConfiguration()
-  .addCommentProcessor(interfaceClass, commentProcessor)
-  .build();
+class Main {
+    public static void main(String... args) {
+        ICommentProcessor commentProcessor = ...// instance of your own ICommentProcessor implementation
+        Class<?> interfaceClass = ...// class of the interface that defines the methods that are
+        // exposed into the expression language
+        DocxStamper stamper = new DocxStamperConfiguration()
+                .addCommentProcessor(interfaceClass, commentProcessor)
+                .build();
+    }
+}
 ```
 For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](src/main/java/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.java).
 
@@ -104,9 +114,13 @@ The docx file format does not allow comments in Headers or Footers of a document
 By default, DocxStamper fails with an UnresolvedExpressionException if an expression within the document or within the comments cannot be resolved successfully. If you want to change this behavior, you can do the following:
 
 ```java
-DocxStamper stamper = new DocxStamperConfiguration()
-  .setFailOnUnresolvedExpression(false)
-  .build();
+class Main {
+    public static void main(String... args) {
+        DocxStamper stamper = new DocxStamperConfiguration()
+          .setFailOnUnresolvedExpression(false)
+          .build();
+    }
+}
 ```
 
 ## Sample Code
@@ -116,21 +130,7 @@ If you want to have a look at the .docx templates used in the tests, have a look
 
 ## Maven coordinates
 To include docx-stamper in your project, you can use the following maven coordinates in your dependency management system:
-
-```xml
-<repositories>
-    <repository>
-      <id>jcenter</id>
-      <url>https://jcenter.bintray.com/</url>
-    </repository>
-</repositories>
-
-<dependency>
-    <groupId>org.wickedsource.docx-stamper</groupId>
-    <artifactId>docx-stamper</artifactId>
-    <version>1.4.0</version>
-</dependency>
-```
+[go to last documented version](https://verronpro.github.io/docx-stamper/dependency-info.html)
 
 Note that as of version 1.4.0 you have to provide the dependency to your version of Docx4J yourself:
 
