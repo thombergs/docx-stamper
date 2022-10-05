@@ -14,7 +14,7 @@
     </description>
     <url>https://github.com/verronpro/docx-stamper</url>
     <scm>
-        <url>scm:git:https://github.com/verronpro/docx-stamper</url>
+        <url>https://github.com/verronpro/docx-stamper</url>
         <developerConnection>scm:git:https://github.com/verronpro/docx-stamper.git</developerConnection>
         <connection>scm:git:https://github.com/verronpro/docx-stamper.git</connection>
     </scm>
