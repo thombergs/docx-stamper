@@ -3,6 +3,7 @@ package org.wickedsource.docxstamper.processor;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Comments;
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
@@ -10,8 +11,6 @@ import org.springframework.expression.spel.SpelParseException;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.proxy.ProxyBuilder;
@@ -86,9 +85,8 @@ public class CommentProcessorRegistry {
       }
 
       @Override
-      protected void onRun(RunCoordinates runCoordinates,
-                                     P paragraph) {
-        runProcessorsOnRunComment(document, comments, proxyBuilder, paragraph, runCoordinates)
+      protected void onRun(R run, P paragraph) {
+        runProcessorsOnRunComment(document, comments, proxyBuilder, paragraph, run)
                 .ifPresent(proceedComments::add);
       }
 
@@ -163,24 +161,30 @@ public class CommentProcessorRegistry {
    * @param <T>                  the type of the context root object.
    */
   private <T> Optional<CommentWrapper> runProcessorsOnParagraphComment(final WordprocessingMLPackage document,
-                                                   final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
-                                                   P paragraph) {
+                                                                       final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
+                                                                       P paragraph) {
     Comments.Comment comment = CommentUtil.getCommentFor(paragraph, document);
     return runCommentProcessors(document, comments, proxyBuilder, comment, paragraph, null);
   }
 
-  private <T> Optional<CommentWrapper> runProcessorsOnRunComment(final WordprocessingMLPackage document,
-                                                       final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
-                                                       P paragraph, RunCoordinates runCoordinates) {
-    Comments.Comment comment = CommentUtil.getCommentAround(runCoordinates.getRun(), document);
-    return runCommentProcessors(document, comments, proxyBuilder, comment, paragraph, runCoordinates);
+  private <T> Optional<CommentWrapper> runProcessorsOnRunComment(
+          WordprocessingMLPackage document,
+          Map<BigInteger, CommentWrapper> comments,
+          ProxyBuilder<T> proxyBuilder,
+          P paragraph, R run
+  ) {
+    Comments.Comment comment = CommentUtil.getCommentAround(run, document);
+    return runCommentProcessors(document, comments, proxyBuilder, comment, paragraph, run);
   }
 
-  private <T> Optional<CommentWrapper> runCommentProcessors(final WordprocessingMLPackage document,
-                                                           final Map<BigInteger, CommentWrapper> comments, ProxyBuilder<T> proxyBuilder,
-                                                            Comments.Comment comment, P paragraph,
-                                                           RunCoordinates runCoordinates) {
-
+  private <T> Optional<CommentWrapper> runCommentProcessors(
+          WordprocessingMLPackage document,
+          Map<BigInteger, CommentWrapper> comments,
+          ProxyBuilder<T> proxyBuilder,
+          Comments.Comment comment,
+          P paragraph,
+          R run
+  ) {
     CommentWrapper commentWrapper = Optional.ofNullable(comment)
             .map(Comments.Comment::getId)
             .map(comments::get)
@@ -197,7 +201,7 @@ public class CommentProcessorRegistry {
       Class<?> commentProcessorInterface = commentProcessorInterfaces.get(processor);
       proxyBuilder.withInterface(commentProcessorInterface, processor);
       processor.setParagraph(paragraph);
-      processor.setCurrentRunCoordinates(runCoordinates);
+      processor.setCurrentRun(run);
       processor.setCurrentCommentWrapper(commentWrapper);
     }
 

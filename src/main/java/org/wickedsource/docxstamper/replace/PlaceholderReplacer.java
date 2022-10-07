@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 import org.wickedsource.docxstamper.api.DocxStamperException;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
