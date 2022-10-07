@@ -34,10 +34,10 @@ public class ReplaceWithProcessor extends BaseCommentProcessor
     @Override
     public void replaceWordWith(String expression) {
         logger.warn("replaceWordWith has been deprecated in favor of inplace placeholders (${expression})");
-        if (expression != null && this.getCurrentRunCoordinates() != null) {
-            RunUtil.setText(this.getCurrentRunCoordinates().getRun(), expression);
+        if (expression != null && this.getCurrentRun() != null) {
+            RunUtil.setText(this.getCurrentRun(), expression);
         } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-            RunUtil.setText(this.getCurrentRunCoordinates().getRun(), config.getNullValuesDefault());
+            RunUtil.setText(this.getCurrentRun(), config.getNullValuesDefault());
         }
     }
 }

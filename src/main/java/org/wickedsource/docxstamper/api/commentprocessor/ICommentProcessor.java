@@ -2,7 +2,7 @@ package org.wickedsource.docxstamper.api.commentprocessor;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
-import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
+import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
 /**
@@ -66,7 +66,7 @@ public interface ICommentProcessor {
      *
      * @param coordinates coordinates of the currently processed run within the template.
      */
-    void setCurrentRunCoordinates(RunCoordinates coordinates);
+    void setCurrentRun(R coordinates);
 
 
     /**

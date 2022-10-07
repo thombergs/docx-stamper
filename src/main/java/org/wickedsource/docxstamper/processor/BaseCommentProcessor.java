@@ -1,9 +1,8 @@
 package org.wickedsource.docxstamper.processor;
 
 import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
-import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
 import java.util.Objects;
@@ -12,17 +11,17 @@ public abstract class BaseCommentProcessor implements ICommentProcessor {
 
 	private P paragraph;
 
-	private RunCoordinates currentRunCoordinates;
+	private R currentRun;
 
 	private CommentWrapper currentCommentWrapper;
 
-	public RunCoordinates getCurrentRunCoordinates() {
-		return currentRunCoordinates;
+	public R getCurrentRun() {
+		return currentRun;
 	}
 
 	@Override
-	public void setCurrentRunCoordinates(RunCoordinates currentRunCoordinates) {
-		this.currentRunCoordinates = currentRunCoordinates;
+	public void setCurrentRun(R currentRun) {
+		this.currentRun = currentRun;
 	}
 
 	@Override

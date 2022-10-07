@@ -4,10 +4,6 @@ import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
-import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCellCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
-import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.util.ArrayList;
@@ -30,16 +26,13 @@ public abstract class CoordinatesWalker {
     }
 
     private void walkParagraph(P paragraph){
-        int rowIndex = 0;
-
         // Creating a copy of the content helps avoid a concurrent modification exception
         List<Object> content = new ArrayList<>(paragraph.getContent());
 
         for (Object contentElement : content) {
             if (XmlUtils.unwrap(contentElement) instanceof R) {
                 R run = (R) contentElement;
-                RunCoordinates runCoordinates = new RunCoordinates(run, rowIndex);
-                onRun(runCoordinates, paragraph);
+                onRun(run, paragraph);
             }
         }
 
@@ -50,12 +43,9 @@ public abstract class CoordinatesWalker {
 
     protected abstract void onParagraph(P paragraph);
 
-    protected abstract void onRun(RunCoordinates runCoordinates, P paragraph);
+    protected abstract void onRun(R run, P paragraph);
 
-    protected abstract void onTable(TableCoordinates tableCoordinates);
 
-    protected abstract void onTableCell(TableCellCoordinates tableCellCoordinates);
 
-    protected abstract void onTableRow(TableRowCoordinates tableRowCoordinates);
 
 }
