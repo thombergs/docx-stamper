@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class RepeatTableRowTest extends AbstractDocx4jTest {
+public class ConditionalDisplayOfParagraphsInRepeatTableTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
@@ -31,7 +31,7 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
                 new Character("Disco Stu", "Hank Azaria"),
                 new Character("Krusty the Clown", "Dan Castellaneta"))));
 
-        InputStream template = getClass().getResourceAsStream("RepeatTableRowTest.docx");
+        InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsInRepeatTableTest.docx");
 
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
@@ -42,18 +42,24 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
         // 1 header row + 1 row per character in list
         Assert.assertEquals(7, parentTableRows.size());
 
-        Assert.assertEquals("Homer Simpson", getTextFromCell(parentTableRows, 1, 0));
-        Assert.assertEquals("Dan Castellaneta", getTextFromCell(parentTableRows, 1, 1));
-        Assert.assertEquals("Marge Simpson", getTextFromCell(parentTableRows, 2, 0));
-        Assert.assertEquals("Julie Kavner", getTextFromCell(parentTableRows, 2, 1));
-        Assert.assertEquals("Bart Simpson", getTextFromCell(parentTableRows, 3, 0));
-        Assert.assertEquals("Nancy Cartwright", getTextFromCell(parentTableRows, 3, 1));
-        Assert.assertEquals("Kent Brockman", getTextFromCell(parentTableRows, 4, 0));
-        Assert.assertEquals("Harry Shearer", getTextFromCell(parentTableRows, 4, 1));
-        Assert.assertEquals("Disco Stu", getTextFromCell(parentTableRows, 5, 0));
-        Assert.assertEquals("Hank Azaria", getTextFromCell(parentTableRows, 5, 1));
-        Assert.assertEquals("Krusty the Clown", getTextFromCell(parentTableRows, 6, 0));
-        Assert.assertEquals("Dan Castellaneta", getTextFromCell(parentTableRows, 6, 1));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 1, 0));
+        Assert.assertEquals("", getTextFromCell(parentTableRows, 1, 1));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 1, 2));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 2, 0));
+        Assert.assertEquals("", getTextFromCell(parentTableRows, 2, 1));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 2, 2));
+        Assert.assertEquals("This paragraph is only included if the name is „Bart“.  ", getTextFromCell(parentTableRows, 3, 0));
+        Assert.assertEquals("", getTextFromCell(parentTableRows, 3, 1));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 3, 2));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 4, 0));
+        Assert.assertEquals("", getTextFromCell(parentTableRows, 4, 1));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 4, 2));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 5, 0));
+        Assert.assertEquals("", getTextFromCell(parentTableRows, 5, 1));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 5, 2));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 6, 0));
+        Assert.assertEquals("", getTextFromCell(parentTableRows, 6, 1));
+        Assert.assertEquals("This paragraph stays untouched.", getTextFromCell(parentTableRows, 6, 2));
     }
 
     private String getTextFromCell(List<Tr> tableRows, int rowNumber, int cellNumber) {

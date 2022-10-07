@@ -14,19 +14,21 @@ import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class RepeatParagraphTest extends AbstractDocx4jTest {
 
     @Test
     public void test() throws Docx4JException, IOException {
-        CharactersContext context = new CharactersContext();
-        context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
-        context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
-        context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
-        context.getCharacters().add(new Character("Kent Brockman", "Harry Shearer"));
-        context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
-        context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
+        CharactersContext context = new CharactersContext(new ArrayList<>(Arrays.asList(
+                new Character("Homer Simpson", "Dan Castellaneta"),
+                new Character("Marge Simpson", "Julie Kavner"),
+                new Character("Bart Simpson", "Nancy Cartwright"),
+                new Character("Kent Brockman", "Harry Shearer"),
+                new Character("Disco Stu", "Hank Azaria"),
+                new Character("Krusty the Clown", "Dan Castellaneta"))));
+
         InputStream template = getClass().getResourceAsStream("RepeatParagraphTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
