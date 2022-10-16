@@ -25,7 +25,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
     private final DocxStamperConfiguration config;
 
     private Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
-    private Map<CommentWrapper, List<Object>> repeatElementsMap = new HashMap<>();
+    private Map<CommentWrapper, List<Object>> repeatingElementsMap = new HashMap<>();
     private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap<>();
     private Map<CommentWrapper, ContentAccessor> gcpMap = new HashMap<>();
     private final ObjectFactory objectFactory;
@@ -53,7 +53,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                 subContexts.put(currentCommentWrapper, contexts);
                 subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
                 gcpMap.put(currentCommentWrapper, gcp);
-                repeatElementsMap.put(currentCommentWrapper, repeatElements);
+                repeatingElementsMap.put(currentCommentWrapper, repeatElements);
             } catch (InvalidFormatException e) {
                 throw new RuntimeException(e);
             }
@@ -68,38 +68,45 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
-        for (CommentWrapper commentWrapper : subContexts.keySet()) {
-            List<Object> expressionContexts = subContexts.get(commentWrapper);
+        for (Map.Entry<CommentWrapper, List<Object>> entry : subContexts.entrySet()) {
+            CommentWrapper commentWrapper = entry.getKey();
+            List<Object> expressionContexts = entry.getValue();
 
-            // index changes after each replacement so we need to get the insert index at the right moment.
-            ContentAccessor insertParentContentAccessor = gcpMap.get(commentWrapper);
-            int index = insertParentContentAccessor.getContent().indexOf(repeatElementsMap.get(commentWrapper).get(0));
+            // index changes after each replacement, so we need to get the insert index at the last moment.
+            List<Object> parentContent = gcpMap.get(commentWrapper).getContent();
+            List<Object> repeatingElements = repeatingElementsMap.get(commentWrapper);
+            int index = parentContent.indexOf(repeatingElements.get(0));
 
-            if (expressionContexts != null) {
-                for (Object subContext : expressionContexts) {
-                    try {
-                        WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
-                        DocxStamper<Object> stamper = new DocxStamper<>(config);
-                        ByteArrayOutputStream output = new ByteArrayOutputStream();
-                        stamper.stamp(subTemplate, subContext, output);
-                        WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
-                        try {
-                            List<Object> changes = DocumentUtil.prepareDocumentForInsert(subDocument, document);
-                            insertParentContentAccessor.getContent().addAll(index, changes);
-                            index += changes.size();
-                        } catch (Exception e) {
-                            throw new RuntimeException("Unexpected error occured ! Skipping this comment", e);
-                        }
-                    } catch (Docx4JException e) {
-                        throw new RuntimeException(e);
-                    }
+            if (expressionContexts == null) {
+                if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
+                    P nullReplacedParagraph = ParagraphUtil.create(config.getNullValuesDefault());
+                    parentContent.add(index, nullReplacedParagraph);
+                    CommentUtil.deleteComment(commentWrapper);
+                    parentContent.removeAll(repeatingElements);
                 }
-            } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-                insertParentContentAccessor.getContent().add(index, ParagraphUtil.create(config.getNullValuesDefault()));
+                continue;
             }
 
+            for (Object subContext : expressionContexts) {
+                try {
+                    WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
+                    DocxStamper<Object> stamper = new DocxStamper<>(config);
+                    ByteArrayOutputStream output = new ByteArrayOutputStream();
+                    stamper.stamp(subTemplate, subContext, output);
+                    WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
+                    try {
+                        List<Object> changes = DocumentUtil.prepareDocumentForInsert(subDocument, document);
+                        parentContent.addAll(index, changes);
+                        index += changes.size();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Unexpected error occured ! Skipping this comment", e);
+                    }
+                } catch (Docx4JException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             CommentUtil.deleteComment(commentWrapper);
-            insertParentContentAccessor.getContent().removeAll(repeatElementsMap.get(commentWrapper));
+            parentContent.removeAll(repeatingElements);
         }
     }
 
@@ -108,7 +115,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         subContexts = new HashMap<>();
         subTemplates = new HashMap<>();
         gcpMap = new HashMap<>();
-        repeatElementsMap = new HashMap<>();
+        repeatingElementsMap = new HashMap<>();
     }
 
     private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements) throws InvalidFormatException {

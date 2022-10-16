@@ -5,12 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pro.verron</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.4.8</version>
+    <version>1.5.0</version>
     <packaging>jar</packaging>
     <name>docx-stamper</name>
 
-    <description>Docx-stamper is a Java template engine for docx documents. This is a maintenance fork from
-        https://github.com/thombergs/docx-stamper.
+    <description>
+        Docx-stamper is a Java template engine for docx documents.
+        This is a fork from org.wickedsource.docx-stamper
     </description>
     <url>https://github.com/verronpro/docx-stamper</url>
     <scm>

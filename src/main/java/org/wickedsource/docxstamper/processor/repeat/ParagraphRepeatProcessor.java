@@ -12,6 +12,7 @@ import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
+import org.wickedsource.docxstamper.util.ParagraphUtil;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -53,17 +54,22 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
-        for (P paragraph : pToRepeat.keySet()) {
-            ParagraphsToRepeat paragraphsToRepeat = pToRepeat.get(paragraph);
+        for (Map.Entry<P, ParagraphsToRepeat> entry : pToRepeat.entrySet()) {
+            P paragraph = entry.getKey();
+            ParagraphsToRepeat paragraphsToRepeat = entry.getValue();
             List<Object> expressionContexts = paragraphsToRepeat.data;
 
-
             List<P> paragraphsToAdd = new ArrayList<>();
-            for (final Object expressionContext : expressionContexts) {
+
+            if (expressionContexts == null) {
+                if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
+                    P nullReplacedParagraph = ParagraphUtil.create(config.getNullValuesDefault());
+                    paragraphsToAdd.add(nullReplacedParagraph);
+                }
+            } else for (Object expressionContext : expressionContexts) {
                 for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
                     P pClone = XmlUtils.deepCopy(paragraphToClone);
                     placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
-
                     paragraphsToAdd.add(pClone);
                 }
             }
@@ -75,7 +81,6 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
                 if (index >= 0) {
                     contentAccessor.getContent().addAll(index, paragraphsToAdd);
                 }
-
                 contentAccessor.getContent().removeAll(paragraphsToRepeat.paragraphs);
             }
         }

@@ -22,6 +22,7 @@ import java.util.Map.Entry;
 
 public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProcessor {
 
+    private final DocxStamperConfiguration config;
     private Map<Tr, List<Object>> tableRowsToRepeat = new HashMap<>();
 
     private final PlaceholderReplacer<Object> placeholderReplacer;
@@ -32,13 +33,15 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
             DocxStamperConfiguration config
     ) {
 
-        this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
-        placeholderReplacer.setExpressionResolver(expressionResolver);
-        placeholderReplacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
-        placeholderReplacer.setReplaceNullValues(config.isReplaceNullValues());
-        placeholderReplacer.setNullValuesDefault(config.getNullValuesDefault());
-        placeholderReplacer.setReplaceUnresolvedExpressions(config.isReplaceUnresolvedExpressions());
-        placeholderReplacer.setUnresolvedExpressionsDefaultValue(config.getUnresolvedExpressionsDefaultValue());
+        PlaceholderReplacer<Object> replacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
+        replacer.setExpressionResolver(expressionResolver);
+        replacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
+        replacer.setReplaceNullValues(config.isReplaceNullValues());
+        replacer.setNullValuesDefault(config.getNullValuesDefault());
+        replacer.setReplaceUnresolvedExpressions(config.isReplaceUnresolvedExpressions());
+        replacer.setUnresolvedExpressionsDefaultValue(config.getUnresolvedExpressionsDefaultValue());
+        this.placeholderReplacer = replacer;
+        this.config = config;
     }
 
     @Override
@@ -55,13 +58,21 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
         for (Entry<Tr, List<Object>> entry : tableRowsToRepeat.entrySet()) {
             Tr row = entry.getKey();
             List<Object> expressionContexts = entry.getValue();
-            for (Object expressionContext : expressionContexts) {
+            if (expressionContexts == null) {
+                if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
+                    Tr rowClone = XmlUtils.deepCopy(row);
+                    Object nullExpressionContext = new Object();
+                    DocumentWalker walker = new ParagraphResolverDocumentWalker(rowClone, nullExpressionContext, document, this.placeholderReplacer);
+                    walker.walk();
+                    ((Tbl) row.getParent()).getContent().add(rowClone);
+                }
+            } else for (Object expressionContext : expressionContexts) {
                 Tr rowClone = XmlUtils.deepCopy(row);
                 DocumentWalker walker = new ParagraphResolverDocumentWalker(rowClone, expressionContext, document, this.placeholderReplacer);
                 walker.walk();
-                ((Tbl)row.getParent()).getContent().add(rowClone);
+                ((Tbl) row.getParent()).getContent().add(rowClone);
             }
-            ((Tbl)row.getParent()).getContent().remove(row);
+            ((Tbl) row.getParent()).getContent().remove(row);
         }
     }
 
