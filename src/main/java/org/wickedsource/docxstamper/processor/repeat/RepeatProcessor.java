@@ -8,7 +8,6 @@ import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
-import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
@@ -24,19 +23,10 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
 
     private Map<TableRowCoordinates, List<Object>> tableRowsToRepeat = new HashMap<>();
 
-    private PlaceholderReplacer<Object> placeholderReplacer;
-    private final DocxStamperConfiguration config;
+    private final PlaceholderReplacer placeholderReplacer;
 
-    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {
-        this.config = config;
-
-        this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
-        placeholderReplacer.setExpressionResolver(expressionResolver);
-        placeholderReplacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
-        placeholderReplacer.setReplaceNullValues(config.isReplaceNullValues());
-        placeholderReplacer.setNullValuesDefault(config.getNullValuesDefault());
-        placeholderReplacer.setReplaceUnresolvedExpressions(config.isReplaceUnresolvedExpressions());
-        placeholderReplacer.setUnresolvedExpressionsDefaultValue(config.getUnresolvedExpressionsDefaultValue());
+    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, DocxStamperConfiguration config) {
+        this.placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
     }
 
     @Override

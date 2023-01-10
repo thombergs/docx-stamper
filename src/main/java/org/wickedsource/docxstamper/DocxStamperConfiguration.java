@@ -30,13 +30,13 @@ public class DocxStamperConfiguration {
 
     private String nullValuesDefault = null;
 
-    private Map<Class<?>, ICommentProcessor> commentProcessors = new HashMap<>();
+    private final Map<Class<?>, Object> commentProcessors = new HashMap<>();
 
-    private Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
+    private final Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
 
     private ITypeResolver defaultTypeResolver = new FallbackResolver();
 
-    private Map<Class<?>, Object> expressionFunctions = new HashMap<>();
+    private final Map<Class<?>, Object> expressionFunctions = new HashMap<>();
 
     /**
      * The String provided as lineBreakPlaceholder will be replaces with a line break
@@ -176,15 +176,15 @@ public class DocxStamperConfiguration {
         return new DocxStamper(this);
     }
 
-    EvaluationContextConfigurer getEvaluationContextConfigurer() {
+    public EvaluationContextConfigurer getEvaluationContextConfigurer() {
         return evaluationContextConfigurer;
     }
 
-    boolean isFailOnUnresolvedExpression() {
+    public boolean isFailOnUnresolvedExpression() {
         return failOnUnresolvedExpression;
     }
 
-    Map<Class<?>, ICommentProcessor> getCommentProcessors() {
+    public Map<Class<?>, Object> getCommentProcessors() {
         return commentProcessors;
     }
 

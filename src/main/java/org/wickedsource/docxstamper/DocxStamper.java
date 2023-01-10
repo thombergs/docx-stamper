@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
-import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -12,7 +11,6 @@ import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.*;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
-import org.wickedsource.docxstamper.proxy.ProxyBuilder;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
@@ -34,7 +32,7 @@ import java.util.Map;
  */
 public class DocxStamper<T> {
 
-    private PlaceholderReplacer<T> placeholderReplacer;
+    private PlaceholderReplacer placeholderReplacer;
 
     private CommentProcessorRegistry commentProcessorRegistry;
 
@@ -59,27 +57,17 @@ public class DocxStamper<T> {
             typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
         }
 
-        ExpressionResolver expressionResolver = new ExpressionResolver(config.getEvaluationContextConfigurer());
-        placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
-        placeholderReplacer.setExpressionResolver(expressionResolver);
-        placeholderReplacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
-        placeholderReplacer.setReplaceNullValues(config.isReplaceNullValues());
-        placeholderReplacer.setNullValuesDefault(config.getNullValuesDefault());
-        placeholderReplacer.setReplaceUnresolvedExpressions(config.isReplaceUnresolvedExpressions());
-        placeholderReplacer.setUnresolvedExpressionsDefaultValue(config.getUnresolvedExpressionsDefaultValue());
+        ExpressionResolver expressionResolver = new ExpressionResolver(config);
+        placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
 
-        commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
+        config.getCommentProcessors().put(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry, config));
+        config.getCommentProcessors().put(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry, config));
+        config.getCommentProcessors().put(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(config));
+        config.getCommentProcessors().put(IDisplayIfProcessor.class, new DisplayIfProcessor());
+        config.getCommentProcessors().put(IReplaceWithProcessor.class, new ReplaceWithProcessor(config));
+
+        commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer, config);
         commentProcessorRegistry.setExpressionResolver(expressionResolver);
-        commentProcessorRegistry.setFailOnInvalidExpression(config.isFailOnUnresolvedExpression());
-        commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry, expressionResolver, config));
-        commentProcessorRegistry.registerCommentProcessor(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry, expressionResolver, config));
-        commentProcessorRegistry.registerCommentProcessor(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(config));
-        commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor(config));
-        commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class,
-                new ReplaceWithProcessor(config));
-        for (Map.Entry<Class<?>, ICommentProcessor> entry : config.getCommentProcessors().entrySet()) {
-            commentProcessorRegistry.registerCommentProcessor(entry.getKey(), entry.getValue());
-        }
     }
 
     /**
@@ -137,9 +125,8 @@ public class DocxStamper<T> {
      */
     public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
         try {
-            ProxyBuilder<T> proxyBuilder = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
-            processComments(document, proxyBuilder);
-            replaceExpressions(document, proxyBuilder);
+            processComments(document, contextRoot);
+            replaceExpressions(document, contextRoot);
             document.save(out);
             commentProcessorRegistry.reset();
         } catch (DocxStamperException e) {
@@ -149,26 +136,12 @@ public class DocxStamper<T> {
         }
     }
 
-    private ProxyBuilder<T> addCustomInterfacesToContextRoot(T contextRoot, Map<Class<?>, Object> interfacesToImplementations) {
-        ProxyBuilder<T> proxyBuilder = new ProxyBuilder<T>()
-                .withRoot(contextRoot);
-        if (interfacesToImplementations.isEmpty()) {
-            return proxyBuilder;
-        }
-        for (Map.Entry<Class<?>, Object> entry : interfacesToImplementations.entrySet()) {
-            Class<?> interfaceClass = entry.getKey();
-            Object implementation = entry.getValue();
-            proxyBuilder.withInterface(interfaceClass, implementation);
-        }
-        return proxyBuilder;
+    private void replaceExpressions(WordprocessingMLPackage document, T contextObject) {
+        placeholderReplacer.resolveExpressions(document, contextObject);
     }
 
-    private void replaceExpressions(WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
-        placeholderReplacer.resolveExpressions(document, proxyBuilder);
-    }
-
-    private void processComments(final WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
-        commentProcessorRegistry.runProcessors(document, proxyBuilder);
+    private void processComments(final WordprocessingMLPackage document, T contextObject) {
+        commentProcessorRegistry.runProcessors(document, contextObject);
     }
 
 }

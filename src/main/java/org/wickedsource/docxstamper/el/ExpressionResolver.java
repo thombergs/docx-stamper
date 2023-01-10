@@ -4,20 +4,15 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
+import org.wickedsource.docxstamper.DocxStamperConfiguration;
 
 public class ExpressionResolver {
 
     private static final ExpressionUtil expressionUtil = new ExpressionUtil();
+    private final DocxStamperConfiguration configuration;
 
-    private final EvaluationContextConfigurer evaluationContextConfigurer;
-
-    public ExpressionResolver() {
-        this.evaluationContextConfigurer = new NoOpEvaluationContextConfigurer();
-    }
-
-    public ExpressionResolver(EvaluationContextConfigurer evaluationContextConfigurer) {
-        this.evaluationContextConfigurer = evaluationContextConfigurer;
+    public ExpressionResolver(DocxStamperConfiguration configuration) {
+        this.configuration = configuration;
     }
 
     /**
@@ -32,10 +27,9 @@ public class ExpressionResolver {
             expressionString = expressionUtil.stripExpression(expressionString);
         }
         ExpressionParser parser = new SpelExpressionParser();
-        // TODO create a custom evaluation context to allow skipping the use of a proxy to inject processor methods
-        // processors methods should be registered as methodaccessors instead of added as proxy method on the context
         StandardEvaluationContext evaluationContext = new StandardEvaluationContext(contextRoot);
-        evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
+        evaluationContext.addMethodResolver(new StandardMethodResolver(configuration));
+        configuration.getEvaluationContextConfigurer().configureEvaluationContext(evaluationContext);
         Expression expression = parser.parseExpression(expressionString);
         return expression.getValue(evaluationContext);
     }

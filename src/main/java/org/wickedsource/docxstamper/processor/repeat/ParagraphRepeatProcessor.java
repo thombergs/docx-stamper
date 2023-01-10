@@ -9,7 +9,6 @@ import org.docx4j.wml.P;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
-import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
@@ -30,13 +29,12 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
     private Map<ParagraphCoordinates, ParagraphsToRepeat> pToRepeat = new HashMap<>();
 
-    private PlaceholderReplacer<Object> placeholderReplacer;
+    private final PlaceholderReplacer placeholderReplacer;
     private final DocxStamperConfiguration config;
 
-    public ParagraphRepeatProcessor(TypeResolverRegistry typeResolverRegistry, ExpressionResolver expressionResolver, DocxStamperConfiguration config) {
-        this.placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry);
+    public ParagraphRepeatProcessor(TypeResolverRegistry typeResolverRegistry, DocxStamperConfiguration config) {
+        this.placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
         this.config = config;
-        this.placeholderReplacer.setExpressionResolver(expressionResolver);
     }
 
     @Override
