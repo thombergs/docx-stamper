@@ -75,13 +75,20 @@ public interface ICommentProcessor {
      * This method is always called BEFORE the custom methods of the custom comment
      * processor interface are called.
      *
-     *  @param commentWrapper of the currently processed comment within the template.
+     * @param commentWrapper of the currently processed comment within the template.
      */
     void setCurrentCommentWrapper(CommentWrapper commentWrapper);
+
+    /**
+     * Passes the processed document, in order to make all linked data (images, etc) available
+     * to processors that need it (example : repeatDocPart)
+     *
+     * @param document DocX template being processed.
+     */
+    void setDocument(WordprocessingMLPackage document);
 
     /**
      * Resets all state in the comment processor so that it can be re-used in another stamping process.
      */
     void reset();
-
 }

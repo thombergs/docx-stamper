@@ -4,6 +4,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.util.RunUtil;
 
@@ -14,13 +15,12 @@ import org.wickedsource.docxstamper.util.RunUtil;
 public class ReplaceWithProcessor extends BaseCommentProcessor
         implements IReplaceWithProcessor {
 
-    private Logger logger = LoggerFactory.getLogger(ReplaceWithProcessor.class);
+    private final Logger logger = LoggerFactory.getLogger(ReplaceWithProcessor.class);
 
-    private final DocxStamperConfiguration config;
-
-    public ReplaceWithProcessor(DocxStamperConfiguration config) {
-        this.config = config;
+    public ReplaceWithProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
+        super(config, typeResolverRegistry);
     }
+
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
@@ -36,8 +36,8 @@ public class ReplaceWithProcessor extends BaseCommentProcessor
         logger.warn("replaceWordWith has been deprecated in favor of inplace placeholders (${expression})");
         if (expression != null && this.getCurrentRunCoordinates() != null) {
             RunUtil.setText(this.getCurrentRunCoordinates().getRun(), expression);
-        } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-            RunUtil.setText(this.getCurrentRunCoordinates().getRun(), config.getNullValuesDefault());
+        } else if (configuration.isReplaceNullValues() && configuration.getNullValuesDefault() != null) {
+            RunUtil.setText(this.getCurrentRunCoordinates().getRun(), configuration.getNullValuesDefault());
         }
     }
 }

@@ -8,35 +8,40 @@ import org.wickedsource.docxstamper.util.CommentWrapper;
 
 public class TestImpl implements ITestInterface, ICommentProcessor {
 
-	@Override
-	public String returnString(String string) {
-		return string;
-	}
+    @Override
+    public String returnString(String string) {
+        return string;
+    }
 
-	@Override
-	public void commitChanges(WordprocessingMLPackage document) {
+    @Override
+    public void commitChanges(WordprocessingMLPackage document) {
 
-	}
+    }
 
-	@Override
-	public void setCurrentParagraphCoordinates(ParagraphCoordinates coordinates) {
+    @Override
+    public void setCurrentParagraphCoordinates(ParagraphCoordinates coordinates) {
 
-	}
+    }
 
-	@Override
-	public void setCurrentRunCoordinates(RunCoordinates coordinates) {
-		// TODO Auto-generated method stub
+    @Override
+    public void setCurrentRunCoordinates(RunCoordinates coordinates) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 
-	@Override
-	public void setCurrentCommentWrapper(CommentWrapper commentWrapper) {
+    @Override
+    public void setCurrentCommentWrapper(CommentWrapper commentWrapper) {
 
-	}
+    }
 
-	@Override
-	public void reset() {
+    @Override
+    public void setDocument(WordprocessingMLPackage document) {
 
-	}
+    }
+
+    @Override
+    public void reset() {
+
+    }
 
 }

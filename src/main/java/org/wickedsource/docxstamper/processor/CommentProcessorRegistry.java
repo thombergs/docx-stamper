@@ -148,19 +148,19 @@ public class CommentProcessorRegistry {
                                                                          final Map<BigInteger, CommentWrapper> comments, T expressionContext,
                                                                          ParagraphCoordinates paragraphCoordinates) {
         Comments.Comment comment = CommentUtil.getCommentFor(paragraphCoordinates.getParagraph(), document);
-        return runCommentProcessors(comments, expressionContext, comment, paragraphCoordinates, null);
+        return runCommentProcessors(comments, expressionContext, comment, paragraphCoordinates, null, document);
     }
 
     private <T> Optional<CommentWrapper> runProcessorsOnRunComment(final WordprocessingMLPackage document,
                                                                    final Map<BigInteger, CommentWrapper> comments, T expressionContext,
                                                                    ParagraphCoordinates paragraphCoordinates, RunCoordinates runCoordinates) {
         Comments.Comment comment = CommentUtil.getCommentAround(runCoordinates.getRun(), document);
-        return runCommentProcessors(comments, expressionContext, comment, paragraphCoordinates, runCoordinates);
+        return runCommentProcessors(comments, expressionContext, comment, paragraphCoordinates, runCoordinates, document);
     }
 
     private <T> Optional<CommentWrapper> runCommentProcessors(final Map<BigInteger, CommentWrapper> comments, T expressionContext,
                                                               Comments.Comment comment, ParagraphCoordinates paragraphCoordinates,
-                                                              RunCoordinates runCoordinates) {
+                                                              RunCoordinates runCoordinates, WordprocessingMLPackage document) {
 
         CommentWrapper commentWrapper = Optional.ofNullable(comment)
                 .map(Comments.Comment::getId)
@@ -178,11 +178,12 @@ public class CommentProcessorRegistry {
             ((ICommentProcessor) processor).setCurrentParagraphCoordinates(paragraphCoordinates);
             ((ICommentProcessor) processor).setCurrentRunCoordinates(runCoordinates);
             ((ICommentProcessor) processor).setCurrentCommentWrapper(commentWrapper);
+            ((ICommentProcessor) processor).setDocument(document);
         }
 
         try {
             expressionResolver.resolveExpression(commentString, expressionContext);
-            comments.remove(comment.getId()); // guarantee one-time processing
+            comments.remove(comment.getId());
             logger.debug(
                     String.format("Comment '%s' has been successfully processed by a comment processor.",
                             commentString));

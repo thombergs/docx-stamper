@@ -1,9 +1,11 @@
 package org.wickedsource.docxstamper.processor.displayif;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
+import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.util.ObjectDeleter;
@@ -19,7 +21,8 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 
     private List<TableRowCoordinates> tableRowsToBeRemoved = new ArrayList<>();
 
-    public DisplayIfProcessor() {
+    public DisplayIfProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
+        super(config, typeResolverRegistry);
     }
 
     @Override

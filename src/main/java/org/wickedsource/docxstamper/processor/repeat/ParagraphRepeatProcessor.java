@@ -10,8 +10,8 @@ import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
-import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
+import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
 
 import java.math.BigInteger;
@@ -23,18 +23,16 @@ import java.util.Map;
 public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IParagraphRepeatProcessor {
 
     private static class ParagraphsToRepeat {
+        CommentWrapper commentWrapper;
         List<Object> data;
         List<P> paragraphs;
     }
 
     private Map<ParagraphCoordinates, ParagraphsToRepeat> pToRepeat = new HashMap<>();
 
-    private final PlaceholderReplacer placeholderReplacer;
-    private final DocxStamperConfiguration config;
 
-    public ParagraphRepeatProcessor(TypeResolverRegistry typeResolverRegistry, DocxStamperConfiguration config) {
-        this.placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
-        this.config = config;
+    public ParagraphRepeatProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
+        super(config, typeResolverRegistry);
     }
 
     @Override
@@ -45,11 +43,11 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
         List<P> paragraphs = getParagraphsInsideComment(paragraph);
 
         ParagraphsToRepeat toRepeat = new ParagraphsToRepeat();
+        toRepeat.commentWrapper = getCurrentCommentWrapper();
         toRepeat.data = objects;
         toRepeat.paragraphs = paragraphs;
 
         pToRepeat.put(paragraphCoordinates, toRepeat);
-        CommentUtil.deleteComment(getCurrentCommentWrapper());
     }
 
     @Override
@@ -64,13 +62,14 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
                 for (final Object expressionContext : expressionContexts) {
                     for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
                         P pClone = XmlUtils.deepCopy(paragraphToClone);
+                        CommentUtil.deleteCommentFromElement(pClone, paragraphsToRepeat.commentWrapper.getComment().getId());
                         placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
 
                         paragraphsToAdd.add(pClone);
                     }
                 }
-            } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-                paragraphsToAdd.add(ParagraphUtil.create(config.getNullValuesDefault()));
+            } else if (configuration.isReplaceNullValues() && configuration.getNullValuesDefault() != null) {
+                paragraphsToAdd.add(ParagraphUtil.create(configuration.getNullValuesDefault()));
             }
 
             Object parent = rCoords.getParagraph().getParent();

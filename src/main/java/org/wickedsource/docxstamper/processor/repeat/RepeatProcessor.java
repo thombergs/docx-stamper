@@ -10,8 +10,8 @@ import org.wickedsource.docxstamper.api.coordinates.TableRowCoordinates;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
-import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
+import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
@@ -22,12 +22,12 @@ import java.util.Map;
 public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProcessor {
 
     private Map<TableRowCoordinates, List<Object>> tableRowsToRepeat = new HashMap<>();
+    private Map<TableRowCoordinates, CommentWrapper> tableRowsCommentsToRemove = new HashMap<>();
 
-    private final PlaceholderReplacer placeholderReplacer;
-
-    public RepeatProcessor(TypeResolverRegistry typeResolverRegistry, DocxStamperConfiguration config) {
-        this.placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
+    public RepeatProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
+        super(config, typeResolverRegistry);
     }
+
 
     @Override
     public void commitChanges(WordprocessingMLPackage document) {
@@ -37,6 +37,7 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
     @Override
     public void reset() {
         this.tableRowsToRepeat = new HashMap<>();
+        this.tableRowsCommentsToRemove = new HashMap<>();
     }
 
     private void repeatRows(final WordprocessingMLPackage document) {
@@ -47,6 +48,8 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
             if (expressionContexts != null) {
                 for (final Object expressionContext : expressionContexts) {
                     Tr rowClone = XmlUtils.deepCopy(rCoords.getRow());
+                    CommentUtil.deleteCommentFromElement(rowClone, tableRowsCommentsToRemove.get(rCoords).getComment().getId());
+
                     DocumentWalker walker = new BaseDocumentWalker(rowClone) {
                         @Override
                         protected void onParagraph(P paragraph) {
@@ -70,7 +73,8 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
                 pCoords.getParentTableCellCoordinates().getParentTableRowCoordinates() == null) {
             throw new CommentProcessingException("Paragraph is not within a table!", pCoords);
         }
-        tableRowsToRepeat.put(getCurrentParagraphCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates(), objects);
-        CommentUtil.deleteComment(getCurrentCommentWrapper());
+        TableRowCoordinates parentTableRowCoordinates = getCurrentParagraphCoordinates().getParentTableCellCoordinates().getParentTableRowCoordinates();
+        tableRowsToRepeat.put(parentTableRowCoordinates, objects);
+        tableRowsCommentsToRemove.put(parentTableRowCoordinates, getCurrentCommentWrapper());
     }
 }

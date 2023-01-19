@@ -16,7 +16,7 @@ import java.util.Random;
  */
 public class ImageResolver implements ITypeResolver {
 
-    private static Random random = new Random();
+    private static final Random random = new Random();
 
     @Override
     public R resolve(WordprocessingMLPackage document, Object image) {

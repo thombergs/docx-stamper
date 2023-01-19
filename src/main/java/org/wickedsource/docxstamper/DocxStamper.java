@@ -2,15 +2,11 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
-import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
-import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
-import org.wickedsource.docxstamper.processor.repeat.*;
-import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
-import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
@@ -19,6 +15,8 @@ import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.Map;
 
@@ -60,11 +58,17 @@ public class DocxStamper<T> {
         ExpressionResolver expressionResolver = new ExpressionResolver(config);
         placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
 
-        config.getCommentProcessors().put(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry, config));
-        config.getCommentProcessors().put(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry, config));
-        config.getCommentProcessors().put(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(config));
-        config.getCommentProcessors().put(IDisplayIfProcessor.class, new DisplayIfProcessor());
-        config.getCommentProcessors().put(IReplaceWithProcessor.class, new ReplaceWithProcessor(config));
+        config.getCommentProcessorsToUse().entrySet().forEach(entry -> {
+            try {
+                Class<?> processorImpl = entry.getValue();
+                Constructor<?> constructor = processorImpl.getDeclaredConstructor(DocxStamperConfiguration.class, TypeResolverRegistry.class);
+                Object processorInstance = constructor.newInstance(config, typeResolverRegistry);
+                config.getCommentProcessors().put(entry.getKey(), processorInstance);
+            } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+                     IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
 
         commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer, config);
         commentProcessorRegistry.setExpressionResolver(expressionResolver);
@@ -134,6 +138,17 @@ public class DocxStamper<T> {
         } catch (Exception e) {
             throw new DocxStamperException(e);
         }
+    }
+
+    /**
+     * This method allows getting comment processors instances in use to access their internal state. Useful for
+     * testing purposes.
+     *
+     * @param interfaceToGet ICommentProcessor interface to lookup.
+     * @return ICommentProcessor implementation instance or null if not used.
+     */
+    public ICommentProcessor getCommentProcessorInstance(Class<?> interfaceToGet) {
+        return (ICommentProcessor) config.getCommentProcessors().get(interfaceToGet);
     }
 
     private void replaceExpressions(WordprocessingMLPackage document, T contextObject) {

@@ -27,7 +27,7 @@ public class DocumentUtil {
      * @throws Exception
      */
     public static List<Object> prepareDocumentForInsert(WordprocessingMLPackage sourceDocument, WordprocessingMLPackage destDocument) throws Exception {
-        return walkObjects(sourceDocument.getMainDocumentPart(), sourceDocument, destDocument);
+        return walkObjectsAndImportImages(sourceDocument.getMainDocumentPart(), sourceDocument, destDocument);
     }
 
     /**
@@ -40,7 +40,7 @@ public class DocumentUtil {
      * @return the list of imported objects from the source container.
      * @throws Exception
      */
-    private static List<Object> walkObjects(ContentAccessor sourceContainer, WordprocessingMLPackage sourceDocument, WordprocessingMLPackage destDocument) throws Exception {
+    public static List<Object> walkObjectsAndImportImages(ContentAccessor sourceContainer, WordprocessingMLPackage sourceDocument, WordprocessingMLPackage destDocument) throws Exception {
         List<Object> result = new ArrayList<>();
         for (Object obj : sourceContainer.getContent()) {
             if (obj instanceof R && isImageRun((R) obj)) {
@@ -48,7 +48,7 @@ public class DocumentUtil {
                 // TODO : retrieve filename, altText and width from source document
                 result.add(ImageResolver.createRunWithImage(destDocument, imageData, null, null, null));
             } else if (obj instanceof ContentAccessor) {
-                List<Object> importedChildren = walkObjects((ContentAccessor) obj, sourceDocument, destDocument);
+                List<Object> importedChildren = walkObjectsAndImportImages((ContentAccessor) obj, sourceDocument, destDocument);
                 ((ContentAccessor) obj).getContent().clear();
                 ((ContentAccessor) obj).getContent().addAll(importedChildren);
                 result.add(obj);
@@ -121,7 +121,7 @@ public class DocumentUtil {
      * @param drawing the drawing to get the relationship id.
      * @return
      */
-    private static String getImageRelationshipId(Drawing drawing) {
+    public static String getImageRelationshipId(Drawing drawing) {
         Graphic graphic = getInlineGraphic(drawing);
         return graphic.getGraphicData().getPic().getBlipFill().getBlip().getEmbed();
     }

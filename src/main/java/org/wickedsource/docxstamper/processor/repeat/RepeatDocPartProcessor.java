@@ -3,40 +3,40 @@ package org.wickedsource.docxstamper.processor.repeat;
 import org.docx4j.XmlUtils;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.exceptions.InvalidFormatException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
 import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
 import org.wickedsource.docxstamper.DocxStamper;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
-import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
+import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
-
-    private final DocxStamperConfiguration config;
 
     private Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
     private Map<CommentWrapper, List<Object>> repeatElementsMap = new HashMap<>();
     private Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap<>();
     private Map<CommentWrapper, ContentAccessor> gcpMap = new HashMap<>();
-    private final ObjectFactory objectFactory;
 
-    public RepeatDocPartProcessor(DocxStamperConfiguration config) {
-        this.config = config;
-        this.objectFactory = Context.getWmlObjectFactory();
+    private static ObjectFactory objectFactory = null;
+
+    public RepeatDocPartProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
+        super(config, typeResolverRegistry);
     }
 
+
     @Override
-    public void repeatDocPart(List<Object> contexts) {
+    public void repeatDocPart(List<Object> contexts) throws Exception {
         if (contexts == null) {
             contexts = Collections.emptyList();
         }
@@ -48,16 +48,19 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         );
         List<Object> repeatElements = getRepeatElements(currentCommentWrapper, gcp);
 
-        if (repeatElements.size() > 0) {
-            try {
-                subContexts.put(currentCommentWrapper, contexts);
-                subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
-                gcpMap.put(currentCommentWrapper, gcp);
-                repeatElementsMap.put(currentCommentWrapper, repeatElements);
-            } catch (InvalidFormatException e) {
-                throw new RuntimeException(e);
-            }
+        if (!repeatElements.isEmpty()) {
+            subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements, getOrCreateObjectFactory()));
+            subContexts.put(currentCommentWrapper, contexts);
+            gcpMap.put(currentCommentWrapper, gcp);
+            repeatElementsMap.put(currentCommentWrapper, repeatElements);
         }
+    }
+
+    private static ObjectFactory getOrCreateObjectFactory() {
+        if (objectFactory == null) {
+            objectFactory = Context.getWmlObjectFactory();
+        }
+        return objectFactory;
     }
 
     private WordprocessingMLPackage copyTemplate(WordprocessingMLPackage doc) throws Docx4JException {
@@ -79,7 +82,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                 for (Object subContext : expressionContexts) {
                     try {
                         WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
-                        DocxStamper<Object> stamper = new DocxStamper<>(config);
+                        DocxStamper<Object> stamper = new DocxStamper<>(configuration.copy());
                         ByteArrayOutputStream output = new ByteArrayOutputStream();
                         stamper.stamp(subTemplate, subContext, output);
                         WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
@@ -94,11 +97,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
                         throw new RuntimeException(e);
                     }
                 }
-            } else if (config.isReplaceNullValues() && config.getNullValuesDefault() != null) {
-                insertParentContentAccessor.getContent().add(index, ParagraphUtil.create(config.getNullValuesDefault()));
+            } else if (configuration.isReplaceNullValues() && configuration.getNullValuesDefault() != null) {
+                insertParentContentAccessor.getContent().add(index, ParagraphUtil.create(configuration.getNullValuesDefault()));
             }
 
-            CommentUtil.deleteComment(commentWrapper);
             insertParentContentAccessor.getContent().removeAll(repeatElementsMap.get(commentWrapper));
         }
     }
@@ -111,21 +113,60 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         repeatElementsMap = new HashMap<>();
     }
 
-    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements) throws InvalidFormatException {
-        CommentUtil.deleteComment(commentWrapper); // for deep copy without comment
-
-        WordprocessingMLPackage document = WordprocessingMLPackage.createPackage();
+    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements, ObjectFactory objectFactory) throws Exception {
+        WordprocessingMLPackage document = getDocument();
+        WordprocessingMLPackage subDocument = WordprocessingMLPackage.createPackage();
 
         CommentsPart commentsPart = new CommentsPart();
-        document.getMainDocumentPart().addTargetPart(commentsPart);
+        subDocument.getMainDocumentPart().addTargetPart(commentsPart);
 
-        document.getMainDocumentPart().getContent().addAll(repeatElements);
+        // copy the elements to repeat without comment range anchors
+        List<Object> finalRepeatElements = repeatElements.stream().map(XmlUtils::deepCopy).collect(Collectors.toList());
+        removeCommentAnchorsFromFinalElements(commentWrapper, finalRepeatElements);
+        subDocument.getMainDocumentPart().getContent().addAll(finalRepeatElements);
+
+        // copy the images from parent document using the original repeat elements
+        ContentAccessor fakeBody = getOrCreateObjectFactory().createBody();
+        fakeBody.getContent().addAll(repeatElements);
+        DocumentUtil.walkObjectsAndImportImages(fakeBody, document, subDocument);
 
         Comments comments = objectFactory.createComments();
         commentWrapper.getChildren().forEach(comment -> comments.getComment().add(comment.getComment()));
         commentsPart.setContents(comments);
 
-        return document;
+        return subDocument;
+    }
+
+    private static void removeCommentAnchorsFromFinalElements(CommentWrapper commentWrapper, List<Object> finalRepeatElements) {
+        List<Object> commentsToRemove = new ArrayList<>();
+
+        new BaseDocumentWalker(() -> finalRepeatElements) {
+            @Override
+            protected void onCommentRangeStart(CommentRangeStart commentRangeStart) {
+                if (commentRangeStart.getId().equals(commentWrapper.getComment().getId())) {
+                    commentsToRemove.add(commentRangeStart);
+                }
+            }
+
+            @Override
+            protected void onCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
+                if (commentRangeEnd.getId().equals(commentWrapper.getComment().getId())) {
+                    commentsToRemove.add(commentRangeEnd);
+                }
+            }
+        }.walk();
+
+        for (Object commentAnchorToRemove : commentsToRemove) {
+            if (commentAnchorToRemove instanceof CommentRangeStart) {
+                ContentAccessor parent = ((ContentAccessor) ((CommentRangeStart) commentAnchorToRemove).getParent());
+                parent.getContent().removeAll(parent.getContent().subList(0, parent.getContent().indexOf(commentAnchorToRemove) + 1));
+            } else if (commentAnchorToRemove instanceof CommentRangeEnd) {
+                ContentAccessor parent = ((ContentAccessor) ((CommentRangeEnd) commentAnchorToRemove).getParent());
+                parent.getContent().removeAll(parent.getContent().subList(parent.getContent().indexOf(commentAnchorToRemove), parent.getContent().size()));
+            } else {
+                throw new RuntimeException("Unknown comment anchor type given to remove !");
+            }
+        }
     }
 
     private static List<Object> getRepeatElements(CommentWrapper commentWrapper, ContentAccessor greatestCommonParent) {
