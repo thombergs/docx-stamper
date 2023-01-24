@@ -20,6 +20,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.*;
 
+import org.springframework.util.CollectionUtils;
+
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
 
     private final DocxStamperConfiguration config;
@@ -129,12 +131,21 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         document.getMainDocumentPart().getContent().addAll(repeatElements);
 
         Comments comments = objectFactory.createComments();
-        commentWrapper.getChildren().forEach(comment -> comments.getComment().add(comment.getComment()));
+        extractedSubComments(commentWrapper,comments);
         commentsPart.setContents(comments);
 
         return document;
     }
 
+	private void extractedSubComments(CommentWrapper commentWrapper, Comments comments) {
+		for (CommentWrapper child : commentWrapper.getChildren()) {
+			comments.getComment().add(child.getComment());
+			if (CollectionUtils.isEmpty(child.getChildren())) {
+				continue;
+			}
+			extractedSubComments(child, comments);
+		}
+	}
     private static List<Object> getRepeatElements(CommentWrapper commentWrapper, ContentAccessor greatestCommonParent) {
         List<Object> repeatElements = new ArrayList<>();
         boolean startFound = false;
