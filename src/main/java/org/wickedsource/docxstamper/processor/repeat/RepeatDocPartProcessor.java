@@ -7,6 +7,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
 import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
+import org.springframework.util.CollectionUtils;
 import org.wickedsource.docxstamper.DocxStamper;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
@@ -131,10 +132,20 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
         DocumentUtil.walkObjectsAndImportImages(fakeBody, document, subDocument);
 
         Comments comments = objectFactory.createComments();
-        commentWrapper.getChildren().forEach(comment -> comments.getComment().add(comment.getComment()));
+        extractedSubComments(commentWrapper, comments);
         commentsPart.setContents(comments);
 
         return subDocument;
+    }
+
+    private void extractedSubComments(CommentWrapper commentWrapper, Comments comments) {
+        for (CommentWrapper child : commentWrapper.getChildren()) {
+            comments.getComment().add(child.getComment());
+            if (CollectionUtils.isEmpty(child.getChildren())) {
+                continue;
+            }
+            extractedSubComments(child, comments);
+        }
     }
 
     private static void removeCommentAnchorsFromFinalElements(CommentWrapper commentWrapper, List<Object> finalRepeatElements) {
