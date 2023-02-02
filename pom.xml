@@ -259,7 +259,7 @@
         <dependency>
             <groupId>org.docx4j</groupId>
             <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
-            <version>11.4.8</version>
+            <version>11.4.9</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
