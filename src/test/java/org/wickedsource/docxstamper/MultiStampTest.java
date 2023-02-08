@@ -19,25 +19,25 @@ import java.util.List;
 
 public class MultiStampTest extends AbstractDocx4jTest {
 
-	@Test
-	public void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
-		DocxStamper<NamesContext> stamper = new DocxStamper<>(new DocxStamperConfiguration());
-		NamesContext context = new NamesContext();
+    @Test
+    public void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
+        DocxStamper<NamesContext> stamper = new DocxStamper<>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));
+        NamesContext context = new NamesContext();
 
-		InputStream template = getClass().getResourceAsStream("MultiStampTest.docx");
-		OutputStream out = getOutputStream();
-		stamper.stamp(template, context, out);
-		InputStream in = getInputStream(out);
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
-		assertTableRows(document);
+        InputStream template = getClass().getResourceAsStream("MultiStampTest.docx");
+        OutputStream out = getOutputStream();
+        stamper.stamp(template, context, out);
+        InputStream in = getInputStream(out);
+        WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
+        assertTableRows(document);
 
-		template = getClass().getResourceAsStream("MultiStampTest.docx");
-		out = getOutputStream();
-		stamper.stamp(template, context, out);
-		in = getInputStream(out);
-		document = WordprocessingMLPackage.load(in);
-		assertTableRows(document);
-	}
+        template = getClass().getResourceAsStream("MultiStampTest.docx");
+        out = getOutputStream();
+        stamper.stamp(template, context, out);
+        in = getInputStream(out);
+        document = WordprocessingMLPackage.load(in);
+        assertTableRows(document);
+    }
 
 	private static void assertRowContainsText(Tr row, String text) {
 		final List<Tc> cell0 = DocumentUtil.extractElements(row, Tc.class);
@@ -46,7 +46,7 @@ public class MultiStampTest extends AbstractDocx4jTest {
 		Assert.assertTrue(message, cellContent.contains(text));
 	}
 
-	private void assertTableRows(WordprocessingMLPackage document) {
+    private void assertTableRows(WordprocessingMLPackage document) {
 		final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
 		Assert.assertEquals(1, tablesFromObject.size());
 
@@ -58,26 +58,26 @@ public class MultiStampTest extends AbstractDocx4jTest {
 		assertRowContainsText(tableRows.get(2), "Bart");
 		assertRowContainsText(tableRows.get(3), "Lisa");
 		assertRowContainsText(tableRows.get(4), "Maggie");
-	}
+    }
 
-	public static class NamesContext {
+    public static class NamesContext {
 		private List<NameContext> names = new ArrayList<>();
 
-		public NamesContext() {
+        public NamesContext() {
 			this.names.add(new NameContext("Homer"));
 			this.names.add(new NameContext("Marge"));
 			this.names.add(new NameContext("Bart"));
 			this.names.add(new NameContext("Lisa"));
 			this.names.add(new NameContext("Maggie"));
-		}
+        }
 
 		public List<NameContext> getNames() {
-			return names;
-		}
+            return names;
+        }
 
 		public void setNames(List<NameContext> names) {
-			this.names = names;
-		}
-	}
+            this.names = names;
+        }
+    }
 
 }

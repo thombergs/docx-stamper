@@ -3,6 +3,7 @@ package org.wickedsource.docxstamper.util;
 import org.docx4j.wml.CommentRangeEnd;
 import org.docx4j.wml.CommentRangeStart;
 import org.docx4j.wml.Comments;
+import org.docx4j.wml.R;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,7 +16,12 @@ public class CommentWrapper {
 
     private CommentRangeEnd commentRangeEnd;
 
-    private Set<CommentWrapper> children = new HashSet<>();
+    private R.CommentReference commentReference;
+
+    private Set<CommentWrapper> children = new HashSet();
+
+    public CommentWrapper() {
+    }
 
     public Comments.Comment getComment() {
         return comment;
@@ -27,6 +33,10 @@ public class CommentWrapper {
 
     public CommentRangeEnd getCommentRangeEnd() {
         return commentRangeEnd;
+    }
+
+    public R.CommentReference getCommentReference() {
+        return commentReference;
     }
 
     public Set<CommentWrapper> getChildren() {
@@ -45,7 +55,12 @@ public class CommentWrapper {
         this.commentRangeEnd = commentRangeEnd;
     }
 
+    void setCommentReference(R.CommentReference commentReference) {
+        this.commentReference = commentReference;
+    }
+
     void setChildren(Set<CommentWrapper> children) {
         this.children = children;
     }
+
 }

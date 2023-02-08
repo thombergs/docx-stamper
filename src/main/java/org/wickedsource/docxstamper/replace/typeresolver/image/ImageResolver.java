@@ -14,7 +14,7 @@ import java.util.Random;
  * object will be replaced by an actual image in the resulting .docx document. The image will be put as an inline into
  * the surrounding paragraph of text.
  */
-public class ImageResolver implements ITypeResolver {
+public class ImageResolver implements ITypeResolver<Object, R> {
 
     private static final Random random = new Random();
 

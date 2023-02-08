@@ -21,6 +21,11 @@ import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 
 	int initParagraphsNumber = 2;

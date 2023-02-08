@@ -9,9 +9,9 @@ import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 class ParagraphResolverDocumentWalker extends BaseDocumentWalker {
     private final Object expressionContext;
     private final WordprocessingMLPackage document;
-    private final PlaceholderReplacer<Object> placeholderReplacer;
+    private final PlaceholderReplacer placeholderReplacer;
 
-    public ParagraphResolverDocumentWalker(Tr rowClone, Object expressionContext, WordprocessingMLPackage document, PlaceholderReplacer<Object> replacer) {
+    public ParagraphResolverDocumentWalker(Tr rowClone, Object expressionContext, WordprocessingMLPackage document, PlaceholderReplacer replacer) {
         super(rowClone);
         this.expressionContext = expressionContext;
         this.document = document;

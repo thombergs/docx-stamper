@@ -14,6 +14,11 @@ public abstract class BaseDocumentWalker extends DocumentWalker {
     }
 
     @Override
+    protected void onRun(R run) {
+
+    }
+
+    @Override
     protected void onTable(Tbl table) {
 
     }
@@ -36,5 +41,10 @@ public abstract class BaseDocumentWalker extends DocumentWalker {
     @Override
     protected void onCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
 
+    }
+
+    @Override
+    protected void onCommentReference(R.CommentReference commentReference) {
+        
     }
 }

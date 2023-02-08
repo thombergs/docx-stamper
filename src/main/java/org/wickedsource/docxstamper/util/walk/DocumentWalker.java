@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper.util.walk;
 
-import jakarta.xml.bind.JAXBElement;
 import org.docx4j.XmlUtils;
 import org.docx4j.wml.*;
 
@@ -8,7 +7,7 @@ public abstract class DocumentWalker {
 
     private final ContentAccessor contentAccessor;
 
-    protected DocumentWalker(ContentAccessor contentAccessor) {
+    public DocumentWalker(ContentAccessor contentAccessor) {
         this.contentAccessor = contentAccessor;
     }
 
@@ -18,6 +17,9 @@ public abstract class DocumentWalker {
             if (unwrappedObject instanceof P) {
                 P p = (P) unwrappedObject;
                 walkParagraph(p);
+            } else if (unwrappedObject instanceof R) {
+                R r = (R) unwrappedObject;
+                walkRun(r);
             } else if (unwrappedObject instanceof Tbl) {
                 Tbl table = (Tbl) unwrappedObject;
                 walkTable(table);
@@ -33,6 +35,9 @@ public abstract class DocumentWalker {
             } else if (unwrappedObject instanceof CommentRangeEnd) {
                 CommentRangeEnd commentRangeEnd = (CommentRangeEnd) unwrappedObject;
                 onCommentRangeEnd(commentRangeEnd);
+            } else if (unwrappedObject instanceof R.CommentReference) {
+                R.CommentReference commentReference = (R.CommentReference) unwrappedObject;
+                onCommentReference(commentReference);
             }
         }
     }
@@ -40,8 +45,9 @@ public abstract class DocumentWalker {
     private void walkTable(Tbl table) {
         onTable(table);
         for (Object contentElement : table.getContent()) {
-            if (XmlUtils.unwrap(contentElement) instanceof Tr) {
-                Tr row = (Tr) contentElement;
+            Object unwrappedObject = XmlUtils.unwrap(contentElement);
+            if (unwrappedObject instanceof Tr) {
+                Tr row = (Tr) unwrappedObject;
                 walkTableRow(row);
             }
         }
@@ -51,8 +57,9 @@ public abstract class DocumentWalker {
     private void walkTableRow(Tr row) {
         onTableRow(row);
         for (Object rowContentElement : row.getContent()) {
-            if (XmlUtils.unwrap(rowContentElement) instanceof Tc) {
-                Tc cell = rowContentElement instanceof Tc ? (Tc) rowContentElement : (Tc) ((JAXBElement<?>) rowContentElement).getValue();
+            Object unwrappedObject = XmlUtils.unwrap(rowContentElement);
+            if (unwrappedObject instanceof Tc) {
+                Tc cell = (Tc) unwrappedObject;
                 walkTableCell(cell);
             }
         }
@@ -61,12 +68,22 @@ public abstract class DocumentWalker {
     private void walkTableCell(Tc cell) {
         onTableCell(cell);
         for (Object cellContentElement : cell.getContent()) {
-            if (XmlUtils.unwrap(cellContentElement) instanceof P) {
+            Object unwrappedObject = XmlUtils.unwrap(cellContentElement);
+            if (unwrappedObject instanceof P) {
                 P p = (P) cellContentElement;
                 walkParagraph(p);
-            } else if (XmlUtils.unwrap(cellContentElement) instanceof Tbl) {
-                Tbl nestedTable = (Tbl) ((JAXBElement<?>) cellContentElement).getValue();
+            } else if (unwrappedObject instanceof R) {
+                R r = (R) cellContentElement;
+                walkRun(r);
+            } else if (unwrappedObject instanceof Tbl) {
+                Tbl nestedTable = (Tbl) unwrappedObject;
                 walkTable(nestedTable);
+            } else if (unwrappedObject instanceof CommentRangeStart) {
+                CommentRangeStart commentRangeStart = (CommentRangeStart) unwrappedObject;
+                onCommentRangeStart(commentRangeStart);
+            } else if (unwrappedObject instanceof CommentRangeEnd) {
+                CommentRangeEnd commentRangeEnd = (CommentRangeEnd) unwrappedObject;
+                onCommentRangeEnd(commentRangeEnd);
             }
         }
     }
@@ -74,15 +91,32 @@ public abstract class DocumentWalker {
     private void walkParagraph(P p) {
         onParagraph(p);
         for (Object element : p.getContent()) {
-            if (XmlUtils.unwrap(element) instanceof CommentRangeStart) {
-                CommentRangeStart commentRangeStart = (CommentRangeStart) element;
+            Object unwrappedObject = XmlUtils.unwrap(element);
+            if (unwrappedObject instanceof R) {
+                R r = (R) unwrappedObject;
+                walkRun(r);
+            } else if (unwrappedObject instanceof CommentRangeStart) {
+                CommentRangeStart commentRangeStart = (CommentRangeStart) unwrappedObject;
                 onCommentRangeStart(commentRangeStart);
-            } else if (XmlUtils.unwrap(element) instanceof CommentRangeEnd) {
-                CommentRangeEnd commentRangeEnd = (CommentRangeEnd) element;
+            } else if (unwrappedObject instanceof CommentRangeEnd) {
+                CommentRangeEnd commentRangeEnd = (CommentRangeEnd) unwrappedObject;
                 onCommentRangeEnd(commentRangeEnd);
             }
         }
     }
+
+    private void walkRun(R r) {
+        onRun(r);
+        for (Object element : r.getContent()) {
+            Object unwrappedObject = XmlUtils.unwrap(element);
+            if (unwrappedObject instanceof R.CommentReference) {
+                R.CommentReference commentReference = (R.CommentReference) unwrappedObject;
+                onCommentReference(commentReference);
+            }
+        }
+    }
+
+    protected abstract void onRun(R run);
 
     protected abstract void onParagraph(P paragraph);
 
@@ -96,4 +130,5 @@ public abstract class DocumentWalker {
 
     protected abstract void onCommentRangeEnd(CommentRangeEnd commentRangeEnd);
 
+    protected abstract void onCommentReference(R.CommentReference commentReference);
 }

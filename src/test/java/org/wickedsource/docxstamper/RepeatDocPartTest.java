@@ -63,7 +63,7 @@ public class RepeatDocPartTest extends AbstractDocx4jTest {
                     case 2: {
                         P paragraph = (P) object;
                         List<Object> runs = paragraph.getContent();
-                        Assert.assertEquals(2, runs.size());
+                        Assert.assertEquals(3, runs.size());
 
                         List<Object> targetRunContent = ((R) runs.get(1)).getContent();
                         Assert.assertEquals(1, targetRunContent.size());

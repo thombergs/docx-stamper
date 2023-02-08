@@ -15,6 +15,7 @@ import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
@@ -71,9 +72,10 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
     }
 
     private void paragraphsInNestedTablesAreRemoved(WordprocessingMLPackage document) {
+        final List<Tbl> tables = DocumentUtil.getTableFromObject(document);
 
-        final Tbl nestedTable = DocumentUtil.extractElements(DocumentUtil.extractElements(document, Tbl.class).get(0), Tbl.class).get(0);
-        Tc cell = (Tc) ((JAXBElement<?>) ((Tr) nestedTable.getContent().get(1)).getContent().get(0)).getValue();
+        Tbl nestedTable = tables.get(1);
+        Tc cell = (Tc) ((JAXBElement) ((Tr) nestedTable.getContent().get(1)).getContent().get(0)).getValue();
         P p1 = (P) cell.getContent().get(0);
 
         Assert.assertEquals(1, cell.getContent().size());

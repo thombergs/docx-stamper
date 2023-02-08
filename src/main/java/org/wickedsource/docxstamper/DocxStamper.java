@@ -3,15 +3,10 @@ package org.wickedsource.docxstamper;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
+import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
-import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
-import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
-import org.wickedsource.docxstamper.processor.repeat.*;
-import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
-import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
-import org.wickedsource.docxstamper.proxy.ProxyBuilder;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
@@ -20,6 +15,8 @@ import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.Map;
 
@@ -33,9 +30,11 @@ import java.util.Map;
  */
 public class DocxStamper<T> {
 
-    private PlaceholderReplacer<T> placeholderReplacer;
+    private PlaceholderReplacer placeholderReplacer;
 
     private CommentProcessorRegistry commentProcessorRegistry;
+
+    private TypeResolverRegistry typeResolverRegistry;
 
     private DocxStamperConfiguration config = new DocxStamperConfiguration();
 
@@ -49,31 +48,30 @@ public class DocxStamper<T> {
     }
 
     private void initFields() {
-        TypeResolverRegistry typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
+        typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
         typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
         typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
-        config.getTypeResolvers().forEach(typeResolverRegistry::registerTypeResolver);
-
-        ExpressionResolver expressionResolver = new ExpressionResolver(config.getEvaluationContextConfigurer());
-        placeholderReplacer = new PlaceholderReplacer<>(typeResolverRegistry, config.getLineBreakPlaceholder());
-        placeholderReplacer.setExpressionResolver(expressionResolver);
-        placeholderReplacer.setLeaveEmptyOnExpressionError(config.isLeaveEmptyOnExpressionError());
-        placeholderReplacer.setReplaceNullValues(config.isReplaceNullValues());
-        placeholderReplacer.setNullValuesDefault(config.getNullValuesDefault());
-        placeholderReplacer.setReplaceUnresolvedExpressions(config.isReplaceUnresolvedExpressions());
-        placeholderReplacer.setUnresolvedExpressionsDefaultValue(config.getUnresolvedExpressionsDefaultValue());
-
-        commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer);
-        commentProcessorRegistry.setExpressionResolver(expressionResolver);
-        commentProcessorRegistry.setFailOnInvalidExpression(config.isFailOnUnresolvedExpression());
-        commentProcessorRegistry.registerCommentProcessor(IRepeatProcessor.class, new RepeatProcessor(typeResolverRegistry, expressionResolver, config));
-        commentProcessorRegistry.registerCommentProcessor(IParagraphRepeatProcessor.class, new ParagraphRepeatProcessor(typeResolverRegistry, expressionResolver, config));
-        commentProcessorRegistry.registerCommentProcessor(IRepeatDocPartProcessor.class, new RepeatDocPartProcessor(config));
-        commentProcessorRegistry.registerCommentProcessor(IDisplayIfProcessor.class, new DisplayIfProcessor());
-        commentProcessorRegistry.registerCommentProcessor(IReplaceWithProcessor.class, new ReplaceWithProcessor(config));
-        for (Map.Entry<Class<?>, ICommentProcessor> entry : config.getCommentProcessors().entrySet()) {
-            commentProcessorRegistry.registerCommentProcessor(entry.getKey(), entry.getValue());
+        for (Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()) {
+            typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
         }
+
+        ExpressionResolver expressionResolver = new ExpressionResolver(config);
+        placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
+
+        config.getCommentProcessorsToUse().entrySet().forEach(entry -> {
+            try {
+                Class<?> processorImpl = entry.getValue();
+                Constructor<?> constructor = processorImpl.getDeclaredConstructor(DocxStamperConfiguration.class, TypeResolverRegistry.class);
+                Object processorInstance = constructor.newInstance(config, typeResolverRegistry);
+                config.getCommentProcessors().put(entry.getKey(), processorInstance);
+            } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+                     IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer, config);
+        commentProcessorRegistry.setExpressionResolver(expressionResolver);
     }
 
     /**
@@ -131,9 +129,8 @@ public class DocxStamper<T> {
      */
     public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
         try {
-            ProxyBuilder<T> proxyBuilder = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
-            processComments(document, proxyBuilder);
-            replaceExpressions(document, proxyBuilder);
+            processComments(document, contextRoot);
+            replaceExpressions(document, contextRoot);
             document.save(out);
             commentProcessorRegistry.reset();
         } catch (DocxStamperException e) {
@@ -143,26 +140,23 @@ public class DocxStamper<T> {
         }
     }
 
-    private ProxyBuilder<T> addCustomInterfacesToContextRoot(T contextRoot, Map<Class<?>, Object> interfacesToImplementations) {
-        ProxyBuilder<T> proxyBuilder = new ProxyBuilder<T>()
-                .withRoot(contextRoot);
-        if (interfacesToImplementations.isEmpty()) {
-            return proxyBuilder;
-        }
-        for (Map.Entry<Class<?>, Object> entry : interfacesToImplementations.entrySet()) {
-            Class<?> interfaceClass = entry.getKey();
-            Object implementation = entry.getValue();
-            proxyBuilder.withInterface(interfaceClass, implementation);
-        }
-        return proxyBuilder;
+    /**
+     * This method allows getting comment processors instances in use to access their internal state. Useful for
+     * testing purposes.
+     *
+     * @param interfaceToGet ICommentProcessor interface to lookup.
+     * @return ICommentProcessor implementation instance or null if not used.
+     */
+    public ICommentProcessor getCommentProcessorInstance(Class<?> interfaceToGet) {
+        return (ICommentProcessor) config.getCommentProcessors().get(interfaceToGet);
     }
 
-    private void replaceExpressions(WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
-        placeholderReplacer.resolveExpressions(document, proxyBuilder);
+    private void replaceExpressions(WordprocessingMLPackage document, T contextObject) {
+        placeholderReplacer.resolveExpressions(document, contextObject);
     }
 
-    private void processComments(final WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
-        commentProcessorRegistry.runProcessors(document, proxyBuilder);
+    private void processComments(final WordprocessingMLPackage document, T contextObject) {
+        commentProcessorRegistry.runProcessors(document, contextObject);
     }
 
 }

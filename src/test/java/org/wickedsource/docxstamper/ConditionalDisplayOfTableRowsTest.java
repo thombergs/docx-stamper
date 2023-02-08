@@ -3,6 +3,7 @@ package org.wickedsource.docxstamper;
 import org.docx4j.TextUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.Tr;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
@@ -24,6 +25,7 @@ public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
         InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
+        final List<Tr> rowCoords = DocumentUtil.getTableRowsFromObject(document);
         final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
         Assert.assertEquals(2, tablesFromObject.size());
 

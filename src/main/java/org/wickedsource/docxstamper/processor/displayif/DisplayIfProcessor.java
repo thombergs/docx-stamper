@@ -5,13 +5,14 @@ import org.docx4j.wml.P;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
+import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.util.ObjectDeleter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplayIfProcessor {
 
@@ -20,10 +21,10 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
     private List<Tbl> tablesToBeRemoved = new ArrayList<>();
 
     private List<Tr> tableRowsToBeRemoved = new ArrayList<>();
+    private List<Object> objectsToBeRemoved = new ArrayList<>();
 
-    private List<Objects> objectsToBeRemoved = new ArrayList<>();
-
-    public DisplayIfProcessor() {
+    public DisplayIfProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
+        super(config, typeResolverRegistry);
     }
 
     @Override
@@ -44,8 +45,8 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
     }
 
     private void removeParagraphs(ObjectDeleter deleter) {
-        for (P paragraph : paragraphsToBeRemoved) {
-            deleter.deleteParagraph(paragraph);
+        for (P p : paragraphsToBeRemoved) {
+            deleter.deleteParagraph(p);
         }
     }
 
@@ -62,16 +63,15 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
     }
 
     private void removeTableRows(ObjectDeleter deleter) {
-        for (Tr tableRow : tableRowsToBeRemoved) {
-            deleter.deleteTableRow(tableRow);
+        for (Tr row : tableRowsToBeRemoved) {
+            deleter.deleteTableRow(row);
         }
     }
 
     @Override
     public void displayParagraphIf(Boolean condition) {
         if (!condition) {
-            P paragraph = getParagraph();
-            paragraphsToBeRemoved.add(paragraph);
+            paragraphsToBeRemoved.add(getParagraph());
         }
     }
 
@@ -83,13 +83,14 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
     @Override
     public void displayTableIf(Boolean condition) {
         if (!condition) {
-            P paragraph = getParagraph();
-            if (paragraph.getParent() instanceof Tc &&
-                    ((Tc) paragraph.getParent()).getParent() instanceof Tr &&
-                    ((Tr)((Tc) paragraph.getParent()).getParent()).getParent() instanceof Tbl) {
-                tablesToBeRemoved.add(((Tbl)((Tr)((Tc) paragraph.getParent()).getParent()).getParent()));
+            P p = getParagraph();
+
+            if (p.getParent() instanceof Tc &&
+                    ((Tc) p.getParent()).getParent() instanceof Tr &&
+                    ((Tr) ((Tc) p.getParent()).getParent()).getParent() instanceof Tbl) {
+                tablesToBeRemoved.add((Tbl) ((Tr) ((Tc) p.getParent()).getParent()).getParent());
             } else {
-                throw new CommentProcessingException("Paragraph is not within a table!", paragraph);
+                throw new CommentProcessingException("Paragraph is not within a table!", p);
             }
         }
     }
@@ -97,12 +98,12 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
     @Override
     public void displayTableRowIf(Boolean condition) {
         if (!condition) {
-            P paragraph = getParagraph();
-            if (paragraph.getParent() instanceof Tc &&
-                    ((Tc) paragraph.getParent()).getParent() instanceof Tr) {
-                tableRowsToBeRemoved.add((Tr)((Tc) paragraph.getParent()).getParent());
+            P p = getParagraph();
+            if (p.getParent() instanceof Tc &&
+                    ((Tc) p.getParent()).getParent() instanceof Tr) {
+                tableRowsToBeRemoved.add((Tr) ((Tc) p.getParent()).getParent());
             } else {
-                throw new CommentProcessingException("Paragraph is not within a table!", paragraph);
+                throw new CommentProcessingException("Paragraph is not within a table!", p);
             }
         }
     }

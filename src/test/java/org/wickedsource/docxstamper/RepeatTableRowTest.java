@@ -3,6 +3,8 @@ package org.wickedsource.docxstamper;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
+import org.docx4j.wml.Tc;
+import org.docx4j.wml.Tr;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
@@ -10,6 +12,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
+import org.wickedsource.docxstamper.util.DocumentUtil;
+import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
@@ -31,25 +35,30 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
 
         WordprocessingMLPackage document = stampAndLoad(template, context);
 
+        final List<Tr> rows = DocumentUtil.getTableRowsFromObject(document);
         final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
         Assert.assertEquals(1, tablesFromObject.size());
 
         final List<Tr> parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
         // 1 header row + 1 row per character in list
+        Assert.assertEquals(7, rows.size());
+
         Assert.assertEquals(7, parentTableRows.size());
 
-        Assert.assertEquals("Homer Simpson", getTextFromCell(parentTableRows, 1, 0));
-        Assert.assertEquals("Dan Castellaneta", getTextFromCell(parentTableRows, 1, 1));
-        Assert.assertEquals("Marge Simpson", getTextFromCell(parentTableRows, 2, 0));
-        Assert.assertEquals("Julie Kavner", getTextFromCell(parentTableRows, 2, 1));
-        Assert.assertEquals("Bart Simpson", getTextFromCell(parentTableRows, 3, 0));
-        Assert.assertEquals("Nancy Cartwright", getTextFromCell(parentTableRows, 3, 1));
-        Assert.assertEquals("Kent Brockman", getTextFromCell(parentTableRows, 4, 0));
-        Assert.assertEquals("Harry Shearer", getTextFromCell(parentTableRows, 4, 1));
-        Assert.assertEquals("Disco Stu", getTextFromCell(parentTableRows, 5, 0));
-        Assert.assertEquals("Hank Azaria", getTextFromCell(parentTableRows, 5, 1));
-        Assert.assertEquals("Krusty the Clown", getTextFromCell(parentTableRows, 6, 0));
-        Assert.assertEquals("Dan Castellaneta", getTextFromCell(parentTableRows, 6, 1));
+        final List<Tc> cells = DocumentUtil.getTableCellsFromObject(document);
+
+        Assert.assertEquals("Homer Simpson", new ParagraphWrapper((P) cells.get(2).getContent().get(0)).getText());
+        Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(3).getContent().get(0)).getText());
+        Assert.assertEquals("Marge Simpson", new ParagraphWrapper((P) cells.get(4).getContent().get(0)).getText());
+        Assert.assertEquals("Julie Kavner", new ParagraphWrapper((P) cells.get(5).getContent().get(0)).getText());
+        Assert.assertEquals("Bart Simpson", new ParagraphWrapper((P) cells.get(6).getContent().get(0)).getText());
+        Assert.assertEquals("Nancy Cartwright", new ParagraphWrapper((P) cells.get(7).getContent().get(0)).getText());
+        Assert.assertEquals("Kent Brockman", new ParagraphWrapper((P) cells.get(8).getContent().get(0)).getText());
+        Assert.assertEquals("Harry Shearer", new ParagraphWrapper((P) cells.get(9).getContent().get(0)).getText());
+        Assert.assertEquals("Disco Stu", new ParagraphWrapper((P) cells.get(10).getContent().get(0)).getText());
+        Assert.assertEquals("Hank Azaria", new ParagraphWrapper((P) cells.get(11).getContent().get(0)).getText());
+        Assert.assertEquals("Krusty the Clown", new ParagraphWrapper((P) cells.get(12).getContent().get(0)).getText());
+        Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(13).getContent().get(0)).getText());
     }
 
     private String getTextFromCell(List<Tr> tableRows, int rowNumber, int cellNumber) {

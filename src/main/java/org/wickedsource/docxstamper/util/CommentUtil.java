@@ -16,10 +16,7 @@ import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
 import java.math.BigInteger;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class CommentUtil {
@@ -155,17 +152,42 @@ public class CommentUtil {
             ContentAccessor commentRangeEndParent = (ContentAccessor) comment
                     .getCommentRangeEnd().getParent();
             commentRangeEndParent.getContent().remove(comment.getCommentRangeEnd());
-            deleteCommentReference(commentRangeEndParent,
-                    comment.getCommentRangeEnd().getId());
         }
         if (comment.getCommentRangeStart() != null) {
             ContentAccessor commentRangeStartParent = (ContentAccessor) comment
                     .getCommentRangeStart().getParent();
             commentRangeStartParent.getContent().remove(comment.getCommentRangeStart());
-            deleteCommentReference(commentRangeStartParent,
-                    comment.getCommentRangeStart().getId());
         }
-        // TODO: also delete comment from comments.xml
+        if (comment.getCommentReference() != null) {
+            ContentAccessor commentReferenceParent = (ContentAccessor) comment
+                    .getCommentReference().getParent();
+            commentReferenceParent.getContent().remove(comment.getCommentReference());
+        }
+    }
+
+    public static void deleteCommentFromElement(ContentAccessor element, BigInteger commentId) {
+        List<Object> elementsToRemove = new ArrayList<>();
+
+        for (Object obj : element.getContent()) {
+            Object unwrapped = XmlUtils.unwrap(obj);
+            if (unwrapped instanceof CommentRangeStart) {
+                if (((CommentRangeStart) unwrapped).getId().equals(commentId)) {
+                    elementsToRemove.add(obj);
+                }
+            } else if (unwrapped instanceof CommentRangeEnd) {
+                if (((CommentRangeEnd) unwrapped).getId().equals(commentId)) {
+                    elementsToRemove.add(obj);
+                }
+            } else if (unwrapped instanceof R.CommentReference) {
+                if (((R.CommentReference) unwrapped).getId().equals(commentId)) {
+                    elementsToRemove.add(obj);
+                }
+            } else if (unwrapped instanceof ContentAccessor) {
+                deleteCommentFromElement((ContentAccessor) unwrapped, commentId);
+            }
+        }
+
+        element.getContent().removeAll(elementsToRemove);
     }
 
     private static boolean deleteCommentReference(ContentAccessor parent,
@@ -176,20 +198,26 @@ public class CommentUtil {
                 if (deleteCommentReference((ContentAccessor) contentObject, commentId)) {
                     return true;
                 }
-            }
-            if (contentObject instanceof R) {
+            } else if (contentObject instanceof R) {
                 for (Object runContentObject : ((R) contentObject).getContent()) {
                     Object unwrapped = XmlUtils.unwrap(runContentObject);
-                    if (unwrapped instanceof R.CommentReference) {
-                        BigInteger foundCommentId = ((R.CommentReference) unwrapped)
-                                .getId();
-                        if (foundCommentId.equals(commentId)) {
-                            parent.getContent().remove(i);
-                            return true;
-                        }
-                    }
+                    if (unwrapped instanceof R.CommentReference && removeCommentReference(parent, commentId, i, (R.CommentReference) unwrapped))
+                        return true;
                 }
+            } else if (contentObject instanceof R.CommentReference) {
+                if (removeCommentReference(parent, commentId, i, (R.CommentReference) contentObject))
+                    return true;
             }
+        }
+        return false;
+    }
+
+    private static boolean removeCommentReference(ContentAccessor parent, BigInteger commentId, int i, R.CommentReference contentObject) {
+        BigInteger foundCommentId = contentObject
+                .getId();
+        if (foundCommentId.equals(commentId)) {
+            parent.getContent().remove(i);
+            return true;
         }
         return false;
     }
@@ -271,16 +299,25 @@ public class CommentUtil {
             protected void onCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
                 CommentWrapper commentWrapper = allComments.get(commentRangeEnd.getId());
                 if (commentWrapper == null) {
-                    throw new RuntimeException("UNEXPECTED !");
+                    throw new RuntimeException("Found a comment range end before the comment range start !");
                 }
                 commentWrapper.setCommentRangeEnd(commentRangeEnd);
                 if (!stack.isEmpty()) {
                     if (stack.peek().equals(commentWrapper)) {
                         stack.pop();
                     } else {
-                        throw new RuntimeException("UNEXPECTED 2 !");
+                        throw new RuntimeException("Cannot figure which comment contains the other !");
                     }
                 }
+            }
+
+            @Override
+            protected void onCommentReference(R.CommentReference commentReference) {
+                CommentWrapper commentWrapper = allComments.get(commentReference.getId());
+                if (commentWrapper == null) {
+                    throw new RuntimeException("Found a comment reference before the comment range start !");
+                }
+                commentWrapper.setCommentReference(commentReference);
             }
         };
         documentWalker.walk();

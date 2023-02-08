@@ -28,7 +28,7 @@ import org.wickedsource.docxstamper.util.CommentWrapper;
  * <p><strong>2. Creating an implementation of your interface</strong><br/>
  * Your implementation class must also implement the Interface
  * ICommentProcessor. To stay in the above example, when the boldIf method is called, simply keep track of the paragraphs that are to be made bold.
- * The currently processed paragraph is passed into the method setCurrentParagraphCoordinates() before your own method
+ * The currently processed paragraph is passed into the method setCurrentParagraph() before your own method
  * (in this case boldIf()) is called.
  * Within the method commitChanges() you then do the manipulations on the word document, i.e. make the paragraphs
  * that were commented bold.
@@ -45,7 +45,7 @@ public interface ICommentProcessor {
      * within in the custom methods of a comment processor, the ongoing iteration over the paragraphs in the document
      * may be disturbed.
      *
-     * @param document The word document that can be manipulated by using the DOCX4J api.
+     * @param document The Word document that can be manipulated by using the DOCX4J api.
      */
     void commitChanges(WordprocessingMLPackage document);
 
@@ -54,7 +54,7 @@ public interface ICommentProcessor {
      * .docx template. This method is always called BEFORE the custom methods of the custom comment processor interface
      * are called.
      *
-     * @param paragraph currently processed paragraph within the template.
+     * @param paragraph coordinates of the currently processed paragraph within the template.
      */
     void setParagraph(P paragraph);
 
@@ -64,10 +64,9 @@ public interface ICommentProcessor {
      * .docx template. This method is always called BEFORE the custom methods of the custom comment processor interface
      * are called.
      *
-     * @param coordinates coordinates of the currently processed run within the template.
+     * @param run coordinates of the currently processed run within the template.
      */
-    void setCurrentRun(R coordinates);
-
+    void setCurrentRun(R run);
 
     /**
      * Passes the comment range wrapper that is currently being processed
@@ -75,13 +74,20 @@ public interface ICommentProcessor {
      * This method is always called BEFORE the custom methods of the custom comment
      * processor interface are called.
      *
-     *  @param commentWrapper of the currently processed comment within the template.
+     * @param commentWrapper of the currently processed comment within the template.
      */
     void setCurrentCommentWrapper(CommentWrapper commentWrapper);
+
+    /**
+     * Passes the processed document, in order to make all linked data (images, etc) available
+     * to processors that need it (example : repeatDocPart)
+     *
+     * @param document DocX template being processed.
+     */
+    void setDocument(WordprocessingMLPackage document);
 
     /**
      * Resets all state in the comment processor so that it can be re-used in another stamping process.
      */
     void reset();
-
 }

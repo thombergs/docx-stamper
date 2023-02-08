@@ -5,21 +5,21 @@ import java.util.List;
 
 
 public class Grade {
-	public Grade() {
-	}
+    public Grade() {
+    }
 
-	int number;
-	List<AClass> classes = new ArrayList<>();
+    int number;
+    List<AClass> classes = new ArrayList<>();
 
-	public int getNumber() {
-		return number;
-	}
+    public int getNumber() {
+        return number;
+    }
 
-	public Grade(int number) {
-		this.number = number;
-	}
+    public Grade(int number) {
+        this.number = number;
+    }
 
-	public List<AClass> getClasses() {
-		return classes;
-	}
+    public List<AClass> getClasses() {
+        return classes;
+    }
 }

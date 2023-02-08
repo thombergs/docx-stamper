@@ -10,5 +10,5 @@ public interface IRepeatDocPartProcessor {
      *
      * @param objects the objects which serve as context root for expressions found in the template table row.
      */
-    void repeatDocPart(List<Object> objects);
+    void repeatDocPart(List<Object> objects) throws Exception;
 }

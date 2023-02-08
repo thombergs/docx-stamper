@@ -14,22 +14,23 @@ import java.io.OutputStream;
 
 public class LeaveEmptyOnExpressionErrorTest extends AbstractDocx4jTest {
 
-  @Test
-  public void test() throws Docx4JException, IOException {
+    @Test
+    public void test() throws Docx4JException, IOException {
     NameContext context = new NameContext("Homer Simpson");
-    InputStream template = getClass().getResourceAsStream("LeaveEmptyOnExpressionErrorTest.docx");
-    OutputStream out = getOutputStream();
-    DocxStamper<NameContext> stamper = new DocxStamperConfiguration()
-            .leaveEmptyOnExpressionError(true)
-            .build();
-    stamper.stamp(template, context, out);
-    InputStream in = getInputStream(out);
-    WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
-    resolvedExpressionsAreReplaced(document);
-  }
+        InputStream template = getClass().getResourceAsStream("LeaveEmptyOnExpressionErrorTest.docx");
+        OutputStream out = getOutputStream();
+        DocxStamper<NameContext> stamper = new DocxStamperConfiguration()
+                .setFailOnUnresolvedExpression(false)
+                .leaveEmptyOnExpressionError(true)
+                .build();
+        stamper.stamp(template, context, out);
+        InputStream in = getInputStream(out);
+        WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
+        resolvedExpressionsAreReplaced(document);
+    }
 
-  private void resolvedExpressionsAreReplaced(WordprocessingMLPackage document) {
-    P nameParagraph = (P) document.getMainDocumentPart().getContent().get(0);
-    Assert.assertEquals("Leave me empty .", new ParagraphWrapper(nameParagraph).getText());
-  }
+    private void resolvedExpressionsAreReplaced(WordprocessingMLPackage document) {
+        P nameParagraph = (P) document.getMainDocumentPart().getContent().get(0);
+        Assert.assertEquals("Leave me empty .", new ParagraphWrapper(nameParagraph).getText());
+    }
 }

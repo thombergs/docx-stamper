@@ -8,18 +8,18 @@ public class AClass {
 	public AClass() {
 	}
 
-	int number;
-	List<Student> students = new ArrayList<>();
+    int number;
+    List<Student> students = new ArrayList<>();
 
-	public int getNumber() {
-		return number;
-	}
+    public int getNumber() {
+        return number;
+    }
 
-	public List<Student> getStudents() {
-		return students;
-	}
+    public List<Student> getStudents() {
+        return students;
+    }
 
-	public AClass(int number) {
-		this.number = number;
-	}
+    public AClass(int number) {
+        this.number = number;
+    }
 }
