@@ -6,6 +6,8 @@ import org.docx4j.model.styles.StyleUtil;
 import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 
+import java.util.Objects;
+
 
 public class RunUtil {
 
@@ -26,24 +28,29 @@ public class RunUtil {
         StringBuilder result = new StringBuilder();
         for (Object content : run.getContent()) {
             if (content instanceof JAXBElement) {
-                JAXBElement<?> element = (JAXBElement<?>) content;
-                if (element.getValue() instanceof Text) {
-                    Text textObj = (Text) element.getValue();
-                    String text = textObj.getValue();
-                    if (!PRESERVE.equals(textObj.getSpace())) {
-                        // trimming text if spaces are not to be preserved (simulates behavior of Word; LibreOffice seems
-                        // to ignore the "space" property and always preserves spaces)
-                        text = text.trim();
-                    }
-                    result.append(text);
-                }else if (element.getValue() instanceof R.Tab){
-                    result.append("\t");
-                }
+                result.append(getText((JAXBElement<?>) content));
             } else if (content instanceof Text) {
-                result.append(((Text) content).getValue());
+                result.append(getText((Text) content));
             }
         }
         return result.toString();
+    }
+
+    private static CharSequence getText(JAXBElement<?> content) {
+        Object elementValue = content.getValue();
+        if (elementValue instanceof Text)
+            return getText((Text) elementValue);
+        if (elementValue instanceof R.Tab)
+            return "\t";
+        return "";
+    }
+
+    private static CharSequence getText(Text text) {
+        String value = text.getValue();
+        String space = text.getSpace();
+        return Objects.equals(space, PRESERVE)
+                ? value // keeps spaces if spaces are to be preserved (LibreOffice seems to ignore the "space" property)
+                : value.trim(); // trimming value if spaces are not to be preserved (simulates behavior of Word;)
     }
 
     /**

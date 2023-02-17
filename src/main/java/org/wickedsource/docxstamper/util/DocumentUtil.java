@@ -179,9 +179,9 @@ public class DocumentUtil {
         List<Object> documentElements = new ArrayList<>();
         // we handle full documents slightly differently as they have headers and footers
         if (object instanceof WordprocessingMLPackage) {
-            documentElements.addAll(getElementsFromHeader(((WordprocessingMLPackage) (object)), elementClass));
-            documentElements.addAll(getElements(((WordprocessingMLPackage) (object)).getMainDocumentPart(), elementClass));
-            documentElements.addAll(getElementsForFooter(((WordprocessingMLPackage) (object)), elementClass));
+            documentElements.addAll(getElementsFromHeader(((WordprocessingMLPackage)  object), elementClass));
+            documentElements.addAll(getElements(((WordprocessingMLPackage)  object).getMainDocumentPart(), elementClass));
+            documentElements.addAll(getElementsForFooter(((WordprocessingMLPackage)  object), elementClass));
         } else {
             documentElements.addAll(getElements(object, elementClass));
         }

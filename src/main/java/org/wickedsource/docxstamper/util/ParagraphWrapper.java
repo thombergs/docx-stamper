@@ -1,10 +1,10 @@
 package org.wickedsource.docxstamper.util;
 
-import org.docx4j.wml.P;
-import org.docx4j.wml.R;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import org.docx4j.wml.P;
+import org.docx4j.wml.R;
 
 /**
  * A "Run" defines a region of text within a docx document with a common set of properties. Word processors are
@@ -33,7 +33,7 @@ public class ParagraphWrapper {
         this.runs.clear();
         int index = 0;
         for (Object contentElement : paragraph.getContent()) {
-            if (contentElement instanceof R && !"".equals(RunUtil.getText((R) contentElement))) {
+            if (contentElement instanceof R && !RunUtil.getText((R)contentElement).equals("")) {
                 this.addRun((R) contentElement, index);
             }
             index++;
@@ -115,7 +115,7 @@ public class ParagraphWrapper {
 
             // remove all runs between first and last
             for (IndexedRun run : affectedRuns) {
-                if (run != firstRun && run != lastRun) {
+                if (!Objects.equals(run, firstRun) && !Objects.equals(run, lastRun)) {
                     this.paragraph.getContent().remove(run.getRun());
                 }
             }

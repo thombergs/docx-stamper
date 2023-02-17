@@ -37,8 +37,8 @@ public class ParagraphUtil {
 
     /**
      * Finds all Paragraphs in a Document which are in a TextBox
-     * @param document
-     * @return 
+     * 
+     *  
      */
     public static List<Object> getAllTextBoxes(WordprocessingMLPackage document) {
         ClassFinder finder = new ClassFinder(P.class); // docx4j class
