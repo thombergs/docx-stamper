@@ -60,7 +60,8 @@ public class Image {
     }
 
     /**
-     * @return the expected alternative text to display for user that can't see the image itself
+     *Returns the expected alternative text to display for user that can't see the image itself.
+ 
      */
     public String getAltText() {
         return altText;

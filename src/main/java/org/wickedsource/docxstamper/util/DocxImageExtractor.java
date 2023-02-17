@@ -26,7 +26,7 @@ public class DocxImageExtractor {
      * Extract an inline graphic from a drawing.
      *
      * @param drawing the drawing containing the graphic.
-     * @return
+     * 
      */
     private static Graphic getInlineGraphic(Drawing drawing) {
         if (drawing.getAnchorOrInline().isEmpty()) {
@@ -98,9 +98,9 @@ public class DocxImageExtractor {
      * Extract an image bytes from an embedded image run.
      *
      * @param run run containing the embedded drawing.
-     * @return
-     * @throws Docx4JException
-     * @throws IOException
+     * 
+     * 
+     * 
      */
     byte[] getRunDrawingData(R run) throws Docx4JException, IOException {
         String imageRelId = getPic(run).getBlipFill().getBlip().getEmbed();

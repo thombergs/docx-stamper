@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.util.Collections.emptyList;
+
 public class ExpressionUtil {
 
     /**
@@ -28,13 +30,14 @@ public class ExpressionUtil {
     }
 
     private List<String> findExpressions(String text, String expressionPattern) {
-        List<String> matches = new ArrayList<>();
-        if ("".equals(text) || text == null) {
-            return matches;
-        }
+        if (text == null)
+            return emptyList();
+        if (text.equals(""))
+            return emptyList();
         Pattern pattern = Pattern.compile(expressionPattern);
         Matcher matcher = pattern.matcher(text);
         int index = 0;
+        List<String> matches = new ArrayList<>();
         while (matcher.find(index)) {
             String match = matcher.group();
             matches.add(match);

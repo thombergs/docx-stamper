@@ -37,7 +37,7 @@ public class CommentUtil {
     public static Comments.Comment getCommentAround(R run,
                                                     WordprocessingMLPackage document) {
         try {
-            if (run instanceof Child) {
+            if (run != null) {
                 Child child = run;
                 ContentAccessor parent = (ContentAccessor) child.getParent();
                 if (parent == null)
@@ -97,7 +97,7 @@ public class CommentUtil {
      *                 comment from the comments.xml part).
      * @return the concatenated string of all paragraphs of text within the comment or
      * null if the specified object is not commented.
-     * @throws Docx4JException in case of a Docx4J processing error.
+     * 
      */
     public static Comments.Comment getCommentFor(ContentAccessor object,
                                                  WordprocessingMLPackage document) {
@@ -227,7 +227,7 @@ public class CommentUtil {
         Map<BigInteger, CommentWrapper> rootComments = new HashMap<>();
         Map<BigInteger, CommentWrapper> allComments = new HashMap<>();
         collectCommentRanges(rootComments, allComments, document);
-        collectComments(rootComments, allComments, document);
+        collectComments(allComments, document);
         return cleanMalformedComments(rootComments);
     }
 
@@ -323,8 +323,7 @@ public class CommentUtil {
         documentWalker.walk();
     }
 
-    private static void collectComments(final Map<BigInteger, CommentWrapper> rootComments,
-                                        Map<BigInteger, CommentWrapper> allComments, WordprocessingMLPackage document) {
+    private static void collectComments(Map<BigInteger, CommentWrapper> allComments, WordprocessingMLPackage document) {
         try {
             CommentsPart commentsPart = (CommentsPart) document.getParts()
                     .get(new PartName("/word/comments.xml"));

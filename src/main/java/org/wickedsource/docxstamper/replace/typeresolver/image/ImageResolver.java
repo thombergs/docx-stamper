@@ -1,13 +1,14 @@
 package org.wickedsource.docxstamper.replace.typeresolver.image;
 
+import java.util.Random;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
+import org.docx4j.wml.Drawing;
+import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
-
-import java.util.Random;
 
 /**
  * This ITypeResolver allows context objects to return objects of type Image. An expression that resolves to an Image
@@ -59,9 +60,9 @@ public class ImageResolver implements ITypeResolver<Image> {
         }
 
         // Now add the inline in w:p/w:r/w:drawing
-        org.docx4j.wml.ObjectFactory factory = new org.docx4j.wml.ObjectFactory();
-        org.docx4j.wml.R run = factory.createR();
-        org.docx4j.wml.Drawing drawing = factory.createDrawing();
+        ObjectFactory factory = new ObjectFactory();
+        R run = factory.createR();
+        Drawing drawing = factory.createDrawing();
         run.getContent().add(drawing);
         drawing.getAnchorOrInline().add(inline);
 
