@@ -1,2 +1,2 @@
 build = "mvn"
-jdkVersion = "11"
+jdkVersion = "17"

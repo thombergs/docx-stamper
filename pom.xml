@@ -134,8 +134,8 @@
                 <version>3.10.1</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <target>1.8</target>
-                    <source>1.8</source>
+                    <target>17</target>
+                    <source>17</source>
                 </configuration>
             </plugin>
             <plugin>
@@ -185,10 +185,6 @@
                 <configuration>
                     <inputEncoding>UTF-8</inputEncoding>
                     <outputEncoding>UTF-8</outputEncoding>
-                    <jvmArgs>
-                        <jvmArg>--add-opens</jvmArg>
-                        <jvmArg>java.base/java.lang=ALL-UNNAMED</jvmArg>
-                    </jvmArgs>
                 </configuration>
             </plugin>
             <plugin>
@@ -286,7 +282,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-expression</artifactId>
-            <version>5.3.23</version>
+            <version>6.0.5</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -297,7 +293,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context</artifactId>
-            <version>5.3.23</version>
+            <version>6.0.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
