@@ -14,17 +14,22 @@ import java.util.Random;
  * object will be replaced by an actual image in the resulting .docx document. The image will be put as an inline into
  * the surrounding paragraph of text.
  */
-public class ImageResolver implements ITypeResolver<Object, R> {
+public class ImageResolver implements ITypeResolver<Image> {
 
     private static final Random random = new Random();
 
     @Override
-    public R resolve(WordprocessingMLPackage document, Object image) {
+    public R resolve(WordprocessingMLPackage document, Image image) {
         try {
             // TODO: adding the same image twice will put the image twice into the docx-zip file. make the second
             //       addition of the same image a reference instead.
-            Image img = (Image) image;
-            return createRunWithImage(document, img.getImageBytes(), img.getFilename(), img.getAltText(), img.getMaxWidth());
+            return createRunWithImage(
+                    document,
+                    image.getImageBytes(),
+                    image.getFilename(),
+                    image.getAltText(),
+                    image.getMaxWidth()
+            );
         } catch (Exception e) {
             throw new DocxStamperException("Error while adding image to document!", e);
         }

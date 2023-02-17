@@ -8,15 +8,14 @@ import java.util.Map;
  */
 public class TypeResolverRegistry {
 
-    private ITypeResolver defaultResolver;
+    private final Map<Class<?>, ITypeResolver<?>> typeResolversByType = new HashMap<>();
+    private ITypeResolver<Object> defaultResolver;
 
-    private final Map<Class<?>, ITypeResolver> typeResolversByType = new HashMap<>();
-
-    public TypeResolverRegistry(ITypeResolver defaultResolver) {
+    public TypeResolverRegistry(ITypeResolver<Object> defaultResolver) {
         this.defaultResolver = defaultResolver;
     }
 
-    public <T> void registerTypeResolver(Class<T> resolvedType, ITypeResolver resolver) {
+    public <T> void registerTypeResolver(Class<T> resolvedType, ITypeResolver<T> resolver) {
         typeResolversByType.put(resolvedType, resolver);
     }
 
@@ -28,13 +27,14 @@ public class TypeResolverRegistry {
      * @return the ITypeResolver implementation that was earlier registered for the given class, or the default ITypeResolver
      * if none is found.
      */
-    public <T> ITypeResolver getResolverForType(Class<T> type) {
-        ITypeResolver resolver = typeResolversByType.get(type);
-        if (resolver == null) {
-            return defaultResolver;
-        } else {
-            return resolver;
-        }
+    public <T> ITypeResolver<T> getResolverForType(Class<T> type) {
+        return typeResolversByType.containsKey(type)
+                ? (ITypeResolver<T>) typeResolversByType.get(type)
+                : (ITypeResolver<T>) defaultResolver;
+    }
+
+    public ITypeResolver<Object> getDefaultResolver() {
+        return defaultResolver;
     }
 
     /**
@@ -42,11 +42,7 @@ public class TypeResolverRegistry {
      *
      * @param defaultResolver the resolver to use as default.
      */
-    public void setDefaultResolver(ITypeResolver defaultResolver) {
+    public void setDefaultResolver(ITypeResolver<Object> defaultResolver) {
         this.defaultResolver = defaultResolver;
-    }
-
-    public ITypeResolver getDefaultResolver() {
-        return defaultResolver;
     }
 }

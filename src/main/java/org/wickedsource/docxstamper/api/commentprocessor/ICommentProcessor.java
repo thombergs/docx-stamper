@@ -58,7 +58,6 @@ public interface ICommentProcessor {
      */
     void setParagraph(P paragraph);
 
-
     /**
      * Passes the run that is currently being processed (i.e. the run that is commented in the
      * .docx template. This method is always called BEFORE the custom methods of the custom comment processor interface

@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper.api.typeresolver;
 
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.R;
 
 /**
  * <p>
@@ -16,8 +17,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
  * DocxStamper.getTypeResolverRegistry().addTypeResolver().
  * </p>
  */
-public interface ITypeResolver<S, T> {
-
+public interface ITypeResolver<T> {
     /**
      * This method is called when a placeholder in the .docx template is to replaced by the result of an expression that
      * was found in the .docx template. It creates an object of the DOCX4J api that is put in the place of the found
@@ -29,6 +29,5 @@ public interface ITypeResolver<S, T> {
      * @return an object of the DOCX4J api (usually of type org.docx4j.wml.R = "run of text") that will be put in the place of an
      * expression found in the .docx document.
      */
-    T resolve(WordprocessingMLPackage document, S expressionResult);
-
+    R resolve(WordprocessingMLPackage document, T expressionResult);
 }
