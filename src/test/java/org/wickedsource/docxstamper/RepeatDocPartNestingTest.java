@@ -1,18 +1,12 @@
 package org.wickedsource.docxstamper;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tc;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.context.AClass;
 import org.wickedsource.docxstamper.context.Grade;
 import org.wickedsource.docxstamper.context.SchoolContext;
@@ -25,6 +19,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 
@@ -51,19 +47,21 @@ public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 		documentContent = document.getMainDocumentPart().getContent();
 		// check object's num
 		int expectObjects = initParagraphsNumber + schoolNameTitle + numberOfGrades * (gradeTitle + numberOfClasses * (classTitle + numberOfStudents)) + lastParagraphTitle;
-		Assert.assertEquals(expectObjects, documentContent.size());
+		assertEquals(expectObjects, documentContent.size());
 
 		int index = 2; // skip init paragraphs
 		// check school name
 		checkParagraphContent(schoolContext.getSchoolName(), index++);
 		for (Grade grade : schoolContext.getGrades()) {
 			// check grade name
-			String expected = String.format("Grade No.%d there are %d classes",grade.getNumber(),grade.getClasses().size());
+			String expected = String.format("Grade No.%d there are %d classes",
+											grade.getNumber(),
+											grade.getClasses().size());
 			checkParagraphContent(expected, index++);
 			for (AClass aClass : grade.getClasses()) {
 				// check class name
 				expected = String.format("Class No.%d there are %d students", aClass.getNumber(), aClass.getStudents()
-						.size());
+																										.size());
 				checkParagraphContent(expected, index++);
 				// check the student's list
 				for (Student s : aClass.getStudents()) {
@@ -76,27 +74,21 @@ public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 						}
 					};
 					cellWalker.walk();
-					Assert.assertEquals(3, cells.size());
-					Assert.assertEquals(String.valueOf(s.getNumber()), new ParagraphWrapper((P) cells.get(0)
-							.getContent()
-							.get(0)).getText());
-					Assert.assertEquals(s.getName(), new ParagraphWrapper((P) cells.get(1).getContent()
-							.get(0)).getText());
-					Assert.assertEquals(String.valueOf(s.getAge()), new ParagraphWrapper((P) cells.get(2)
-							.getContent()
-							.get(0)).getText());
+					assertEquals(3, cells.size());
+					assertEquals(String.valueOf(s.getNumber()), new ParagraphWrapper((P) cells.get(0)
+																							  .getContent()
+																							  .get(0)).getText());
+					assertEquals(s.getName(), new ParagraphWrapper((P) cells.get(1).getContent()
+																			.get(0)).getText());
+					assertEquals(String.valueOf(s.getAge()), new ParagraphWrapper((P) cells.get(2)
+																						   .getContent()
+																						   .get(0)).getText());
 
 				}
 			}
 		}
 		checkParagraphContent(String.format("There are %d grades.", numberOfGrades), index);
 
-	}
-
-	private void checkParagraphContent(String expected, int index) {
-		Object object = XmlUtils.unwrap(documentContent.get(index));
-		P paragraph = (P) object;
-		Assert.assertEquals(expected, new ParagraphWrapper(paragraph).getText());
 	}
 
 	private Grade createOneGrade(int number) {
@@ -106,6 +98,12 @@ public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 			grade.getClasses().add(createOneClass(i));
 		}
 		return grade;
+	}
+
+	private void checkParagraphContent(String expected, int index) {
+		Object object = XmlUtils.unwrap(documentContent.get(index));
+		P paragraph = (P) object;
+		assertEquals(expected, new ParagraphWrapper(paragraph).getText());
 	}
 
 	private AClass createOneClass(int classNumber) {

@@ -4,14 +4,15 @@ import org.docx4j.TextUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.R;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MultiSectionTest extends AbstractDocx4jTest {
 
@@ -31,26 +32,10 @@ public class MultiSectionTest extends AbstractDocx4jTest {
 
 	private void assertTableRows(WordprocessingMLPackage document) {
 		final List<R> runs = DocumentUtil.extractElements(document, R.class);
-		Assert.assertTrue(runs.stream().map(TextUtils::getText).anyMatch(s -> s.contains("Homer")));
-		Assert.assertTrue(runs.stream().map(TextUtils::getText).anyMatch(s -> s.contains("Marge")));
+		assertTrue(runs.stream().map(TextUtils::getText).anyMatch(s -> s.contains("Homer")));
+		assertTrue(runs.stream().map(TextUtils::getText).anyMatch(s -> s.contains("Marge")));
 	}
 
-	public static class NamesContext {
-		private final String firstName;
-		private final String secondName;
-
-		public NamesContext(String firstName, String secondName) {
-			this.firstName = firstName;
-			this.secondName = secondName;
-		}
-
-		public String getFirstName() {
-			return firstName;
-		}
-
-		public String getSecondName() {
-			return secondName;
-		}
+	public record NamesContext(String firstName, String secondName) {
 	}
-
 }

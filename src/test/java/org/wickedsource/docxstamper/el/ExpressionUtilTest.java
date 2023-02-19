@@ -1,73 +1,78 @@
 package org.wickedsource.docxstamper.el;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
+
 public class ExpressionUtilTest {
+	@Test
+	public void findsPlaceholders() {
+		String text = "lorem ipsum ${placeholder1} lorem ipsum ${placeholder2}";
 
-    @Test
-    public void findsPlaceholders() {
-        String text = "lorem ipsum ${placeholder1} lorem ipsum ${placeholder2}";
+		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
 
-        ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findVariableExpressions(text);
+		assertEquals(2, placeholders.size());
+		assertEquals("${placeholder1}", placeholders.get(0));
+		assertEquals("${placeholder2}", placeholders.get(1));
+	}
 
-        Assert.assertEquals(2, placeholders.size());
-        Assert.assertEquals("${placeholder1}", placeholders.get(0));
-        Assert.assertEquals("${placeholder2}", placeholders.get(1));
-    }
+	@Test
+	public void findsProcessorExpressions() {
+		String text = "lorem ipsum #{expression1} lorem ipsum #{expression2}";
 
-    @Test
-    public void findsProcessorExpressions() {
-        String text = "lorem ipsum #{expression1} lorem ipsum #{expression2}";
+		List<String> placeholders = ExpressionUtil.findProcessorExpressions(text);
 
-        ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findProcessorExpressions(text);
+		assertEquals(2, placeholders.size());
+		assertEquals("#{expression1}", placeholders.get(0));
+		assertEquals("#{expression2}", placeholders.get(1));
+	}
 
-        Assert.assertEquals(2, placeholders.size());
-        Assert.assertEquals("#{expression1}", placeholders.get(0));
-        Assert.assertEquals("#{expression2}", placeholders.get(1));
-    }
+	@Test
+	public void findsPlaceholdersWithError() {
+		String text = "lorem ipsum ${placeholder1} ${ lorem ipsum } ${placeholder2";
 
-    @Test
-    public void findsPlaceholdersWithError() {
-        String text = "lorem ipsum ${placeholder1} ${ lorem ipsum } ${placeholder2";
+		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
 
-        ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findVariableExpressions(text);
+		assertEquals(2, placeholders.size());
+		assertEquals("${placeholder1}", placeholders.get(0));
+		assertEquals("${ lorem ipsum }", placeholders.get(1));
+	}
 
-        Assert.assertEquals(2, placeholders.size());
-        Assert.assertEquals("${placeholder1}", placeholders.get(0));
-        Assert.assertEquals("${ lorem ipsum }", placeholders.get(1));
-    }
+	@Test
+	public void returnsEmptyListOnEmptyText() {
+		String text = "";
 
-    @Test
-    public void returnsEmptyListOnEmptyText() {
-        String text = "";
-        ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findVariableExpressions(text);
-        Assert.assertTrue(placeholders.isEmpty());
-    }
+		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
 
-    @Test
-    public void returnsEmptyListOnNullText() {
-        ExpressionUtil finder = new ExpressionUtil();
-        List<String> placeholders = finder.findVariableExpressions(null);
-        Assert.assertTrue(placeholders.isEmpty());
-    }
+		assertTrue(placeholders.isEmpty());
+	}
 
-    @Test
-    public void stripsExpressions() {
-        ExpressionUtil finder = new ExpressionUtil();
-        Assert.assertEquals("myExpression", finder.stripExpression("${myExpression}"));
-    }
+	@Test
+	public void returnsEmptyListOnNullText() {
+		String text = null;
 
-    @Test(expected = IllegalArgumentException.class)
-    public void stripsNullExpressionThrowsException() {
-        ExpressionUtil finder = new ExpressionUtil();
-        finder.stripExpression(null);
-    }
+		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
+
+		assertTrue(placeholders.isEmpty());
+	}
+
+	@Test
+	public void stripsExpressions() {
+		String expressionValue = "myExpression";
+		String expression = "${%s}".formatted(expressionValue);
+		String expected = expressionValue;
+
+		String actual = stripExpression(expression);
+
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void stripsNullExpressionThrowsException() {
+		assertThrows(IllegalArgumentException.class, () -> stripExpression(null));
+	}
 
 }
