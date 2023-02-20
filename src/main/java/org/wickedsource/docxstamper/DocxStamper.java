@@ -30,133 +30,133 @@ import java.util.Map;
  */
 public class DocxStamper<T> {
 
-    private PlaceholderReplacer placeholderReplacer;
+	private PlaceholderReplacer placeholderReplacer;
 
-    private CommentProcessorRegistry commentProcessorRegistry;
+	private CommentProcessorRegistry commentProcessorRegistry;
 
-    private TypeResolverRegistry typeResolverRegistry;
+	private TypeResolverRegistry typeResolverRegistry;
 
-    private DocxStamperConfiguration config = new DocxStamperConfiguration();
+	private DocxStamperConfiguration config = new DocxStamperConfiguration();
 
-    public DocxStamper() {
-        initFields();
-    }
+	public DocxStamper() {
+		initFields();
+	}
 
-    public DocxStamper(DocxStamperConfiguration config) {
-        this.config = config;
-        initFields();
-    }
+	private void initFields() {
+		typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
+		typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
+		typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
+		for (Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()) {
+			typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
+		}
 
-    private void initFields() {
-        typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
-        typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
-        typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
-        for (Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()) {
-            typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
-        }
+		ExpressionResolver expressionResolver = new ExpressionResolver(config);
+		placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
 
-        ExpressionResolver expressionResolver = new ExpressionResolver(config);
-        placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
+		config.getCommentProcessorsToUse().forEach((key, processorImpl) -> {
+			try {
+				Constructor<?> constructor = processorImpl.getDeclaredConstructor(DocxStamperConfiguration.class,
+																				  TypeResolverRegistry.class);
+				Object processorInstance = constructor.newInstance(config, typeResolverRegistry);
+				config.putCommentProcessor(key, processorInstance);
+			} catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
+					 IllegalAccessException e) {
+				throw new RuntimeException(e);
+			}
+		});
 
-        config.getCommentProcessorsToUse().entrySet().forEach(entry -> {
-            try {
-                Class<?> processorImpl = entry.getValue();
-                Constructor<?> constructor = processorImpl.getDeclaredConstructor(DocxStamperConfiguration.class, TypeResolverRegistry.class);
-                Object processorInstance = constructor.newInstance(config, typeResolverRegistry);
-                config.getCommentProcessors().put(entry.getKey(), processorInstance);
-            } catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-                     IllegalAccessException e) {
-                throw new RuntimeException(e);
-            }
-        });
+		commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer, config);
+		commentProcessorRegistry.setExpressionResolver(expressionResolver);
+	}
 
-        commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer, config);
-        commentProcessorRegistry.setExpressionResolver(expressionResolver);
-    }
+	public DocxStamper(DocxStamperConfiguration config) {
+		this.config = config;
+		initFields();
+	}
 
-    /**
-     * <p>
-     * Reads in a .docx template and "stamps" it into the given OutputStream, using the specified context object to
-     * fill out any expressions it finds.
-     * </p>
-     * <p>
-     * In the .docx template you have the following options to influence the "stamping" process:
-     * </p>
-     * <ul>
-     * <li>Use expressions like ${name} or ${person.isOlderThan(18)} in the template's text. These expressions are resolved
-     * against the contextRoot object you pass into this method and are replaced by the results.</li>
-     * <li>Use comments within the .docx template to mark certain paragraphs to be manipulated. </li>
-     * </ul>
-     * <p>
-     * Within comments, you can put expressions in which you can use the following methods by default:
-     * </p>
-     * <ul>
-     * <li><em>displayParagraphIf(boolean)</em> to conditionally display paragraphs or not</li>
-     * <li><em>displayTableRowIf(boolean)</em> to conditionally display table rows or not</li>
-     * <li><em>displayTableIf(boolean)</em> to conditionally display whole tables or not</li>
-     * <li><em>repeatTableRow(List&lt;Object&gt;)</em> to create a new table row for each object in the list and resolve expressions
-     * within the table cells against one of the objects within the list.</li>
-     * </ul>
-     * <p>
-     * If you need a wider vocabulary of methods available in the comments, you can create your own ICommentProcessor
-     * and register it via getCommentProcessorRegistry().addCommentProcessor().
-     * </p>
-     *
-     * @param template    the .docx template.
-     * @param contextRoot the context root object against which all expressions found in the template are evaluated.
-     * @param out         the output stream in which to write the resulting .docx document.
-     * @throws DocxStamperException in case of an error.
-     */
-    public void stamp(InputStream template, T contextRoot, OutputStream out) throws DocxStamperException {
-        try {
-            WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
-            stamp(document, contextRoot, out);
-        } catch (DocxStamperException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DocxStamperException(e);
-        }
-    }
+	/**
+	 * <p>
+	 * Reads in a .docx template and "stamps" it into the given OutputStream, using the specified context object to
+	 * fill out any expressions it finds.
+	 * </p>
+	 * <p>
+	 * In the .docx template you have the following options to influence the "stamping" process:
+	 * </p>
+	 * <ul>
+	 * <li>Use expressions like ${name} or ${person.isOlderThan(18)} in the template's text. These expressions are resolved
+	 * against the contextRoot object you pass into this method and are replaced by the results.</li>
+	 * <li>Use comments within the .docx template to mark certain paragraphs to be manipulated. </li>
+	 * </ul>
+	 * <p>
+	 * Within comments, you can put expressions in which you can use the following methods by default:
+	 * </p>
+	 * <ul>
+	 * <li><em>displayParagraphIf(boolean)</em> to conditionally display paragraphs or not</li>
+	 * <li><em>displayTableRowIf(boolean)</em> to conditionally display table rows or not</li>
+	 * <li><em>displayTableIf(boolean)</em> to conditionally display whole tables or not</li>
+	 * <li><em>repeatTableRow(List&lt;Object&gt;)</em> to create a new table row for each object in the list and resolve expressions
+	 * within the table cells against one of the objects within the list.</li>
+	 * </ul>
+	 * <p>
+	 * If you need a wider vocabulary of methods available in the comments, you can create your own ICommentProcessor
+	 * and register it via getCommentProcessorRegistry().addCommentProcessor().
+	 * </p>
+	 *
+	 * @param template    the .docx template.
+	 * @param contextRoot the context root object against which all expressions found in the template are evaluated.
+	 * @param out         the output stream in which to write the resulting .docx document.
+	 * @throws DocxStamperException in case of an error.
+	 */
+	public void stamp(InputStream template, T contextRoot, OutputStream out) throws DocxStamperException {
+		try {
+			WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
+			stamp(document, contextRoot, out);
+		} catch (DocxStamperException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new DocxStamperException(e);
+		}
+	}
 
-    /**
-     * Same as stamp(InputStream, T, OutputStream) except that you may pass in a DOCX4J document as a template instead
-     * of an InputStream.
-     *
-     * @param document    the .docx template.
-     * @param contextRoot the context root object against which all expressions found in the template are evaluated.
-     * @param out         the output stream in which to write the resulting .docx document.
-     * @throws DocxStamperException in case of an error.
-     */
-    public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
-        try {
-            processComments(document, contextRoot);
-            replaceExpressions(document, contextRoot);
-            document.save(out);
-            commentProcessorRegistry.reset();
-        } catch (DocxStamperException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new DocxStamperException(e);
-        }
-    }
+	/**
+	 * Same as stamp(InputStream, T, OutputStream) except that you may pass in a DOCX4J document as a template instead
+	 * of an InputStream.
+	 *
+	 * @param document    the .docx template.
+	 * @param contextRoot the context root object against which all expressions found in the template are evaluated.
+	 * @param out         the output stream in which to write the resulting .docx document.
+	 * @throws DocxStamperException in case of an error.
+	 */
+	public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
+		try {
+			processComments(document, contextRoot);
+			replaceExpressions(document, contextRoot);
+			document.save(out);
+			commentProcessorRegistry.reset();
+		} catch (DocxStamperException e) {
+			throw e;
+		} catch (Exception e) {
+			throw new DocxStamperException(e);
+		}
+	}
 
-    /**
-     * This method allows getting comment processors instances in use to access their internal state. Useful for
-     * testing purposes.
-     *
-     * @param interfaceToGet ICommentProcessor interface to lookup.
-     * @return ICommentProcessor implementation instance or null if not used.
-     */
-    public ICommentProcessor getCommentProcessorInstance(Class<?> interfaceToGet) {
-        return (ICommentProcessor) config.getCommentProcessors().get(interfaceToGet);
-    }
+	private void processComments(final WordprocessingMLPackage document, T contextObject) {
+		commentProcessorRegistry.runProcessors(document, contextObject);
+	}
 
-    private void replaceExpressions(WordprocessingMLPackage document, T contextObject) {
-        placeholderReplacer.resolveExpressions(document, contextObject);
-    }
+	private void replaceExpressions(WordprocessingMLPackage document, T contextObject) {
+		placeholderReplacer.resolveExpressions(document, contextObject);
+	}
 
-    private void processComments(final WordprocessingMLPackage document, T contextObject) {
-        commentProcessorRegistry.runProcessors(document, contextObject);
-    }
+	/**
+	 * This method allows getting comment processors instances in use to access their internal state. Useful for
+	 * testing purposes.
+	 *
+	 * @param interfaceToGet ICommentProcessor interface to lookup.
+	 * @return ICommentProcessor implementation instance or null if not used.
+	 */
+	public ICommentProcessor getCommentProcessorInstance(Class<?> interfaceToGet) {
+		return (ICommentProcessor) config.getCommentProcessors().get(interfaceToGet);
+	}
 
 }
