@@ -4,32 +4,42 @@ import org.springframework.expression.AccessException;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.TypedValue;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.springframework.lang.NonNull;
 
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 
 public class StandardMethodExecutor implements MethodExecutor {
-    private final DocxStamperConfiguration configuration;
-    private final Method method;
-    private final Object implementation;
 
-    public StandardMethodExecutor(DocxStamperConfiguration configuration, Method method, Object implementation) {
-        this.configuration = configuration;
-        this.method = method;
-        this.implementation = implementation;
-    }
+	private final Invoker invoker;
+	private final String methodName;
+	private final boolean failOnUnresolvedExpression;
 
-    @Override
-    public TypedValue execute(EvaluationContext context, Object target, Object... arguments) throws AccessException {
-        try {
-            return new TypedValue(method.invoke(implementation, arguments));
-        } catch (InvocationTargetException | IllegalAccessException e) {
-            if (configuration.isFailOnUnresolvedExpression()) {
-                throw new AccessException(String.format("Error calling method %s", method.getName()), e);
-            } else {
-                return new TypedValue(null);
-            }
-        }
-    }
+	public StandardMethodExecutor(String name, Invoker invoker, boolean failOnUnresolvedExpression) {
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
+		this.invoker = invoker;
+		this.methodName = name;
+	}
+
+	@Override
+	@NonNull
+	public TypedValue execute(
+			@NonNull EvaluationContext context,
+			@NonNull Object target,
+			@NonNull Object... arguments
+	) throws AccessException {
+		try {
+			return new TypedValue(invoker.invoke(arguments));
+		} catch (InvocationTargetException | IllegalAccessException e) {
+			if (failOnUnresolvedExpression) {
+				throw new AccessException(String.format("Error calling method %s", methodName), e);
+			} else {
+				return new TypedValue(null);
+			}
+		}
+	}
+
+	@FunctionalInterface
+	interface Invoker {
+		Object invoke(Object... arguments) throws InvocationTargetException, IllegalAccessException;
+	}
 }
