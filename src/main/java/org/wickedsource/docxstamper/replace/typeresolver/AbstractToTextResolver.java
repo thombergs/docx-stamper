@@ -13,14 +13,14 @@ import org.wickedsource.docxstamper.util.RunUtil;
  */
 public abstract class AbstractToTextResolver<S> implements ITypeResolver<S> {
 
-    protected AbstractToTextResolver() {
-    }
+	protected AbstractToTextResolver() {
+	}
 
-    @Override
-    public R resolve(WordprocessingMLPackage document, S expressionResult) {
-        String text = resolveStringForObject(expressionResult);
-        return RunUtil.create(text);
-    }
+	@Override
+	public R resolve(WordprocessingMLPackage document, S expressionResult) {
+		String text = resolveStringForObject(expressionResult);
+		return RunUtil.create(text);
+	}
 
-    protected abstract String resolveStringForObject(S object);
+	protected abstract String resolveStringForObject(S object);
 }
