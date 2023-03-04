@@ -15,8 +15,6 @@ import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Date;
 import java.util.Map;
 
@@ -53,20 +51,24 @@ public class DocxStamper<T> {
 		ExpressionResolver expressionResolver = new ExpressionResolver(config);
 		placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
 
-		config.getCommentProcessorsToUse().forEach((key, processorImpl) -> {
-			try {
-				Constructor<?> constructor = processorImpl.getDeclaredConstructor(DocxStamperConfiguration.class,
-																				  TypeResolverRegistry.class);
-				Object processorInstance = constructor.newInstance(config, typeResolverRegistry);
-				config.putCommentProcessor(key, processorInstance);
-			} catch (NoSuchMethodException | InvocationTargetException | InstantiationException |
-					 IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-		});
+		config.getCommentProcessorsToUse()
+			  .forEach((key, processor) -> config.putCommentProcessor(key, tryInstantiate(processor)));
 
 		commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer, config);
 		commentProcessorRegistry.setExpressionResolver(expressionResolver);
+	}
+
+	private Object tryInstantiate(Class<?> processor) {
+		try {
+			return instantiate(processor);
+		} catch (ReflectiveOperationException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Object instantiate(Class<?> processor) throws ReflectiveOperationException {
+		var constructor = processor.getDeclaredConstructor(DocxStamperConfiguration.class, TypeResolverRegistry.class);
+		return constructor.newInstance(config, typeResolverRegistry);
 	}
 
 	public DocxStamper(DocxStamperConfiguration config) {
