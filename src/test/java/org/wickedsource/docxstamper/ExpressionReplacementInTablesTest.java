@@ -8,7 +8,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Bart Simpson");
+		Name context = new Name("Bart Simpson");
 		InputStream template = getClass().getResourceAsStream("ExpressionReplacementInTablesTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInFirstLevelTable(document);

@@ -8,7 +8,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -20,7 +20,7 @@ public class ConditionalDisplayOfTablesBug32Test extends AbstractDocx4jTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer");
+		Name context = new Name("Homer");
 		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTablesBug32Test.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		globalTablesAreRemoved(document);
@@ -43,8 +43,8 @@ public class ConditionalDisplayOfTablesBug32Test extends AbstractDocx4jTest {
 	private void nestedTablesAreRemoved(WordprocessingMLPackage document) {
 		Tbl outerTable = (Tbl) ((JAXBElement<?>) document.getMainDocumentPart().getContent().get(3)).getValue();
 		Tc cell = (Tc) ((JAXBElement<?>) ((Tr) outerTable.getContent().get(1)).getContent().get(1)).getValue();
-		assertEquals("",
-					 new ParagraphWrapper((P) cell.getContent()
-												  .get(0)).getText()); // empty paragraph, since the last element inside the cell was removed
+		P paragraph = (P) cell.getContent().get(0);
+		String actual = new ParagraphWrapper(paragraph).getText();
+		assertEquals("", actual); // empty paragraph, since the last element inside the cell was removed
 	}
 }

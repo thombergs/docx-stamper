@@ -4,7 +4,7 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ExpressionReplacementInTextBoxesTest extends AbstractDocx4jTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Bart Simpson");
+		Name context = new Name("Bart Simpson");
 		InputStream template = getClass().getResourceAsStream("ExpressionReplacementInTextBoxesTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInFirstLevelTextBox(document);

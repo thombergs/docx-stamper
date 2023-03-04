@@ -5,7 +5,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 
 import java.io.IOException;
@@ -22,13 +22,10 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 	public void shouldKeepSectionBreakOrientationInRepeatParagraphWithoutSectionBreakInsideComment() throws IOException, Docx4JException {
 		Map<String, Object> context = new HashMap<>();
 
-		NameContext name1 = new NameContext();
-		name1.setName("Homer");
+		Name name1 = new Name("Homer");
+		Name name2 = new Name("Marge");
 
-		NameContext name2 = new NameContext();
-		name2.setName("Marge");
-
-		List<NameContext> repeatValues = new ArrayList<>();
+		List<Name> repeatValues = new ArrayList<>();
 		repeatValues.add(name1);
 		repeatValues.add(name2);
 
@@ -77,13 +74,10 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 	public void shouldKeepSectionBreakOrientationInRepeatParagraphWithSectionBreakInsideComment() throws IOException, Docx4JException {
 		Map<String, Object> context = new HashMap<>();
 
-		NameContext name1 = new NameContext();
-		name1.setName("Homer");
+		Name name1 = new Name("Homer");
+		Name name2 = new Name("Marge");
 
-		NameContext name2 = new NameContext();
-		name2.setName("Marge");
-
-		List<NameContext> repeatValues = new ArrayList<>();
+		List<Name> repeatValues = new ArrayList<>();
 		repeatValues.add(name1);
 		repeatValues.add(name2);
 
@@ -120,13 +114,10 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 	public void shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideComment() throws IOException, Docx4JException {
 		Map<String, Object> context = new HashMap<>();
 
-		NameContext name1 = new NameContext();
-		name1.setName("Homer");
+		Name name1 = new Name("Homer");
+		Name name2 = new Name("Marge");
 
-		NameContext name2 = new NameContext();
-		name2.setName("Marge");
-
-		List<NameContext> repeatValues = new ArrayList<>();
+		List<Name> repeatValues = new ArrayList<>();
 		repeatValues.add(name1);
 		repeatValues.add(name2);
 
@@ -160,13 +151,10 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 	public void shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideCommentAndTableAsLastElement() throws IOException, Docx4JException {
 		Map<String, Object> context = new HashMap<>();
 
-		NameContext name1 = new NameContext();
-		name1.setName("Homer");
+		Name name1 = new Name("Homer");
+		Name name2 = new Name("Marge");
 
-		NameContext name2 = new NameContext();
-		name2.setName("Marge");
-
-		List<NameContext> repeatValues = new ArrayList<>();
+		List<Name> repeatValues = new ArrayList<>();
 		repeatValues.add(name1);
 		repeatValues.add(name2);
 
@@ -201,13 +189,10 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 	public void shouldKeepPageBreakOrientationInRepeatDocPartWithoutSectionBreaksInsideComment() throws IOException, Docx4JException {
 		Map<String, Object> context = new HashMap<>();
 
-		NameContext name1 = new NameContext();
-		name1.setName("Homer");
+		Name name1 = new Name("Homer");
+		Name name2 = new Name("Marge");
 
-		NameContext name2 = new NameContext();
-		name2.setName("Marge");
-
-		List<NameContext> repeatValues = new ArrayList<>();
+		List<Name> repeatValues = new ArrayList<>();
 		repeatValues.add(name1);
 		repeatValues.add(name2);
 

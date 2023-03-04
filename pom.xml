@@ -66,13 +66,29 @@
                     <plugin>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-maven</artifactId>
-                        <version>1.11.1</version>
+                        <version>1.11.4</version>
                         <configuration>
                             <jvmArgs>
                                 <jvmArg>--add-opens</jvmArg>
                                 <jvmArg>java.base/java.lang=ALL-UNNAMED</jvmArg>
                             </jvmArgs>
+                            <features>
+                                <feature>+auto_threads</feature>
+                            </features>
+                            <useSlf4j>true</useSlf4j>
                         </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.pitest</groupId>
+                                <artifactId>pitest-junit5-plugin</artifactId>
+                                <version>1.1.2</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.slf4j</groupId>
+                                <artifactId>slf4j-nop</artifactId>
+                                <version>2.0.5</version>
+                            </dependency>
+                        </dependencies>
                         <executions>
                             <execution>
                                 <phase>pre-site</phase>
@@ -89,7 +105,7 @@
                     <plugin>
                         <groupId>org.pitest</groupId>
                         <artifactId>pitest-maven</artifactId>
-                        <version>1.11.1</version>
+                        <version>1.11.4</version>
                     </plugin>
                 </plugins>
             </reporting>
@@ -106,16 +122,6 @@
             <email>joseph@verron.pro</email>
             <name>Joseph Verron</name>
             <url>https://verron.pro</url>
-        </developer>
-        <developer>
-            <email>tom.hombergs@gmail.com</email>
-            <name>Tom Hombergs</name>
-            <url>http://wickedsource.org</url>
-        </developer>
-        <developer>
-            <email>bertrand@florat.net</email>
-            <name>Bertrand Florat</name>
-            <url>https://florat.net</url>
         </developer>
     </developers>
     <build>

@@ -4,7 +4,7 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class ReplaceNullExpressionTest extends AbstractDocx4jTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext(null);
+		Name context = new Name(null);
 		InputStream template = getClass().getResourceAsStream("ReplaceNullExpressionTest.docx");
 		OutputStream out = getOutputStream();
-		DocxStamper<NameContext> stamper = new DocxStamperConfiguration()
+		DocxStamper<Name> stamper = new DocxStamperConfiguration()
 				.replaceNullValues(true)
 				.build();
 		stamper.stamp(template, context, out);

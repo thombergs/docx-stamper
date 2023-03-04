@@ -4,7 +4,7 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class TernaryOperatorTest extends AbstractDocx4jTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer");
+		Name context = new Name("Homer");
 		InputStream template = getClass().getResourceAsStream("TernaryOperatorTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		P nameParagraph = (P) document.getMainDocumentPart().getContent().get(3);
@@ -27,7 +27,7 @@ public class TernaryOperatorTest extends AbstractDocx4jTest {
 
 	@Test
 	public void test2() throws IOException, Docx4JException {
-		NameContext context = new NameContext("Homer");
+		Name context = new Name("Homer");
 		InputStream template = getClass().getResourceAsStream("TernaryOperatorTest2.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 

@@ -6,7 +6,7 @@ import org.docx4j.wml.Br;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -19,7 +19,7 @@ public class LineBreakReplacementTest extends AbstractDocx4jTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext(null);
+		Name context = new Name(null);
 		DocxStamperConfiguration config = new DocxStamperConfiguration();
 		config.setLineBreakPlaceholder("#");
 		InputStream template = getClass().getResourceAsStream("LineBreakReplacementTest.docx");

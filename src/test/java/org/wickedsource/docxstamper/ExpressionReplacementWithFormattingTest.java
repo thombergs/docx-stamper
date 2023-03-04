@@ -5,7 +5,7 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,7 +16,7 @@ public class ExpressionReplacementWithFormattingTest extends AbstractDocx4jTest 
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer Simpson");
+		Name context = new Name("Homer Simpson");
 		InputStream template = getClass().getResourceAsStream("ExpressionReplacementWithFormattingTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 

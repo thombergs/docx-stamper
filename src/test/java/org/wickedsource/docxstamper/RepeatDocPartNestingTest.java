@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
@@ -60,11 +61,11 @@ public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 			checkParagraphContent(expected, index++);
 			for (AClass aClass : grade.getClasses()) {
 				// check class name
-				expected = String.format("Class No.%d there are %d students", aClass.getNumber(), aClass.getStudents()
-																										.size());
+				expected = String.format("Class No.%d there are %d students", aClass.number(), aClass.students()
+																									 .size());
 				checkParagraphContent(expected, index++);
 				// check the student's list
-				for (Student s : aClass.getStudents()) {
+				for (Student s : aClass.students()) {
 					Object object = XmlUtils.unwrap(documentContent.get(index++));
 					final List<Tc> cells = new ArrayList<>();
 					DocumentWalker cellWalker = new BaseDocumentWalker((ContentAccessor) object) {
@@ -92,7 +93,6 @@ public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 	}
 
 	private Grade createOneGrade(int number) {
-
 		Grade grade = new Grade(number);
 		for (int i = 0; i < numberOfClasses; i++) {
 			grade.getClasses().add(createOneClass(i));
@@ -107,11 +107,8 @@ public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 	}
 
 	private AClass createOneClass(int classNumber) {
-		AClass aClass = new AClass(classNumber);
-		for (int i = 0; i < 5; i++) {
-			aClass.getStudents().add(findOneStudent(i));
-		}
-		return aClass;
+		var students = range(0, 5).mapToObj(this::findOneStudent).toList();
+		return new AClass(classNumber, students);
 	}
 
 	private Student findOneStudent(int i) {

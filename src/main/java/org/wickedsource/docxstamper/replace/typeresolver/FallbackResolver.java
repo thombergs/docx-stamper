@@ -5,13 +5,8 @@ package org.wickedsource.docxstamper.replace.typeresolver;
  * resolver is able to map all objects to their String value.
  */
 public class FallbackResolver extends AbstractToTextResolver<Object> {
-
-    @Override
-    protected String resolveStringForObject(Object object) {
-        if(object!=null)
-            return String.valueOf(object);
-        else
-            return "";
-    }
-
+	@Override
+	protected String resolveStringForObject(Object object) {
+		return object != null ? String.valueOf(object) : "";
+	}
 }

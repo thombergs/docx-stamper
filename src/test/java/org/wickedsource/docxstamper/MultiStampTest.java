@@ -7,7 +7,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
@@ -24,11 +24,11 @@ public class MultiStampTest extends AbstractDocx4jTest {
 	public void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
 		DocxStamper<NamesContext> stamper = new DocxStamper<>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(
 				false));
-		NamesContext context = new NamesContext(List.of(new NameContext("Homer"),
-														new NameContext("Marge"),
-														new NameContext("Bart"),
-														new NameContext("Lisa"),
-														new NameContext("Maggie")));
+		NamesContext context = new NamesContext(List.of(new Name("Homer"),
+														new Name("Marge"),
+														new Name("Bart"),
+														new Name("Lisa"),
+														new Name("Maggie")));
 
 		InputStream template = getClass().getResourceAsStream("MultiStampTest.docx");
 		OutputStream out = getOutputStream();
@@ -66,6 +66,6 @@ public class MultiStampTest extends AbstractDocx4jTest {
 		assertTrue(cellContent.contains(text), message);
 	}
 
-	public record NamesContext(List<NameContext> names) {
+	public record NamesContext(List<Name> names) {
 	}
 }

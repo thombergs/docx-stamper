@@ -4,7 +4,7 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -16,7 +16,7 @@ public class CustomExpressionFunctionTest extends AbstractDocx4jTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer Simpson");
+		Name context = new Name("Homer Simpson");
 		InputStream template = getClass().getResourceAsStream("CustomExpressionFunction.docx");
 		DocxStamperConfiguration config = new DocxStamperConfiguration()
 				.exposeInterfaceToExpressionLanguage(UppercaseFunction.class, new UppercaseFunctionImpl());

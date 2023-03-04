@@ -8,7 +8,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class ConditionalDisplayOfTablesTest extends AbstractDocx4jTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer");
+		Name context = new Name("Homer");
 		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTablesTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		globalTablesAreRemoved(document);

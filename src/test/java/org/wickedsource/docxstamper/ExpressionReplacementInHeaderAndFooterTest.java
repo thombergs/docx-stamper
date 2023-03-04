@@ -9,7 +9,7 @@ import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -21,7 +21,7 @@ public class ExpressionReplacementInHeaderAndFooterTest extends AbstractDocx4jTe
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer Simpson");
+		Name context = new Name("Homer Simpson");
 		InputStream template = getClass().getResourceAsStream("ExpressionReplacementInHeaderAndFooterTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInHeader(document);

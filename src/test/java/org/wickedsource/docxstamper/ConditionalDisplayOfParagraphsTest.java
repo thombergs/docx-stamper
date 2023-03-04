@@ -8,7 +8,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.NameContext;
+import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
@@ -23,7 +23,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
 	@Test
 	public void processorExpressionsInCommentsAreResolved() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer");
+		Name context = new Name("Homer");
 		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		globalParagraphsAreRemoved(document);
@@ -63,7 +63,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
 	@Test
 	public void inlineProcessorExpressionsAreResolved() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Homer");
+		Name context = new Name("Homer");
 		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		globalParagraphsAreRemoved(document);
@@ -73,7 +73,7 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
 	@Test
 	public void unresolvedInlineProcessorExpressionsAreRemoved() throws Docx4JException, IOException {
-		NameContext context = new NameContext("Bart");
+		Name context = new Name("Bart");
 		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
 		WordprocessingMLPackage document = stampAndLoad(template, context);
 		globalInlineProcessorExpressionIsRemoved(document);
