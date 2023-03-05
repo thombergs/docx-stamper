@@ -4,7 +4,6 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -32,5 +31,8 @@ public class ExpressionReplacementInGlobalParagraphsTest extends AbstractDocx4jT
 		P fooParagraph = (P) document.getMainDocumentPart().getContent().get(3);
 		assertEquals("In this paragraph, the variable foo should not be resolved: ${foo}.",
 					 new ParagraphWrapper(fooParagraph).getText());
+	}
+
+	public record Name(String name) {
 	}
 }

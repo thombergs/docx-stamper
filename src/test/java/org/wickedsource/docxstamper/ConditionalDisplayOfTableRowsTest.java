@@ -8,7 +8,6 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
@@ -18,7 +17,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
-
 	@Test
 	public void test() throws Docx4JException, IOException {
 		Name context = new Name("Homer");
@@ -49,5 +47,8 @@ public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
 		List<P> paragraphsFromObject = DocumentUtil.extractElements(tc, P.class);
 		assertEquals(1, paragraphsFromObject.size());
 		return TextUtils.getText(paragraphsFromObject.get(0));
+	}
+
+	public record Name(String name) {
 	}
 }

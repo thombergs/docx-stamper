@@ -16,95 +16,92 @@ import java.util.List;
 
 public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplayIfProcessor {
 
-    private List<P> paragraphsToBeRemoved = new ArrayList<>();
+	private List<P> paragraphsToBeRemoved = new ArrayList<>();
+	private List<Tbl> tablesToBeRemoved = new ArrayList<>();
+	private List<Tr> tableRowsToBeRemoved = new ArrayList<>();
+	private List<Object> objectsToBeRemoved = new ArrayList<>();
 
-    private List<Tbl> tablesToBeRemoved = new ArrayList<>();
+	public DisplayIfProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
+		super(config, typeResolverRegistry);
+	}
 
-    private List<Tr> tableRowsToBeRemoved = new ArrayList<>();
-    private List<Object> objectsToBeRemoved = new ArrayList<>();
+	@Override
+	public void commitChanges(WordprocessingMLPackage document) {
+		ObjectDeleter deleter = new ObjectDeleter();
+		removeParagraphs(deleter);
+		removeTables(deleter);
+		removeTableRows(deleter);
+		removeObjects(deleter);
+	}
 
-    public DisplayIfProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
-        super(config, typeResolverRegistry);
-    }
+	@Override
+	public void reset() {
+		paragraphsToBeRemoved = new ArrayList<>();
+		tablesToBeRemoved = new ArrayList<>();
+		tableRowsToBeRemoved = new ArrayList<>();
+		objectsToBeRemoved = new ArrayList<>();
+	}
 
-    @Override
-    public void commitChanges(WordprocessingMLPackage document) {
-        ObjectDeleter deleter = new ObjectDeleter();
-        removeParagraphs(deleter);
-        removeTables(deleter);
-        removeTableRows(deleter);
-        removeObjects(deleter);
-    }
+	private void removeParagraphs(ObjectDeleter deleter) {
+		for (P p : paragraphsToBeRemoved) {
+			deleter.deleteParagraph(p);
+		}
+	}
 
-    @Override
-    public void reset() {
-        paragraphsToBeRemoved = new ArrayList<>();
-        tablesToBeRemoved = new ArrayList<>();
-        tableRowsToBeRemoved = new ArrayList<>();
-        objectsToBeRemoved = new ArrayList<>();
-    }
+	private void removeTables(ObjectDeleter deleter) {
+		for (Tbl table : tablesToBeRemoved) {
+			deleter.deleteTable(table);
+		}
+	}
 
-    private void removeParagraphs(ObjectDeleter deleter) {
-        for (P p : paragraphsToBeRemoved) {
-            deleter.deleteParagraph(p);
-        }
-    }
+	private void removeTableRows(ObjectDeleter deleter) {
+		for (Tr row : tableRowsToBeRemoved) {
+			deleter.deleteTableRow(row);
+		}
+	}
 
-    private void removeObjects(ObjectDeleter deleter) {
-        for (Object object : objectsToBeRemoved) {
-            deleter.deleteObject(object);
-        }
-    }
+	private void removeObjects(ObjectDeleter deleter) {
+		for (Object object : objectsToBeRemoved) {
+			deleter.deleteObject(object);
+		}
+	}
 
-    private void removeTables(ObjectDeleter deleter) {
-        for (Tbl table : tablesToBeRemoved) {
-            deleter.deleteTable(table);
-        }
-    }
+	@Override
+	public void displayParagraphIf(Boolean condition) {
+		if (condition) return;
+		paragraphsToBeRemoved.add(getParagraph());
+	}
 
-    private void removeTableRows(ObjectDeleter deleter) {
-        for (Tr row : tableRowsToBeRemoved) {
-            deleter.deleteTableRow(row);
-        }
-    }
+	@Override
+	public void displayParagraphIfPresent(Object condition) {
+		displayParagraphIf(condition != null);
+	}
 
-    @Override
-    public void displayParagraphIf(Boolean condition) {
-        if (!condition) {
-            paragraphsToBeRemoved.add(getParagraph());
-        }
-    }
+	@Override
+	public void displayTableIf(Boolean condition) {
+		if (condition) return;
 
-    @Override
-    public void displayParagraphIfPresent(Object condition) {
-        displayParagraphIf(condition != null);
-    }
+		P p = getParagraph();
+		if (p.getParent() instanceof Tc tc
+				&& tc.getParent() instanceof Tr tr
+				&& tr.getParent() instanceof Tbl tbl
+		) {
+			tablesToBeRemoved.add(tbl);
+		} else {
+			throw new CommentProcessingException("Paragraph is not within a table!", p);
+		}
+	}
 
-    @Override
-    public void displayTableIf(Boolean condition) {
-        if (!condition) {
-            P p = getParagraph();
+	@Override
+	public void displayTableRowIf(Boolean condition) {
+		if (condition) return;
 
-            if (p.getParent() instanceof Tc &&
-                    ((Tc) p.getParent()).getParent() instanceof Tr &&
-                    ((Tr) ((Tc) p.getParent()).getParent()).getParent() instanceof Tbl) {
-                tablesToBeRemoved.add((Tbl) ((Tr) ((Tc) p.getParent()).getParent()).getParent());
-            } else {
-                throw new CommentProcessingException("Paragraph is not within a table!", p);
-            }
-        }
-    }
-
-    @Override
-    public void displayTableRowIf(Boolean condition) {
-        if (!condition) {
-            P p = getParagraph();
-            if (p.getParent() instanceof Tc &&
-                    ((Tc) p.getParent()).getParent() instanceof Tr) {
-                tableRowsToBeRemoved.add((Tr) ((Tc) p.getParent()).getParent());
-            } else {
-                throw new CommentProcessingException("Paragraph is not within a table!", p);
-            }
-        }
-    }
+		P p = getParagraph();
+		if (p.getParent() instanceof Tc tc
+				&& tc.getParent() instanceof Tr tr) {
+			tableRowsToBeRemoved.add(tr);
+		} else {
+			throw new CommentProcessingException("Paragraph is not within a table!", p);
+		}
+	}
 }

@@ -8,7 +8,6 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
@@ -20,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
-
 	@Test
 	public void processorExpressionsInCommentsAreResolved() throws Docx4JException, IOException {
 		Name context = new Name("Homer");
@@ -82,6 +80,9 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 	private void globalInlineProcessorExpressionIsRemoved(WordprocessingMLPackage document) {
 		P p2 = (P) document.getMainDocumentPart().getContent().get(2);
 		assertFalse(new ParagraphWrapper(p2).getText().contains("#{"));
+	}
+
+	public record Name(String name) {
 	}
 
 }

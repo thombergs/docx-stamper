@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper;
 
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
-import org.wickedsource.docxstamper.context.Name;
 
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -10,7 +9,6 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class FailOnUnresolvedExpressionTest extends AbstractDocx4jTest {
-
 	@Test
 	public void fails() {
 		Name context = new Name("Homer");
@@ -29,6 +27,9 @@ public class FailOnUnresolvedExpressionTest extends AbstractDocx4jTest {
 				.build();
 		stamper.stamp(template, context, new ByteArrayOutputStream());
 		// no exception
+	}
+
+	public record Name(String name) {
 	}
 
 }

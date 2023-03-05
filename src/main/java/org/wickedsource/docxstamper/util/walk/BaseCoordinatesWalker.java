@@ -6,18 +6,15 @@ import org.docx4j.wml.R;
 
 public abstract class BaseCoordinatesWalker extends CoordinatesWalker {
 
-    public BaseCoordinatesWalker(WordprocessingMLPackage document) {
-        super(document);
-    }
+	public BaseCoordinatesWalker(WordprocessingMLPackage document) {
+		super(document);
+	}
 
-    @Override
-    protected void onParagraph(P paragraph) {
+	@Override
+	protected void onParagraph(P paragraph) {
+	}
 
-    }
-
-
-    @Override
-    protected void onRun(R run, P paragraph) {
-
-    }
+	@Override
+	protected void onRun(R run, P paragraph) {
+	}
 }

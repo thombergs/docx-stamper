@@ -4,7 +4,6 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -31,5 +30,8 @@ public class ReplaceNullExpressionTest extends AbstractDocx4jTest {
 	private void checkNullValueIsReplaced(WordprocessingMLPackage document) {
 		P nameParagraph = (P) document.getMainDocumentPart().getContent().get(0);
 		assertEquals("I am .", new ParagraphWrapper(nameParagraph).getText());
+	}
+
+	public record Name(String name) {
 	}
 }

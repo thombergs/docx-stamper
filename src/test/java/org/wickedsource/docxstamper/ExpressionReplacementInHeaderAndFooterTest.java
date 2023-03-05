@@ -9,7 +9,6 @@ import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -18,7 +17,6 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExpressionReplacementInHeaderAndFooterTest extends AbstractDocx4jTest {
-
 	@Test
 	public void test() throws Docx4JException, IOException {
 		Name context = new Name("Homer Simpson");
@@ -72,5 +70,8 @@ public class ExpressionReplacementInHeaderAndFooterTest extends AbstractDocx4jTe
 		RelationshipsPart relPart = document.getMainDocumentPart().getRelationshipsPart();
 		Relationship rel = relPart.getRelationshipByType(Namespaces.FOOTER);
 		return (FooterPart) relPart.getPart(rel);
+	}
+
+	public record Name(String name) {
 	}
 }

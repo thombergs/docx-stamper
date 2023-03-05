@@ -4,7 +4,6 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -31,6 +30,9 @@ public class TabsIndentationTest extends AbstractDocx4jTest {
 
 		P nameParagraph = (P) document.getMainDocumentPart().getContent().get(1);
 		assertEquals("Space Homer Simpson", new ParagraphWrapper(nameParagraph).getText());
+	}
+
+	public record Name(String name) {
 	}
 
 

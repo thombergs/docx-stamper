@@ -4,7 +4,6 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -13,7 +12,6 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomExpressionFunctionTest extends AbstractDocx4jTest {
-
 	@Test
 	public void test() throws Docx4JException, IOException {
 		Name context = new Name("Homer Simpson");
@@ -33,6 +31,9 @@ public class CustomExpressionFunctionTest extends AbstractDocx4jTest {
 
 	public interface UppercaseFunction {
 		String toUppercase(String string);
+	}
+
+	public record Name(String name) {
 	}
 
 	public static class UppercaseFunctionImpl implements UppercaseFunction {

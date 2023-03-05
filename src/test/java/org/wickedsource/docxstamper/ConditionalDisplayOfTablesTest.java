@@ -8,7 +8,6 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -18,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ConditionalDisplayOfTablesTest extends AbstractDocx4jTest {
-
 	@Test
 	public void test() throws Docx4JException, IOException {
 		Name context = new Name("Homer");
@@ -46,5 +44,8 @@ public class ConditionalDisplayOfTablesTest extends AbstractDocx4jTest {
 		assertEquals("",
 					 new ParagraphWrapper((P) cell.getContent()
 												  .get(0)).getText()); // empty paragraph, since the last element inside the cell was removed
+	}
+
+	public record Name(String name) {
 	}
 }

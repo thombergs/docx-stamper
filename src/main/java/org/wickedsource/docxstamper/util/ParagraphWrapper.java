@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.stream.Collectors.joining;
+
 /**
  * <p>A "Run" defines a region of text within a docx document with a common set of properties. Word processors are
  * relatively free in splitting a paragraph of text into multiple runs, so there is no strict rule to say over how many
@@ -130,25 +132,16 @@ public class ParagraphWrapper {
 	 * @return the text of all runs.
 	 */
 	public String getText() {
-		return getText(this.runs);
+		return runs.stream()
+				   .map(IndexedRun::getRun)
+				   .map(RunUtil::getText)
+				   .collect(joining());
 	}
 
 	private List<IndexedRun> getAffectedRuns(int startIndex, int endIndex) {
-		List<IndexedRun> affectedRuns = new ArrayList<>();
-		for (IndexedRun run : runs) {
-			if (run.isTouchedByRange(startIndex, endIndex)) {
-				affectedRuns.add(run);
-			}
-		}
-		return affectedRuns;
-	}
-
-	private String getText(List<IndexedRun> runs) {
-		StringBuilder builder = new StringBuilder();
-		for (IndexedRun run : runs) {
-			builder.append(RunUtil.getText(run.getRun()));
-		}
-		return builder.toString();
+		return runs.stream()
+				   .filter(run -> run.isTouchedByRange(startIndex, endIndex))
+				   .toList();
 	}
 
 	/**
@@ -158,11 +151,7 @@ public class ParagraphWrapper {
 	 * @return the list of aggregated runs.
 	 */
 	public List<R> getRuns() {
-		List<R> resultList = new ArrayList<>();
-		for (IndexedRun run : runs) {
-			resultList.add(run.getRun());
-		}
-		return resultList;
+		return runs.stream().map(IndexedRun::getRun).toList();
 	}
 
 	@Override

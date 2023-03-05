@@ -5,7 +5,6 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,6 +31,9 @@ public class ExpressionReplacementWithFormattingTest extends AbstractDocx4jTest 
 
 	private void assertItalicStyle(R run) {
 		assertTrue(run.getRPr().getI().isVal(), "expected Run to be styled italic!");
+	}
+
+	public record Name(String name) {
 	}
 
 

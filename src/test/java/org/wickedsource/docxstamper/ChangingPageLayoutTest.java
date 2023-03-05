@@ -5,7 +5,6 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 
 import java.io.IOException;
@@ -220,5 +219,8 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 		assertNull(((P) content.get(9)).getPPr().getSectPr().getPgSz().getOrient());
 
 		assertThatNoCommentOrReferenceRemains(result);
+	}
+
+	public record Name(String name) {
 	}
 }

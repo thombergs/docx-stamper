@@ -7,7 +7,6 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
@@ -19,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MultiStampTest extends AbstractDocx4jTest {
-
 	@Test
 	public void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
 		DocxStamper<NamesContext> stamper = new DocxStamper<>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(
@@ -64,6 +62,9 @@ public class MultiStampTest extends AbstractDocx4jTest {
 		String cellContent = TextUtils.getText(cell0.get(0));
 		String message = String.format("'%s' is not contained in '%s'", text, cellContent);
 		assertTrue(cellContent.contains(text), message);
+	}
+
+	public record Name(String name) {
 	}
 
 	public record NamesContext(List<Name> names) {

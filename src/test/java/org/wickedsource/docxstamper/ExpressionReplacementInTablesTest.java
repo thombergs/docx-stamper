@@ -8,7 +8,6 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -17,7 +16,6 @@ import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
-
 	@Test
 	public void test() throws Docx4JException, IOException {
 		Name context = new Name("Bart Simpson");
@@ -67,5 +65,8 @@ public class ExpressionReplacementInTablesTest extends AbstractDocx4jTest {
 
 		P nameParagraph = (P) nestedCell.getContent().get(0);
 		assertEquals("${foo}", new ParagraphWrapper(nameParagraph).getText());
+	}
+
+	public record Name(String name) {
 	}
 }

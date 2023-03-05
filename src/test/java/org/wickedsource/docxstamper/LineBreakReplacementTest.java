@@ -6,7 +6,6 @@ import org.docx4j.wml.Br;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
@@ -16,7 +15,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LineBreakReplacementTest extends AbstractDocx4jTest {
-
 	@Test
 	public void test() throws Docx4JException, IOException {
 		Name context = new Name(null);
@@ -38,6 +36,9 @@ public class LineBreakReplacementTest extends AbstractDocx4jTest {
 
 		assertEquals(R.class, paragraph.getContent().get(3).getClass());
 		assertEquals(Br.class, ((R) paragraph.getContent().get(3)).getContent().get(0).getClass());
+	}
+
+	public record Name(String name) {
 	}
 
 }

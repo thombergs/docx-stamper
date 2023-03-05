@@ -4,7 +4,6 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Name;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
@@ -31,5 +30,8 @@ public class ExpressionReplacementInTextBoxesTest extends AbstractDocx4jTest {
 	private void unresolvedExpressionsAreNotReplacedInFirstTextBox(WordprocessingMLPackage document) {
 		P nameParagraph = (P) ParagraphUtil.getAllTextBoxes(document).get(2);
 		assertEquals("${foo}", new ParagraphWrapper(nameParagraph).getText());
+	}
+
+	public record Name(String name) {
 	}
 }
