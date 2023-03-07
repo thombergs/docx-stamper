@@ -4,9 +4,12 @@ import org.docx4j.TextUtils;
 import org.docx4j.TraversalUtil;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.wml.P;
+import org.docx4j.wml.RPr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wickedsource.docxstamper.util.ParagraphCollector;
+import org.wickedsource.docxstamper.util.RunCollector;
 import org.wickedsource.docxstamper.util.ThrowingSupplier;
 
 import java.io.*;
@@ -15,7 +18,10 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.function.Supplier;
+
+import static java.util.stream.Collectors.joining;
 
 /**
  * Common methods to interact with docx documents.
@@ -84,11 +90,46 @@ public abstract class AbstractDocx4jTest {
 		return WordprocessingMLPackage.load(in);
 	}
 
-	protected List<String> extractDocumentParagraphs(OutputStream out) throws Docx4JException {
+	protected List<List<String>> extractDocumentParagraphs(OutputStream out) throws Docx4JException {
 		InputStream in = getInputStream(out);
 		WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
 		ParagraphCollector visitor = new ParagraphCollector();
 		TraversalUtil.visit(document.getMainDocumentPart().getContent(), visitor);
-		return visitor.paragraphs().map(TextUtils::getText).toList();
+		return visitor.paragraphs()
+					  .map(AbstractDocx4jTest::extractDocumentRuns)
+					  .toList();
+	}
+
+	private static List<String> extractDocumentRuns(P p) {
+		RunCollector runCollector = new RunCollector();
+		TraversalUtil.visit(p, runCollector);
+		return runCollector.runs()
+						   .filter(o -> !o.getContent().isEmpty())
+						   .filter(o -> !TextUtils.getText(o).isEmpty())
+						   .map(o -> "" + TextUtils.getText(o) + serialize(o.getRPr()))
+						   .toList();
+	}
+
+	private static String serialize(RPr rPr) {
+		if (rPr == null) return "";
+		SortedSet<String> set = new java.util.TreeSet<>();
+		if (rPr.getRStyle() != null) set.add("rStyle=" + rPr.getRStyle().getVal());
+		if (rPr.getB() != null) set.add("b=" + rPr.getB().isVal());
+		if (rPr.getBdr() != null) set.add("bdr=xxx");
+		if (rPr.getCaps() != null) set.add("caps=" + rPr.getCaps().isVal());
+		if (rPr.getColor() != null) set.add("color=" + rPr.getColor().getVal());
+		if (rPr.getRFonts() != null) set.add("rFonts=xxx:" + rPr.getRFonts().getHint().value());
+		if (rPr.getI() != null) set.add("i=" + rPr.getI().isVal());
+		if (rPr.getKern() != null) set.add("kern=" + rPr.getKern().getVal().intValue());
+		if (rPr.getLang() != null) set.add("lang=" + rPr.getLang().getVal());
+		if (rPr.getRPrChange() != null) set.add("rPrChange=xxx");
+		if (rPr.getRStyle() != null) set.add("rStyle=" + rPr.getRStyle().getVal());
+		if (rPr.getRtl() != null) set.add("rtl=" + rPr.getRtl().isVal());
+		if (rPr.getShadow() != null) set.add("shadow=" + rPr.getShadow().isVal());
+		if (rPr.getShd() != null) set.add("shd=" + rPr.getShd().getColor());
+		if (rPr.getSmallCaps() != null) set.add("smallCaps=" + rPr.getSmallCaps().isVal());
+		if (rPr.getVertAlign() != null) set.add("vertAlign=" + rPr.getVertAlign().getVal().value());
+
+		return set.stream().collect(joining(", ", "(", ")"));
 	}
 }

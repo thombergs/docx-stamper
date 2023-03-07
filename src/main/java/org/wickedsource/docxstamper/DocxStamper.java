@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
@@ -113,9 +114,7 @@ public class DocxStamper<T> {
 		try {
 			WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 			stamp(document, contextRoot, out);
-		} catch (DocxStamperException e) {
-			throw e;
-		} catch (Exception e) {
+		} catch (Docx4JException e) {
 			throw new DocxStamperException(e);
 		}
 	}
@@ -135,9 +134,7 @@ public class DocxStamper<T> {
 			replaceExpressions(document, contextRoot);
 			document.save(out);
 			commentProcessorRegistry.reset();
-		} catch (DocxStamperException e) {
-			throw e;
-		} catch (Exception e) {
+		} catch (Docx4JException e) {
 			throw new DocxStamperException(e);
 		}
 	}
@@ -160,5 +157,4 @@ public class DocxStamper<T> {
 	public ICommentProcessor getCommentProcessorInstance(Class<?> interfaceToGet) {
 		return (ICommentProcessor) config.getCommentProcessors().get(interfaceToGet);
 	}
-
 }

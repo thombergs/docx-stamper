@@ -60,7 +60,7 @@ public class ParagraphWrapper {
 	 * @param placeholder the placeholder to be replaced.
 	 * @param replacement the object to replace the placeholder String.
 	 */
-	public void replace(String placeholder, Object replacement) {
+	public void replace(String placeholder, R replacement) {
 		String text = getText();
 		int matchStartIndex = text.indexOf(placeholder);
 		if (matchStartIndex == -1) {
@@ -75,10 +75,13 @@ public class ParagraphWrapper {
 		if (singleRun) {
 			IndexedRun run = affectedRuns.get(0);
 
+
 			boolean placeholderSpansCompleteRun = placeholder.length() == RunUtil.getText(run.getRun()).length();
 			boolean placeholderAtStartOfRun = matchStartIndex == run.getStartIndex();
 			boolean placeholderAtEndOfRun = matchEndIndex == run.getEndIndex();
 			boolean placeholderWithinRun = matchStartIndex > run.getStartIndex() && matchEndIndex < run.getEndIndex();
+
+			replacement.setRPr(run.getRun().getRPr());
 
 			if (placeholderSpansCompleteRun) {
 				this.paragraph.getContent().remove(run.getRun());
@@ -107,7 +110,7 @@ public class ParagraphWrapper {
 		} else {
 			IndexedRun firstRun = affectedRuns.get(0);
 			IndexedRun lastRun = affectedRuns.get(affectedRuns.size() - 1);
-
+			replacement.setRPr(firstRun.getRun().getRPr());
 			// remove the placeholder from first and last run
 			firstRun.replace(matchStartIndex, matchEndIndex, "");
 			lastRun.replace(matchStartIndex, matchEndIndex, "");

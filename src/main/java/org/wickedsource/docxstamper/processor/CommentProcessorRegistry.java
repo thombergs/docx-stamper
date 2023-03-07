@@ -136,10 +136,9 @@ public class CommentProcessorRegistry {
 
 			try {
 				expressionResolver.resolveExpression(strippedExpression, expressionContext);
-				placeholderReplacer.replace(paragraphWrapper, processorExpression, null);
-				logger.debug(String.format(
-						"Processor expression '%s' has been successfully processed by a comment processor.",
-						processorExpression));
+				placeholderReplacer.replace(paragraphWrapper, processorExpression, "");
+				logger.debug("Processor expression '{}' has been successfully processed by a comment processor.",
+							 processorExpression);
 			} catch (SpelEvaluationException | SpelParseException e) {
 				if (configuration.isFailOnUnresolvedExpression()) {
 					throw new UnresolvedExpressionException(strippedExpression, e);

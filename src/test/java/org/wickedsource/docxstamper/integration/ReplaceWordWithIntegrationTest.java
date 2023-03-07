@@ -25,12 +25,17 @@ public class ReplaceWordWithIntegrationTest extends AbstractDocx4jTest {
 				.setFailOnUnresolvedExpression(false)
 				.build();
 		stamper.stamp(template, context, out);
-		List<String> actual = extractDocumentParagraphs(out);
-		List<Object> expected = List.of(
-				"ReplaceWordWith Integration",
-				"This variable name should be resolved to the value Simpsons.",
-				"This variable name should be resolved to the value Simpsons.",
-				"");
+		var actual = extractDocumentParagraphs(out);
+		var expected = List.of(
+				List.of("Replace", "WordWith Integration"),
+				List.of("This variable ",
+						"name(b=true)",
+						" (b=true)",
+						"should be resolved to the value ",
+						"Simpsons",
+						"."),
+				List.of("This variable ", "name(b=true)", " ", "should be resolved to the value ", "Simpsons", "."),
+				List.of());
 		assertEquals(expected, actual);
 	}
 
