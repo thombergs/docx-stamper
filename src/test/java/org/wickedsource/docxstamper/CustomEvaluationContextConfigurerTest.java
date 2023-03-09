@@ -1,7 +1,6 @@
 package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.EvaluationContext;
@@ -10,21 +9,21 @@ import org.springframework.expression.TypedValue;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomEvaluationContextConfigurerTest extends AbstractDocx4jTest {
+public class CustomEvaluationContextConfigurerTest {
 
 	@Test
 	public void customEvaluationContextConfigurerIsHonored() throws Docx4JException, IOException {
-		DocxStamperConfiguration config = new DocxStamperConfiguration();
+		var config = new DocxStamperConfiguration();
 		config.setEvaluationContextConfigurer(context -> context.addPropertyAccessor(new SimpleGetter("foo", "bar")));
 
-		InputStream template = getClass().getResourceAsStream("CustomEvaluationContextConfigurerTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, new EmptyContext(), config);
+		var template = getClass().getResourceAsStream("CustomEvaluationContextConfigurerTest.docx");
+		var stamper = new TestDocxStamper<EmptyContext>(config);
+		var document = stamper.stampAndLoad(template, new EmptyContext());
 
-		P p2 = (P) document.getMainDocumentPart().getContent().get(2);
+		var p2 = (P) document.getMainDocumentPart().getContent().get(2);
 		assertEquals("The variable foo has the value bar.", new ParagraphWrapper(p2).getText());
 	}
 

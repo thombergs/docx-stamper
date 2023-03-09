@@ -7,7 +7,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.AbstractDocx4jTest;
+import org.wickedsource.docxstamper.IOStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,30 +17,43 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.wickedsource.docxstamper.util.DocumentUtil.getParagraphsFromObject;
 import static org.wickedsource.docxstamper.util.DocumentUtil.getTableFromObject;
 
-public class ObjectDeleterTest extends AbstractDocx4jTest {
+public class ObjectDeleterTest {
 
 	@Test
 	public void deletesCorrectGlobalParagraphs() throws Docx4JException, IOException {
-		InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-globalParagraphs.docx");
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
+		var template = getClass().getResourceAsStream("ObjectDeleterTest-globalParagraphs.docx");
+		var in = WordprocessingMLPackage.load(template);
+		var coordinates = getParagraphsFromObject(in);
 
-		List<P> coordinates = getParagraphsFromObject(document);
-
-		ObjectDeleter deleter = new ObjectDeleter();
+		var deleter = new ObjectDeleter();
 		deleter.deleteParagraph(coordinates.get(0));
 		deleter.deleteParagraph(coordinates.get(2));
 		deleter.deleteParagraph(coordinates.get(3));
 
-		WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
-		assertEquals(2, savedDocument.getMainDocumentPart().getContent().size());
+		var document = saveAndLoadDocument(in);
+		assertEquals(2, document.getMainDocumentPart().getContent().size());
 		assertEquals("This is the second paragraph.",
-					 new ParagraphWrapper((P) savedDocument.getMainDocumentPart()
-														   .getContent()
-														   .get(0)).getText());
+					 new ParagraphWrapper((P) document.getMainDocumentPart()
+													  .getContent()
+													  .get(0)).getText());
 		assertEquals("This is the fifth paragraph.",
-					 new ParagraphWrapper((P) savedDocument.getMainDocumentPart()
-														   .getContent()
-														   .get(1)).getText());
+					 new ParagraphWrapper((P) document.getMainDocumentPart()
+													  .getContent()
+													  .get(1)).getText());
+	}
+
+	/**
+	 * Saves the given document into a temporal ByteArrayOutputStream and loads it from there again. This is useful to
+	 * check if changes in the Docx4j object structure are really transported into the XML of the .docx file.
+	 *
+	 * @param document the document to save and load again.
+	 * @return the document after it has been saved and loaded again.
+	 */
+	public WordprocessingMLPackage saveAndLoadDocument(WordprocessingMLPackage document) throws Docx4JException, IOException {
+		var out = IOStreams.getOutputStream();
+		document.save(out);
+		var in = IOStreams.getInputStream(out);
+		return WordprocessingMLPackage.load(in);
 	}
 
 	@Test

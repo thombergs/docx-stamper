@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tc;
@@ -16,14 +15,13 @@ import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
+public class RepeatDocPartNestingTest {
 
 	int initParagraphsNumber = 2;
 	int schoolNameTitle = 1;
@@ -38,12 +36,13 @@ public class RepeatDocPartNestingTest extends AbstractDocx4jTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		SchoolContext schoolContext = new SchoolContext("South Park Primary School");
+		var schoolContext = new SchoolContext("South Park Primary School");
 		for (int i = 0; i < numberOfGrades; i++) {
 			schoolContext.getGrades().add(createOneGrade(i));
 		}
-		InputStream template = getClass().getResourceAsStream("RepeatDocPartNestingTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, schoolContext);
+		var template = getClass().getResourceAsStream("RepeatDocPartNestingTest.docx");
+		var stamper = new TestDocxStamper<SchoolContext>();
+		var document = stamper.stampAndLoad(template, schoolContext);
 
 		documentContent = document.getMainDocumentPart().getContent();
 		// check object's num

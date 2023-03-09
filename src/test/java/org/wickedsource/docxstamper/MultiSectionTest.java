@@ -8,24 +8,18 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MultiSectionTest extends AbstractDocx4jTest {
+public class MultiSectionTest {
 
 	@Test
 	public void expressionsInMultipleSections() throws Docx4JException, IOException {
-		DocxStamper<NamesContext> stamper = new DocxStamper<>(new DocxStamperConfiguration());
-		NamesContext context = new NamesContext("Homer", "Marge");
-
-		InputStream template = getClass().getResourceAsStream("MultiSectionTest.docx");
-		OutputStream out = getOutputStream();
-		stamper.stamp(template, context, out);
-		InputStream in = getInputStream(out);
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
+		var context = new NamesContext("Homer", "Marge");
+		var template = getClass().getResourceAsStream("MultiSectionTest.docx");
+		var stamper = new TestDocxStamper<NamesContext>();
+		var document = stamper.stampAndLoad(template, context);
 		assertTableRows(document);
 
 	}

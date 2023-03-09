@@ -8,16 +8,16 @@ import org.wickedsource.docxstamper.util.ParagraphUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionReplacementInTextBoxesTest extends AbstractDocx4jTest {
+public class ExpressionReplacementInTextBoxesTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Bart Simpson");
-		InputStream template = getClass().getResourceAsStream("ExpressionReplacementInTextBoxesTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Name("Bart Simpson");
+		var template = getClass().getResourceAsStream("ExpressionReplacementInTextBoxesTest.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInFirstLevelTextBox(document);
 		unresolvedExpressionsAreNotReplacedInFirstTextBox(document);
 	}

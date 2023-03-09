@@ -1,27 +1,26 @@
 package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.replace.typeresolver.AbstractToTextResolver;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomTypeResolverTest extends AbstractDocx4jTest {
+public class CustomTypeResolverTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		CustomTypeResolver resolver = new CustomTypeResolver();
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var resolver = new CustomTypeResolver();
+		var config = new DocxStamperConfiguration()
 				.addTypeResolver(CustomType.class, resolver);
-		InputStream template = getClass().getResourceAsStream("CustomTypeResolverTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, new Context(), config);
-		P nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
+		var template = getClass().getResourceAsStream("CustomTypeResolverTest.docx");
+		var stamper = new TestDocxStamper<Context>(config);
+		var document = stamper.stampAndLoad(template, new Context());
+		var nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
 		assertEquals("The name should be resolved to foo.", new ParagraphWrapper(nameParagraph).getText());
 	}
 

@@ -10,36 +10,28 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MultiStampTest extends AbstractDocx4jTest {
+public class MultiStampTest {
 	@Test
 	public void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
-		DocxStamper<NamesContext> stamper = new DocxStamper<>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(
-				false));
-		NamesContext context = new NamesContext(List.of(new Name("Homer"),
-														new Name("Marge"),
-														new Name("Bart"),
-														new Name("Lisa"),
-														new Name("Maggie")));
+		var context = new NamesContext(List.of(
+				new Name("Homer"),
+				new Name("Marge"),
+				new Name("Bart"),
+				new Name("Lisa"),
+				new Name("Maggie")));
 
-		InputStream template = getClass().getResourceAsStream("MultiStampTest.docx");
-		OutputStream out = getOutputStream();
-		stamper.stamp(template, context, out);
-		InputStream in = getInputStream(out);
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
+		var template = getClass().getResourceAsStream("MultiStampTest.docx");
+		var stamper = new TestDocxStamper<>();
+		var document = stamper.stampAndLoad(template, context);
 		assertTableRows(document);
 
 		template = getClass().getResourceAsStream("MultiStampTest.docx");
-		out = getOutputStream();
-		stamper.stamp(template, context, out);
-		in = getInputStream(out);
-		document = WordprocessingMLPackage.load(in);
+		document = stamper.stampAndLoad(template, context);
 		assertTableRows(document);
 	}
 

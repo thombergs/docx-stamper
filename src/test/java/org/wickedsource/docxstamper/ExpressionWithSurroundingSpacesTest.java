@@ -1,23 +1,22 @@
 package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionWithSurroundingSpacesTest extends AbstractDocx4jTest {
+public class ExpressionWithSurroundingSpacesTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Context context = new Context();
-		InputStream template = getClass().getResourceAsStream("ExpressionWithSurroundingSpacesTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Context();
+		var template = getClass().getResourceAsStream("ExpressionWithSurroundingSpacesTest.docx");
+		var stamper = new TestDocxStamper<Context>();
+		var document = stamper.stampAndLoad(template, context);
 
 		assertEquals("Before Expression After.",
 					 new ParagraphWrapper((P) document.getMainDocumentPart().getContent().get(2)).getText());

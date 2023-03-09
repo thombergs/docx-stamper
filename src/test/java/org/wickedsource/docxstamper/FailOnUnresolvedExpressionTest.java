@@ -8,12 +8,12 @@ import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class FailOnUnresolvedExpressionTest extends AbstractDocx4jTest {
+public class FailOnUnresolvedExpressionTest {
 	@Test
 	public void fails() {
-		Name context = new Name("Homer");
-		InputStream template = getClass().getResourceAsStream("FailOnUnresolvedExpressionTest.docx");
-		DocxStamper<Name> stamper = new DocxStamper<>();
+		var context = new Name("Homer");
+		var template = getClass().getResourceAsStream("FailOnUnresolvedExpressionTest.docx");
+		var stamper = new DocxStamper<Name>();
 		assertThrows(UnresolvedExpressionException.class,
 					 () -> stamper.stamp(template, context, new ByteArrayOutputStream()));
 	}

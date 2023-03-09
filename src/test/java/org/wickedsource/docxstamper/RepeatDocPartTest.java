@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.context.Character;
@@ -12,18 +11,17 @@ import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RepeatDocPartTest extends AbstractDocx4jTest {
+public class RepeatDocPartTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		CharactersContext context = new CharactersContext();
+		var context = new CharactersContext();
 		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
 		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
 		context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
@@ -31,10 +29,11 @@ public class RepeatDocPartTest extends AbstractDocx4jTest {
 		context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
 		context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
 
-		InputStream template = getClass().getResourceAsStream("RepeatDocPartTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var template = getClass().getResourceAsStream("RepeatDocPartTest.docx");
+		var stamper = new TestDocxStamper<CharactersContext>();
+		var document = stamper.stampAndLoad(template, context);
 
-		List<Object> documentContent = document.getMainDocumentPart().getContent();
+		var documentContent = document.getMainDocumentPart().getContent();
 
 		int index = 2; // skip init paragraphs
 		for (Character character : context.getCharacters()) {

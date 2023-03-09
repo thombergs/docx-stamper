@@ -5,32 +5,40 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.AbstractDocx4jTest;
+import org.wickedsource.docxstamper.IOStreams;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RunUtilTest extends AbstractDocx4jTest {
+public class RunUtilTest {
 
 	@Test
 	public void getTextReturnsTextOfRun() throws Docx4JException {
-		WordprocessingMLPackage document = loadDocument("singleRun.docx");
-		P paragraph = (P) document.getMainDocumentPart().getContent().get(0);
-		R run = (R) paragraph.getContent().get(0);
+		var document = loadDocument("singleRun.docx");
+		var paragraph = (P) document.getMainDocumentPart().getContent().get(0);
+		var run = (R) paragraph.getContent().get(0);
 		assertEquals("This is the only run of text in this document.", RunUtil.getText(run));
+	}
+
+	public WordprocessingMLPackage loadDocument(String resourceName) throws Docx4JException {
+		var in = getClass().getResourceAsStream(resourceName);
+		return WordprocessingMLPackage.load(in);
 	}
 
 	@Test
 	public void getTextReturnsValueDefinedBySetText() throws Docx4JException, IOException {
-		WordprocessingMLPackage document = loadDocument("singleRun.docx");
-		P paragraph = (P) document.getMainDocumentPart().getContent().get(0);
-		R run = (R) paragraph.getContent().get(0);
-		RunUtil.setText(run, "The text of this run was changed.");
-		document = saveAndLoadDocument(document);
-		paragraph = (P) document.getMainDocumentPart().getContent().get(0);
-		run = (R) paragraph.getContent().get(0);
-		assertEquals("The text of this run was changed.", RunUtil.getText(run));
+		var input = loadDocument("singleRun.docx");
+		var paragraphIn = (P) input.getMainDocumentPart().getContent().get(0);
+		var runIn = (R) paragraphIn.getContent().get(0);
+		RunUtil.setText(runIn, "The text of this run was changed.");
+		var out = IOStreams.getOutputStream();
+		input.save(out);
+		var in = IOStreams.getInputStream(out);
+		var output = WordprocessingMLPackage.load(in);
+		var paragraphOut = (P) output.getMainDocumentPart().getContent().get(0);
+		var runOut = (R) paragraphOut.getContent().get(0);
+		assertEquals("The text of this run was changed.", RunUtil.getText(runOut));
 	}
 
 }

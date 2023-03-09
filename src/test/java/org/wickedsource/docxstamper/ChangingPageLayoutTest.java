@@ -16,27 +16,27 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ChangingPageLayoutTest extends AbstractDocx4jTest {
+public class ChangingPageLayoutTest {
 	@Test
 	public void shouldKeepSectionBreakOrientationInRepeatParagraphWithoutSectionBreakInsideComment() throws IOException, Docx4JException {
-		Map<String, Object> context = new HashMap<>();
+		var context = new HashMap<String, Object>();
 
-		Name name1 = new Name("Homer");
-		Name name2 = new Name("Marge");
+		var name1 = new Name("Homer");
+		var name2 = new Name("Marge");
 
-		List<Name> repeatValues = new ArrayList<>();
+		var repeatValues = new ArrayList<>();
 		repeatValues.add(name1);
 		repeatValues.add(name2);
 
 		context.put("repeatValues", repeatValues);
 
-		InputStream template = getClass().getResourceAsStream("ChangingPageLayoutOutsideRepeatParagraphTest.docx");
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var template = getClass().getResourceAsStream("ChangingPageLayoutOutsideRepeatParagraphTest.docx");
+		var config = new DocxStamperConfiguration()
 				.setEvaluationContextConfigurer(ctx -> ctx.addPropertyAccessor(new MapAccessor()));
+		var stamper = new TestDocxStamper<Map<String, Object>>(config);
+		var result = stamper.stampAndLoad(template, context);
 
-		WordprocessingMLPackage result = stampAndLoad(template, context, config);
-
-		List<Object> content = result.getMainDocumentPart().getContent();
+		var content = result.getMainDocumentPart().getContent();
 
 		assertEquals(
 				STPageOrientation.LANDSCAPE,
@@ -82,13 +82,13 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 
 		context.put("repeatValues", repeatValues);
 
-		InputStream template = getClass().getResourceAsStream("ChangingPageLayoutInRepeatParagraphTest.docx");
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var template = getClass().getResourceAsStream("ChangingPageLayoutInRepeatParagraphTest.docx");
+		var config = new DocxStamperConfiguration()
 				.setEvaluationContextConfigurer(ctx -> ctx.addPropertyAccessor(new MapAccessor()));
+		var stamper = new TestDocxStamper<Map<String, Object>>(config);
+		var result = stamper.stampAndLoad(template, context);
 
-		WordprocessingMLPackage result = stampAndLoad(template, context, config);
-
-		List<Object> content = result.getMainDocumentPart().getContent();
+		var content = result.getMainDocumentPart().getContent();
 		assertEquals(
 				STPageOrientation.LANDSCAPE,
 				((P) content.get(2)).getPPr().getSectPr().getPgSz().getOrient()
@@ -122,13 +122,13 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 
 		context.put("repeatValues", repeatValues);
 
-		InputStream template = getClass().getResourceAsStream("ChangingPageLayoutInRepeatDocPartTest.docx");
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var template = getClass().getResourceAsStream("ChangingPageLayoutInRepeatDocPartTest.docx");
+		var config = new DocxStamperConfiguration()
 				.setEvaluationContextConfigurer(ctx -> ctx.addPropertyAccessor(new MapAccessor()));
+		var stamper = new TestDocxStamper<Map<String, Object>>(config);
+		var result = stamper.stampAndLoad(template, context);
 
-		WordprocessingMLPackage result = stampAndLoad(template, context, config);
-
-		List<Object> content = result.getMainDocumentPart().getContent();
+		var content = result.getMainDocumentPart().getContent();
 		assertNull(((P) content.get(2)).getPPr().getSectPr().getPgSz().getOrient());
 
 		assertEquals(
@@ -161,12 +161,13 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 
 		InputStream template = getClass().getResourceAsStream(
 				"ChangingPageLayoutInRepeatDocPartWithTableLastElementTest.docx");
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var config = new DocxStamperConfiguration()
 				.setEvaluationContextConfigurer(ctx -> ctx.addPropertyAccessor(new MapAccessor()));
 
-		WordprocessingMLPackage result = stampAndLoad(template, context, config);
+		var stamper = new TestDocxStamper<Map<String, Object>>(config);
+		var result = stamper.stampAndLoad(template, context);
 
-		List<Object> content = result.getMainDocumentPart().getContent();
+		var content = result.getMainDocumentPart().getContent();
 		assertNull(((P) content.get(2)).getPPr().getSectPr().getPgSz().getOrient());
 
 		assertEquals(
@@ -197,13 +198,14 @@ public class ChangingPageLayoutTest extends AbstractDocx4jTest {
 
 		context.put("repeatValues", repeatValues);
 
-		InputStream template = getClass().getResourceAsStream("ChangingPageLayoutOutsideRepeatDocPartTest.docx");
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var template = getClass().getResourceAsStream("ChangingPageLayoutOutsideRepeatDocPartTest.docx");
+		var config = new DocxStamperConfiguration()
 				.setEvaluationContextConfigurer(ctx -> ctx.addPropertyAccessor(new MapAccessor()));
 
-		WordprocessingMLPackage result = stampAndLoad(template, context, config);
+		var stamper = new TestDocxStamper<Map<String, Object>>(config);
+		var result = stamper.stampAndLoad(template, context);
 
-		List<Object> content = result.getMainDocumentPart().getContent();
+		var content = result.getMainDocumentPart().getContent();
 
 		assertEquals(
 				STPageOrientation.LANDSCAPE,

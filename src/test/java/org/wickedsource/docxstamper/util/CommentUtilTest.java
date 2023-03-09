@@ -4,16 +4,15 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.AbstractDocx4jTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CommentUtilTest extends AbstractDocx4jTest {
-
+public class CommentUtilTest {
 	@Test
 	public void onlyParagraphsWithCommentRangeStartAreCommented() throws Docx4JException {
-		WordprocessingMLPackage document = loadDocument("CommentUtilTest.docx");
+		var in = getClass().getResourceAsStream("CommentUtilTest.docx");
+		var document = WordprocessingMLPackage.load(in);
 
 		P p1 = (P) document.getMainDocumentPart().getContent().get(0);
 		P p2 = (P) document.getMainDocumentPart().getContent().get(1);

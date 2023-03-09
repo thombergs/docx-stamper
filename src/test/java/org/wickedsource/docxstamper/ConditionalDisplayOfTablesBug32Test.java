@@ -11,16 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ConditionalDisplayOfTablesBug32Test extends AbstractDocx4jTest {
+public class ConditionalDisplayOfTablesBug32Test {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Homer");
-		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTablesBug32Test.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Name("Homer");
+		var template = getClass().getResourceAsStream("ConditionalDisplayOfTablesBug32Test.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 		globalTablesAreRemoved(document);
 		nestedTablesAreRemoved(document);
 	}

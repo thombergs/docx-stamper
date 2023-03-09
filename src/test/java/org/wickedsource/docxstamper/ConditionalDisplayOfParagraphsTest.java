@@ -12,18 +12,19 @@ import org.wickedsource.docxstamper.util.DocumentUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
+public class ConditionalDisplayOfParagraphsTest {
 	@Test
 	public void processorExpressionsInCommentsAreResolved() throws Docx4JException, IOException {
-		Name context = new Name("Homer");
-		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Name("Homer");
+		var template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsTest.docx");
+
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 		globalParagraphsAreRemoved(document);
 		paragraphsInTableAreRemoved(document);
 		paragraphsInNestedTablesAreRemoved(document);
@@ -61,9 +62,10 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
 	@Test
 	public void inlineProcessorExpressionsAreResolved() throws Docx4JException, IOException {
-		Name context = new Name("Homer");
-		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Name("Homer");
+		var template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 		globalParagraphsAreRemoved(document);
 		paragraphsInTableAreRemoved(document);
 		paragraphsInNestedTablesAreRemoved(document);
@@ -71,9 +73,10 @@ public class ConditionalDisplayOfParagraphsTest extends AbstractDocx4jTest {
 
 	@Test
 	public void unresolvedInlineProcessorExpressionsAreRemoved() throws Docx4JException, IOException {
-		Name context = new Name("Bart");
-		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Name("Bart");
+		var template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 		globalInlineProcessorExpressionIsRemoved(document);
 	}
 

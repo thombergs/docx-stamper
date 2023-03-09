@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.TextUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
@@ -11,29 +10,29 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ConditionalDisplayOfTableRowsTest extends AbstractDocx4jTest {
+public class ConditionalDisplayOfTableRowsTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Homer");
-		InputStream template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Name("Homer");
+		var template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 
-		final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
+		var tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
 		assertEquals(2, tablesFromObject.size());
 
-		final List<Tr> parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
+		var parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
 		// gets all the rows within the table and the nested table
 		assertEquals(5, parentTableRows.size());
 
-		final List<Tr> nestedTableRows = DocumentUtil.extractElements(tablesFromObject.get(1), Tr.class);
+		var nestedTableRows = DocumentUtil.extractElements(tablesFromObject.get(1), Tr.class);
 		assertEquals(2, nestedTableRows.size());
 
-		final List<Tc> parentTableCells = DocumentUtil.extractElements(tablesFromObject.get(0), Tc.class);
+		var parentTableCells = DocumentUtil.extractElements(tablesFromObject.get(0), Tc.class);
 		// gets all the cells within the table and the nested table
 		assertEquals(5, parentTableCells.size());
 

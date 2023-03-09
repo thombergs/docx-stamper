@@ -1,29 +1,28 @@
 package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomExpressionFunctionTest extends AbstractDocx4jTest {
+public class CustomExpressionFunctionTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Homer Simpson");
-		InputStream template = getClass().getResourceAsStream("CustomExpressionFunction.docx");
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var context = new Name("Homer Simpson");
+		var template = getClass().getResourceAsStream("CustomExpressionFunction.docx");
+		var config = new DocxStamperConfiguration()
 				.exposeInterfaceToExpressionLanguage(UppercaseFunction.class, new UppercaseFunctionImpl());
-		WordprocessingMLPackage document = stampAndLoad(template, context, config);
-		P nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
+		var stamper = new TestDocxStamper<Name>(config);
+		var document = stamper.stampAndLoad(template, context);
+		var nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
 		assertEquals(
 				"In this paragraph, a custom expression function is used to uppercase a String: HOMER SIMPSON.",
 				new ParagraphWrapper(nameParagraph).getText());
-		P commentedParagraph = (P) document.getMainDocumentPart().getContent().get(3);
+		var commentedParagraph = (P) document.getMainDocumentPart().getContent().get(3);
 		assertEquals(
 				"To test that custom functions work together with comment expressions, we toggle visibility of this paragraph with a comment expression.",
 				new ParagraphWrapper(commentedParagraph).getText());

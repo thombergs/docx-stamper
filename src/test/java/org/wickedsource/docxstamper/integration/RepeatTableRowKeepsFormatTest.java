@@ -2,18 +2,15 @@ package org.wickedsource.docxstamper.integration;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.DocxStamper;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.wickedsource.docxstamper.TestDocxStamper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class RepeatTableRowKeepsFormatTest extends AbstractDocx4jTest {
+public class RepeatTableRowKeepsFormatTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
 		Show context = new Show(List.of(
@@ -24,20 +21,17 @@ public class RepeatTableRowKeepsFormatTest extends AbstractDocx4jTest {
 				new Character(5, "th", "Maggie Simpson", "Julie Kavner")
 		));
 		InputStream template = getClass().getResourceAsStream("RepeatTableRowKeepsFormatTest.docx");
-		OutputStream out = getOutputStream();
-		DocxStamper<Show> stamper = new DocxStamperConfiguration()
-				.setFailOnUnresolvedExpression(false)
-				.build();
-		stamper.stamp(template, context, out);
-		var actual = extractDocumentParagraphs(out);
+		var stamper = new TestDocxStamper<Show>();
+		var actual = stamper.stampAndLoadAndExtract(template, context);
 		var expected = List.of(
-				List.of("1", "st(vertAlign=superscript)", " ", "Homer Simpson", "-", "Dan Castellaneta(b=true)"),
-				List.of("2", "nd(vertAlign=superscript)", " ", "Marge Simpson", "-", "Julie Kavner(b=true)"),
-				List.of("3", "rd(vertAlign=superscript)", " ", "Bart Simpson", "-", "Nancy Cartwright(b=true)"),
-				List.of("4", "th(vertAlign=superscript)", " ", "Lisa Simpson", "-", "Yeardley Smith(b=true)"),
-				List.of("5", "th(vertAlign=superscript)", " ", "Maggie Simpson", "-", "Julie Kavner(b=true)"),
-				List.of());
-		assertEquals(expected, actual);
+				"1|st/vertAlign=superscript| Homer Simpson-|Dan Castellaneta/b=true|",
+				"2|nd/vertAlign=superscript| Marge Simpson-|Julie Kavner/b=true|",
+				"3|rd/vertAlign=superscript| Bart Simpson-|Nancy Cartwright/b=true|",
+				"4|th/vertAlign=superscript| Lisa Simpson-|Yeardley Smith/b=true|",
+				"5|th/vertAlign=superscript| Maggie Simpson-|Julie Kavner/b=true|",
+				"");
+
+		assertIterableEquals(expected, actual);
 	}
 
 	public record Show(List<Character> characters) {
