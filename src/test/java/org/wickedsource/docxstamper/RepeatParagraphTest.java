@@ -8,32 +8,30 @@ import org.wickedsource.docxstamper.context.Character;
 import org.wickedsource.docxstamper.context.CharactersContext;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RepeatParagraphTest extends AbstractDocx4jTest {
+public class RepeatParagraphTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		CharactersContext context = new CharactersContext();
+		var context = new CharactersContext();
 		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
 		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
 		context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
 		context.getCharacters().add(new Character("Kent Brockman", "Harry Shearer"));
 		context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
 		context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
-		InputStream template = getClass().getResourceAsStream("RepeatParagraphTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var template = getClass().getResourceAsStream("RepeatParagraphTest.docx");
+		var stamper = new TestDocxStamper<CharactersContext>();
+		WordprocessingMLPackage document = stamper.stampAndLoad(template, context);
 
-		final List<P> titleCoords = new ArrayList<>();
-		final List<P> quotationCoords = new ArrayList<>();
-		CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
+		var titleCoords = new ArrayList<P>();
+		var quotationCoords = new ArrayList<P>();
+		var walker = new BaseCoordinatesWalker(document) {
 			@Override
 			protected void onParagraph(P paragraph) {
 				if ("Titre2".equals(paragraph.getPPr().getPStyle().getVal())) {

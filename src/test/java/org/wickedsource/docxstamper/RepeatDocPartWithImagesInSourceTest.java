@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.Part;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.Drawing;
@@ -12,34 +11,34 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RepeatDocPartWithImagesInSourceTest extends AbstractDocx4jTest {
+public class RepeatDocPartWithImagesInSourceTest {
 	@Test
 	public void shouldReplicateImageFromTheMainDocumentInTheSubTemplate() throws Docx4JException, IOException {
-		Map<String, Object> context = new HashMap<>();
-		ArrayList<Map<String, Object>> subDocParts = new ArrayList<>();
+		var context = new HashMap<String, Object>();
+		var subDocParts = new ArrayList<Map<String, Object>>();
 
-		Map<String, Object> firstPart = new HashMap<>();
+		var firstPart = new HashMap<String, Object>();
 		firstPart.put("name", "first doc part");
 		subDocParts.add(firstPart);
 
-		Map<String, Object> secondPart = new HashMap<>();
+		var secondPart = new HashMap<String, Object>();
 		secondPart.put("name", "second doc part");
 		subDocParts.add(secondPart);
 
 		context.put("subDocParts", subDocParts);
 
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var config = new DocxStamperConfiguration()
 				.setEvaluationContextConfigurer((StandardEvaluationContext ctx) -> ctx.addPropertyAccessor(new MapAccessor()));
 
-		InputStream template = getClass().getResourceAsStream("RepeatDocPartWithImagesInSourceTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context, config);
+		var template = getClass().getResourceAsStream("RepeatDocPartWithImagesInSourceTest.docx");
+		var stamper = new TestDocxStamper<Map<String, Object>>(config);
+		var document = stamper.stampAndLoad(template, context);
 
 		assertEquals(document.getMainDocumentPart().getContent().size(), 11);
 

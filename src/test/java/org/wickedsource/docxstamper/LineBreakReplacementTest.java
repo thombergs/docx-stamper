@@ -9,19 +9,19 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LineBreakReplacementTest extends AbstractDocx4jTest {
+public class LineBreakReplacementTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name(null);
-		DocxStamperConfiguration config = new DocxStamperConfiguration();
+		var context = new Name(null);
+		var config = new DocxStamperConfiguration();
 		config.setLineBreakPlaceholder("#");
-		InputStream template = getClass().getResourceAsStream("LineBreakReplacementTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context, config);
+		var template = getClass().getResourceAsStream("LineBreakReplacementTest.docx");
+		var stamper = new TestDocxStamper<Name>(config);
+		var document = stamper.stampAndLoad(template, context);
 		lineBreaksAreReplaced(document);
 	}
 

@@ -7,24 +7,19 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LeaveEmptyOnExpressionErrorTest extends AbstractDocx4jTest {
+public class LeaveEmptyOnExpressionErrorTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Homer Simpson");
-		InputStream template = getClass().getResourceAsStream("LeaveEmptyOnExpressionErrorTest.docx");
-		OutputStream out = getOutputStream();
-		DocxStamper<Name> stamper = new DocxStamperConfiguration()
+		var context = new Name("Homer Simpson");
+		var template = getClass().getResourceAsStream("LeaveEmptyOnExpressionErrorTest.docx");
+		var config = new DocxStamperConfiguration()
 				.setFailOnUnresolvedExpression(false)
-				.leaveEmptyOnExpressionError(true)
-				.build();
-		stamper.stamp(template, context, out);
-		InputStream in = getInputStream(out);
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
+				.leaveEmptyOnExpressionError(true);
+		var stamper = new TestDocxStamper<Name>(config);
+		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplaced(document);
 	}
 

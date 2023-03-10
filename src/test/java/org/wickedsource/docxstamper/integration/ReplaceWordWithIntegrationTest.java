@@ -2,41 +2,29 @@ package org.wickedsource.docxstamper.integration;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.DocxStamper;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.wickedsource.docxstamper.TestDocxStamper;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class ReplaceWordWithIntegrationTest extends AbstractDocx4jTest {
+public class ReplaceWordWithIntegrationTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
 		String name = "Simpsons";
 		Name context = new Name(name);
 		InputStream template = getClass().getResourceAsStream("ReplaceWordWithIntegrationTest.docx");
-		OutputStream out = getOutputStream();
-		DocxStamper<Name> stamper = new DocxStamperConfiguration()
-				.setFailOnUnresolvedExpression(false)
-				.build();
-		stamper.stamp(template, context, out);
-		var actual = extractDocumentParagraphs(out);
+		var stamper = new TestDocxStamper<Name>();
+		var actual = stamper.stampAndLoadAndExtract(template, context);
 		var expected = List.of(
-				List.of("Replace", "WordWith Integration"),
-				List.of("This variable ",
-						"name(b=true)",
-						" (b=true)",
-						"should be resolved to the value ",
-						"Simpsons",
-						"."),
-				List.of("This variable ", "name(b=true)", " ", "should be resolved to the value ", "Simpsons", "."),
-				List.of());
-		assertEquals(expected, actual);
+				"ReplaceWordWith Integration",
+				"This variable |name/b=true|| /b=true|should be resolved to the value Simpsons.",
+				"This variable |name/b=true| should be resolved to the value Simpsons.",
+				"");
+		assertIterableEquals(expected, actual);
 	}
 
 	public record Name(String name) {

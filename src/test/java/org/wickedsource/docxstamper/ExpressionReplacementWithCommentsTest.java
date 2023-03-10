@@ -7,23 +7,16 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionReplacementWithCommentsTest extends AbstractDocx4jTest {
+public class ExpressionReplacementWithCommentsTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Homer Simpson");
-		InputStream template = getClass().getResourceAsStream("ExpressionReplacementWithCommentsTest.docx");
-		OutputStream out = getOutputStream();
-		DocxStamper<Name> stamper = new DocxStamperConfiguration()
-				.setFailOnUnresolvedExpression(false)
-				.build();
-		stamper.stamp(template, context, out);
-		InputStream in = getInputStream(out);
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(in);
+		var context = new Name("Homer Simpson");
+		var template = getClass().getResourceAsStream("ExpressionReplacementWithCommentsTest.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplaced(document);
 		unresolvedExpressionsAreNotReplaced(document);
 	}

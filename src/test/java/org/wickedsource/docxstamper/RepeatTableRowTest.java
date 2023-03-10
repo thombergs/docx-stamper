@@ -1,7 +1,6 @@
 package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
@@ -18,10 +17,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RepeatTableRowTest extends AbstractDocx4jTest {
+public class RepeatTableRowTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		CharactersContext context = new CharactersContext();
+		var context = new CharactersContext();
 		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
 		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
 		context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
@@ -30,13 +29,14 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
 		context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
 		InputStream template = getClass().getResourceAsStream("RepeatTableRowTest.docx");
 
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var stamper = new TestDocxStamper<CharactersContext>();
+		var document = stamper.stampAndLoad(template, context);
 
-		final List<Tr> rows = DocumentUtil.getTableRowsFromObject(document);
-		final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
+		var rows = DocumentUtil.getTableRowsFromObject(document);
+		var tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
 		assertEquals(1, tablesFromObject.size());
 
-		final List<Tr> parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
+		var parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
 		// 1 header row + 1 row per character in list
 		assertEquals(7, rows.size());
 

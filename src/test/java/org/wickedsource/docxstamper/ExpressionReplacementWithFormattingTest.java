@@ -1,40 +1,42 @@
 package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.P;
-import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class ExpressionReplacementWithFormattingTest extends AbstractDocx4jTest {
+public class ExpressionReplacementWithFormattingTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Homer Simpson");
-		InputStream template = getClass().getResourceAsStream("ExpressionReplacementWithFormattingTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
-
-		assertBoldStyle((R) ((P) document.getMainDocumentPart().getContent().get(2)).getContent().get(1));
-		assertItalicStyle((R) ((P) document.getMainDocumentPart().getContent().get(3)).getContent().get(1));
-		assertBoldStyle((R) ((P) document.getMainDocumentPart().getContent().get(5)).getContent().get(1));
-
-	}
-
-	private void assertBoldStyle(R run) {
-		assertTrue(run.getRPr().getB().isVal(), "expected Run to be styled bold!");
-	}
-
-	private void assertItalicStyle(R run) {
-		assertTrue(run.getRPr().getI().isVal(), "expected Run to be styled italic!");
+		var context = new Name("Homer Simpson");
+		var template = getClass().getResourceAsStream("ExpressionReplacementWithFormattingTest.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var actual = stamper.stampAndLoadAndExtract(template, context);
+		var expected = List.of(
+				" Expression Replacement with text format",
+				"The text format should be kept intact when an expression is replaced.",
+				"It should be bold: |Homer Simpson/b=true|",
+				"It should be italic: |Homer Simpson/i=true|",
+				"It should be superscript: |Homer Simpson/vertAlign=superscript|",
+				"It should be subscript: |Homer Simpson/vertAlign=subscript|",
+				"It should be striked: |Homer Simpson/strike=true|",
+				"It should be underlined: |Homer Simpson/u=single|",
+				"It should be doubly underlined: |Homer Simpson/u=double|",
+				"It should be thickly underlined: |Homer Simpson/u=thick|",
+				"It should be dot underlined: |Homer Simpson/u=dotted|",
+				"It should be dash underlined: |Homer Simpson/u=dash|",
+				"It should be dot and dash underlined: |Homer Simpson/u=dotDash|",
+				"It should be dot, dot and dash underlined: |Homer Simpson/u=dotDotDash|",
+				"It should be highlighted yellow: |Homer Simpson/highlight=yellow|",
+				"It should be white over darkblue: |Homer Simpson/color=FFFFFF,highlight=darkBlue|",
+				"It should be with header formatting: |Homer Simpson/rStyle=TitreCar|");
+		assertIterableEquals(expected, actual);
 	}
 
 	public record Name(String name) {
 	}
-
-
 }

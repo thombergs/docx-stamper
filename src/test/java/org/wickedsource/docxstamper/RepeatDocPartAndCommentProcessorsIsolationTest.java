@@ -2,7 +2,6 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,17 +16,17 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RepeatDocPartAndCommentProcessorsIsolationTest extends AbstractDocx4jTest {
+public class RepeatDocPartAndCommentProcessorsIsolationTest {
 
 	@Test
 	public void repeatDocPartShouldNotUseSameCommentProcessorInstancesForSubtemplate() throws Docx4JException, IOException {
-		Map<String, Object> context = new HashMap<>();
+		var context = new HashMap<String, Object>();
 
-		List<TableValue> firstTable = new ArrayList<>();
+		var firstTable = new ArrayList<TableValue>();
 		firstTable.add(new TableValue("firstTable value1"));
 		firstTable.add(new TableValue("firstTable value2"));
 
-		List<TableValue> secondTable = new ArrayList<>();
+		var secondTable = new ArrayList<TableValue>();
 		secondTable.add(new TableValue("repeatDocPart value1"));
 		secondTable.add(new TableValue("repeatDocPart value2"));
 		secondTable.add(new TableValue("repeatDocPart value3"));
@@ -43,12 +41,14 @@ public class RepeatDocPartAndCommentProcessorsIsolationTest extends AbstractDocx
 		context.put("secondTable", secondTable);
 		context.put("thirdTable", thirdTable);
 
-		InputStream template = getClass().getResourceAsStream("RepeatDocPartAndCommentProcessorsIsolationTest.docx");
-		DocxStamperConfiguration config = new DocxStamperConfiguration();
+		var template = getClass().getResourceAsStream("RepeatDocPartAndCommentProcessorsIsolationTest.docx");
+		var config = new DocxStamperConfiguration();
 		config.setEvaluationContextConfigurer((ctx) -> ctx.addPropertyAccessor(new MapAccessor()));
-		WordprocessingMLPackage document = stampAndLoad(template, context, config);
 
-		List<Object> documentContent = document.getMainDocumentPart().getContent();
+		var stamper = new TestDocxStamper<Map<String, Object>>(config);
+		var document = stamper.stampAndLoad(template, context);
+
+		var documentContent = document.getMainDocumentPart().getContent();
 
 		assertEquals(19, documentContent.size());
 

@@ -11,26 +11,22 @@ import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomCommentProcessorTest extends AbstractDocx4jTest {
+public class CustomCommentProcessorTest {
 
 	@Test
 	public void test() throws Docx4JException, IOException {
-		DocxStamperConfiguration config = new DocxStamperConfiguration()
+		var template = getClass().getResourceAsStream("CustomCommentProcessorTest.docx");
+		var config = new DocxStamperConfiguration()
 				.addCommentProcessor(ICustomCommentProcessor.class, CustomCommentProcessor.class);
-		InputStream template = getClass().getResourceAsStream("CustomCommentProcessorTest.docx");
-		OutputStream out = getOutputStream();
-		DocxStamper<EmptyContext> stamper = new DocxStamper<>(config);
-		stamper.stamp(template, new EmptyContext(), out);
-		CustomCommentProcessor processor = (CustomCommentProcessor) stamper.getCommentProcessorInstance(
-				ICustomCommentProcessor.class);
-		assertEquals(2, processor.getVisitedParagraphs().size());
+		var stamper = new TestDocxStamper<>(config);
+		stamper.stampAndLoad(template, new EmptyContext());
+
+		assertEquals(2, CustomCommentProcessor.getVisitedParagraphs().size());
 	}
 
 	public interface ICustomCommentProcessor extends ICommentProcessor {
@@ -42,12 +38,16 @@ public class CustomCommentProcessorTest extends AbstractDocx4jTest {
 
 	public static class CustomCommentProcessor extends BaseCommentProcessor implements ICustomCommentProcessor {
 
-		private final List<P> visitedParagraphs = new ArrayList<>();
+		private static final List<P> visitedParagraphs = new ArrayList<>();
 
 		private P currentParagraph;
 
 		public CustomCommentProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
 			super(config, typeResolverRegistry);
+		}
+
+		public static List<P> getVisitedParagraphs() {
+			return visitedParagraphs;
 		}
 
 		@Override
@@ -74,10 +74,6 @@ public class CustomCommentProcessorTest extends AbstractDocx4jTest {
 
 		@Override
 		public void setDocument(WordprocessingMLPackage document) {
-		}
-
-		public List<P> getVisitedParagraphs() {
-			return visitedParagraphs;
 		}
 
 		@Override

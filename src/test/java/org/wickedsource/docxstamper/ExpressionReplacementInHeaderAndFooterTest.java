@@ -12,16 +12,16 @@ import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionReplacementInHeaderAndFooterTest extends AbstractDocx4jTest {
+public class ExpressionReplacementInHeaderAndFooterTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		Name context = new Name("Homer Simpson");
-		InputStream template = getClass().getResourceAsStream("ExpressionReplacementInHeaderAndFooterTest.docx");
-		WordprocessingMLPackage document = stampAndLoad(template, context);
+		var context = new Name("Homer Simpson");
+		var template = getClass().getResourceAsStream("ExpressionReplacementInHeaderAndFooterTest.docx");
+		var stamper = new TestDocxStamper<Name>();
+		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInHeader(document);
 		resolvedExpressionsAreReplacedInFooter(document);
 		unresolvedExpressionsAreNotReplacedInHeader(document);
