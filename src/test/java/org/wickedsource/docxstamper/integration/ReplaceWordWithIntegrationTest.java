@@ -20,10 +20,10 @@ public class ReplaceWordWithIntegrationTest {
 		var stamper = new TestDocxStamper<Name>();
 		var actual = stamper.stampAndLoadAndExtract(template, context);
 		var expected = List.of(
-				"ReplaceWordWith Integration",
-				"This variable |name/b=true|| /b=true|should be resolved to the value Simpsons.",
-				"This variable |name/b=true| should be resolved to the value Simpsons.",
-				"");
+				"ReplaceWordWith Integration//rPr={}",
+				"This variable |name/b=true|| /b=true|should be resolved to the value Simpsons.//rPr={b=true}",
+				"This variable |name/b=true| should be resolved to the value Simpsons.//rPr={}",
+				"//rPr={}");
 		assertIterableEquals(expected, actual);
 	}
 

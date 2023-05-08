@@ -3,12 +3,12 @@ package org.wickedsource.docxstamper.util;
 import org.docx4j.utils.TraversalUtilVisitor;
 import org.docx4j.wml.R;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public class RunCollector extends TraversalUtilVisitor<R> {
-	private final List<R> paragraphs = new ArrayList<>();
+	private final Set<R> paragraphs = new LinkedHashSet<>();
 
 	public Stream<R> runs() {
 		return paragraphs.stream();

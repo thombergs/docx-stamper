@@ -1,233 +1,203 @@
 package org.wickedsource.docxstamper.processor.repeat;
 
-import org.docx4j.XmlUtils;
+import lombok.SneakyThrows;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.openpackaging.parts.WordprocessingML.CommentsPart;
 import org.docx4j.wml.*;
 import org.jvnet.jaxb2_commons.ppp.Child;
-import org.springframework.util.CollectionUtils;
-import org.wickedsource.docxstamper.DocxStamper;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
-import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.OpcStamper;
+import org.wickedsource.docxstamper.api.DocxStamperException;
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
-import org.wickedsource.docxstamper.util.*;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
+import org.wickedsource.docxstamper.util.CommentWrapper;
+import org.wickedsource.docxstamper.util.DocumentUtil;
+import org.wickedsource.docxstamper.util.ParagraphUtil;
+import org.wickedsource.docxstamper.util.SectionUtil;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map.Entry;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
+
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toMap;
+import static org.wickedsource.docxstamper.util.DocumentUtil.walkObjectsAndImportImages;
 
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
-    private final Map<CommentWrapper, List<Object>> subContexts = new HashMap<>();
-    private final Map<CommentWrapper, List<Object>> repeatElementsMap = new HashMap<>();
-    private final Map<CommentWrapper, WordprocessingMLPackage> subTemplates = new HashMap<>();
-    private final Map<CommentWrapper, ContentAccessor> gcpMap = new HashMap<>();
-    /**
-     * section break preceding the first repeating element if present
-     */
-    private final Map<CommentWrapper, SectPr> previousSectionBreak = new HashMap<>();
-    /**
-     * oddNumberOfBreaks will be set to true if repeating elements contain an odd number of section breaks,
-     * false otherwise
-     */
-    private final Map<CommentWrapper, Boolean> oddNumberOfBreaks = new HashMap<>();
+	public static final ThreadFactory THREAD_FACTORY = Executors.defaultThreadFactory();
+	private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
+	private final OpcStamper<WordprocessingMLPackage> stamper;
+	private final Map<CommentWrapper, List<Object>> contexts = new HashMap<>();
+	private final Supplier<? extends List<?>> nullSupplier;
 
-    private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
+	private RepeatDocPartProcessor(
+			PlaceholderReplacer placeholderReplacer,
+			OpcStamper<WordprocessingMLPackage> stamper,
+			Supplier<? extends List<?>> nullSupplier
+	) {
+		super(placeholderReplacer);
+		this.stamper = stamper;
+		this.nullSupplier = nullSupplier;
+	}
 
-    public RepeatDocPartProcessor(
-            DocxStamperConfiguration config,
-            TypeResolverRegistry typeResolverRegistry
-    ) {
-        super(config, typeResolverRegistry);
-    }
+	public static ICommentProcessor newInstance(PlaceholderReplacer pr, OpcStamper<WordprocessingMLPackage> stamper, String nullReplacementValue) {
+		return new RepeatDocPartProcessor(pr, stamper, () -> singletonList(ParagraphUtil.create(nullReplacementValue)));
+	}
 
+	public static ICommentProcessor newInstance(PlaceholderReplacer pr, OpcStamper<WordprocessingMLPackage> stamper) {
+		return new RepeatDocPartProcessor(pr, stamper, Collections::emptyList);
+	}
 
-    @Override
-    public void repeatDocPart(List<Object> contexts) throws Exception {
-        if (contexts == null) {
-            contexts = Collections.emptyList();
-        }
+	@Override
+	public void repeatDocPart(List<Object> contexts) {
+		if (contexts == null)
+			contexts = Collections.emptyList();
 
-        CommentWrapper currentCommentWrapper = getCurrentCommentWrapper();
-        ContentAccessor gcp = findGreatestCommonParent(
-                currentCommentWrapper.getCommentRangeEnd().getParent(),
-                (ContentAccessor) currentCommentWrapper.getCommentRangeStart().getParent()
-        );
-        List<Object> repeatElements = getRepeatElements(currentCommentWrapper, gcp);
+		CommentWrapper currentCommentWrapper = getCurrentCommentWrapper();
+		List<Object> repeatElements = currentCommentWrapper.getRepeatElements();
 
-        if (!repeatElements.isEmpty()) {
-            subTemplates.put(currentCommentWrapper, extractSubTemplate(currentCommentWrapper, repeatElements));
-            subContexts.put(currentCommentWrapper, contexts);
-            gcpMap.put(currentCommentWrapper, gcp);
-            repeatElementsMap.put(currentCommentWrapper, repeatElements);
-        }
-    }
+		if (!repeatElements.isEmpty()) {
+			this.contexts.put(currentCommentWrapper, contexts);
+		}
+	}
 
-    private WordprocessingMLPackage copyTemplate(WordprocessingMLPackage doc) throws Docx4JException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        doc.save(baos);
-        return WordprocessingMLPackage.load(new ByteArrayInputStream(baos.toByteArray()));
-    }
+	@SneakyThrows
+	@Override
+	public void commitChanges(WordprocessingMLPackage document) {
+		for (Entry<CommentWrapper, List<Object>> entry : this.contexts.entrySet()) {
+			CommentWrapper commentWrapper = entry.getKey();
+			List<Object> expressionContexts = entry.getValue();
+			ContentAccessor gcp = Objects.requireNonNull(commentWrapper.getParent());
+			List<Object> repeatElements = commentWrapper.getRepeatElements();
+			WordprocessingMLPackage subTemplate = commentWrapper.tryBuildingSubtemplate(this.getDocument());
+			SectPr previousSectionBreak = SectionUtil.getPreviousSectionBreakIfPresent(repeatElements.get(0), gcp);
+			boolean oddNumberOfBreaks = SectionUtil.isOddNumberOfSectionBreaks(repeatElements);
 
-    @Override
-    public void commitChanges(WordprocessingMLPackage document) {
-        for (CommentWrapper commentWrapper : subContexts.keySet()) {
-            if (commentWrapper == null) throw new RuntimeException("commentWrapper should not be null");
-            List<Object> expressionContexts = subContexts.get(commentWrapper);
+			List<?> changes = expressionContexts == null
+					? nullSupplier.get()
+					: stampSubDocuments(document,
+										expressionContexts,
+										gcp,
+										subTemplate,
+										previousSectionBreak,
+										oddNumberOfBreaks);
 
-            // index changes after each replacement, so we need to get the insert index at the last moment.
-            ContentAccessor insertParentContentAccessor = Objects.requireNonNull(gcpMap.get(commentWrapper));
-            List<Object> parentContent = insertParentContentAccessor.getContent();
-            List<Object> repeatingElements = repeatElementsMap.get(commentWrapper);
-            int index = parentContent.indexOf(repeatingElements.get(0));
+			List<Object> gcpContent = gcp.getContent();
+			int index = gcpContent.indexOf(repeatElements.get(0));
+			gcpContent.addAll(index, changes);
+			gcpContent.removeAll(repeatElements);
+		}
+	}
 
-            if (expressionContexts != null && !expressionContexts.isEmpty()) {
-                Object lastExpressionContext = expressionContexts.get(expressionContexts.size() - 1);
-            for (Object subContext : expressionContexts) {
-                try {
-                    WordprocessingMLPackage subTemplate = copyTemplate(subTemplates.get(commentWrapper));
-                        DocxStamper<Object> stamper = new DocxStamper<>(configuration.copy());
-                    ByteArrayOutputStream output = new ByteArrayOutputStream();
-                    stamper.stamp(subTemplate, subContext, output);
-                    WordprocessingMLPackage subDocument = WordprocessingMLPackage.load(new ByteArrayInputStream(output.toByteArray()));
-                    try {
-                        List<Object> changes = DocumentUtil.prepareDocumentForInsert(subDocument, document);
-                        // make sure we replicate the previous section break before each repeated doc part
-                        if (Objects.requireNonNull(oddNumberOfBreaks.get(commentWrapper)))
-                            if (previousSectionBreak.get(commentWrapper) != null)
-                                if (subContext != lastExpressionContext) {
-                                    P lastP;
-                                    if (changes.get(changes.size() - 1) instanceof P) {
-                                        lastP = (P) changes.get(changes.size() - 1);
-                                    } else {
-                                        // when the last element to be repeated is not a paragraph, we need to add a new
-                                        // one right after to carry the section break to have a valid xml
-                                        lastP = objectFactory.createP();
-                                        lastP.setParent(insertParentContentAccessor);
-                                        changes.add(lastP);
-                                    }
+	private List<Object> stampSubDocuments(WordprocessingMLPackage document, List<Object> expressionContexts, ContentAccessor gcp, WordprocessingMLPackage subTemplate, SectPr previousSectionBreak, boolean oddNumberOfBreaks) {
+		Deque<WordprocessingMLPackage> subDocuments = stampSubDocuments(expressionContexts, subTemplate);
+		Map<R, R> replacements = subDocuments
+				.stream()
+				.map(p -> walkObjectsAndImportImages(p, document)) // TODO: remove the side effect here
+				.map(Map::entrySet)
+				.flatMap(Set::stream)
+				.collect(toMap(Entry::getKey, Entry::getValue));
 
-                                    SectionUtil.applySectionBreakToParagraph(previousSectionBreak.get(commentWrapper), lastP);
-                                }
-                        insertParentContentAccessor.getContent().addAll(index, changes);
-                        index += changes.size();
-                    } catch (Exception e) {
-                        throw new RuntimeException("Unexpected error occured ! Skipping this comment", e);
-                    }
-                } catch (Docx4JException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            } else if (configuration.isReplaceNullValues() && configuration.getNullValuesDefault() != null) {
-                P p = ParagraphUtil.create(configuration.getNullValuesDefault());
-                p.setParent(insertParentContentAccessor);
-                insertParentContentAccessor.getContent().add(index, p);
-            }
+		var changes = new ArrayList<>();
+		for (WordprocessingMLPackage subDocument : subDocuments) {
+			var os = documentAsInsertableElements(subDocument, oddNumberOfBreaks, previousSectionBreak);
+			os.forEach(o -> recursivelyReplaceImages(o, replacements));
+			os.forEach(c -> setParentIfPossible(c, gcp));
+			changes.addAll(os);
+		}
+		return changes;
+	}
 
-            insertParentContentAccessor.getContent().removeAll(repeatElementsMap.get(commentWrapper));
-        }
-    }
+	private Deque<WordprocessingMLPackage> stampSubDocuments(List<Object> subContexts, WordprocessingMLPackage subTemplate) {
+		Deque<WordprocessingMLPackage> subDocuments = new ArrayDeque<>();
+		for (Object subContext : subContexts) {
+			WordprocessingMLPackage templateCopy = outputWord(os -> copy(subTemplate, os));
+			WordprocessingMLPackage subDocument = outputWord(os -> stamp(subContext,
+																		 templateCopy,
+																		 os
+			));
+			subDocuments.add(subDocument);
+		}
+		return subDocuments;
+	}
 
-    @Override
-    public void reset() {
-        subContexts.clear();
-        subTemplates.clear();
-        gcpMap.clear();
-        repeatElementsMap.clear();
-        previousSectionBreak.clear();
-        oddNumberOfBreaks.clear();
-    }
+	private static List<Object> documentAsInsertableElements(WordprocessingMLPackage subDocument, boolean oddNumberOfBreaks, SectPr previousSectionBreak) {
+		List<Object> inserts = new ArrayList<>(DocumentUtil.allElements(subDocument));
+		// make sure we replicate the previous section break before each repeated doc part
+		if (oddNumberOfBreaks && previousSectionBreak != null) {
+			if (DocumentUtil.lastElement(subDocument) instanceof P p) {
+				SectionUtil.applySectionBreakToParagraph(previousSectionBreak, p);
+			} else {
+				// when the last element to be repeated is not a paragraph, we need to add a new
+				// one right after to carry the section break to have a valid xml
+				P p = objectFactory.createP();
+				SectionUtil.applySectionBreakToParagraph(previousSectionBreak, p);
+				inserts.add(p);
+			}
+		}
+		return inserts;
+	}
 
-    private WordprocessingMLPackage extractSubTemplate(CommentWrapper commentWrapper, List<Object> repeatElements) throws Exception {
-        WordprocessingMLPackage document = getDocument();
-        WordprocessingMLPackage subDocument = WordprocessingMLPackage.createPackage();
+	private static void recursivelyReplaceImages(Object o, Map<R, R> replacements) {
+		Queue<Object> q = new ArrayDeque<>();
+		q.add(o);
+		while (!q.isEmpty()) {
+			Object current = q.remove();
+			if (replacements.containsKey(current)
+					&& current instanceof Child child
+					&& child.getParent() instanceof ContentAccessor parent) {
+				List<Object> parentContent = parent.getContent();
+				parentContent.add(parentContent.indexOf(current), replacements.get(current));
+				parentContent.remove(current);
+			} else if (current instanceof ContentAccessor ca) {
+				q.addAll(ca.getContent());
+			}
+		}
+	}
 
-        CommentsPart commentsPart = new CommentsPart();
-        subDocument.getMainDocumentPart().addTargetPart(commentsPart);
+	private static void setParentIfPossible(Object object, ContentAccessor parent) {
+		if (object instanceof Child child)
+			child.setParent(parent);
+	}
 
-        // copy the elements to repeat without comment range anchors
-        List<Object> finalRepeatElements = repeatElements.stream().map(XmlUtils::deepCopy).collect(Collectors.toList());
-        removeCommentAnchorsFromFinalElements(commentWrapper, finalRepeatElements);
-        subDocument.getMainDocumentPart().getContent().addAll(finalRepeatElements);
+	private WordprocessingMLPackage outputWord(Consumer<OutputStream> outputter) {
+		try (
+				PipedOutputStream os = new PipedOutputStream();
+				PipedInputStream is = new PipedInputStream(os)
+		) {
+			Thread thread = THREAD_FACTORY.newThread(() -> outputter.accept(os));
+			thread.start();
+			WordprocessingMLPackage wordprocessingMLPackage = WordprocessingMLPackage.load(is);
+			thread.join();
+			return wordprocessingMLPackage;
 
-        // copy the images from parent document using the original repeat elements
-        ContentAccessor fakeBody = objectFactory.createBody();
-        fakeBody.getContent().addAll(repeatElements);
-        DocumentUtil.walkObjectsAndImportImages(fakeBody, document, subDocument);
+		} catch (Docx4JException | InterruptedException | IOException e) {
+			throw new DocxStamperException(e);
+		}
+	}
 
-        Comments comments = objectFactory.createComments();
-        extractedSubComments(commentWrapper, comments);
-        commentsPart.setContents(comments);
+	private void copy(WordprocessingMLPackage aPackage, OutputStream outputStream) {
+		try {
+			aPackage.save(outputStream);
+		} catch (Docx4JException e) {
+			throw new DocxStamperException(e);
+		}
+	}
 
-        return subDocument;
-    }
+	private void stamp(Object context, WordprocessingMLPackage template, OutputStream outputStream) {
+		stamper.stamp(template, context, outputStream);
+	}
 
-    private void extractedSubComments(CommentWrapper commentWrapper, Comments comments) {
-        for (CommentWrapper child : commentWrapper.getChildren()) {
-            comments.getComment().add(child.getComment());
-            if (CollectionUtils.isEmpty(child.getChildren())) {
-                continue;
-            }
-            extractedSubComments(child, comments);
-        }
-    }
-
-    private static void removeCommentAnchorsFromFinalElements(CommentWrapper commentWrapper, List<Object> finalRepeatElements) {
-        ContentAccessor fakeBody = () -> finalRepeatElements;
-        CommentUtil.deleteCommentFromElement(fakeBody, commentWrapper.getComment().getId());
-    }
-
-    private List<Object> getRepeatElements(CommentWrapper commentWrapper, ContentAccessor greatestCommonParent) {
-        List<Object> repeatElements = new ArrayList<>();
-        boolean startFound = false;
-        for (Object element : greatestCommonParent.getContent()) {
-            if (!startFound
-                    && depthElementSearch(commentWrapper.getCommentRangeStart(), element)) {
-                startFound = true;
-            }
-            if (startFound) {
-                repeatElements.add(element);
-                if (depthElementSearch(commentWrapper.getCommentRangeEnd(), element)) {
-                    break;
-                }
-            }
-        }
-        if (!repeatElements.isEmpty()) {
-            previousSectionBreak.put(commentWrapper, SectionUtil.getPreviousSectionBreakIfPresent(repeatElements.get(0), greatestCommonParent));
-            oddNumberOfBreaks.put(commentWrapper, SectionUtil.isOddNumberOfSectionBreaks(repeatElements));
-        }
-        return repeatElements;
-    }
-
-    private static ContentAccessor findGreatestCommonParent(Object targetSearch, ContentAccessor searchFrom) {
-        if (depthElementSearch(targetSearch, searchFrom)) {
-            return findInsertableParent(searchFrom);
-        }
-        return findGreatestCommonParent(targetSearch, (ContentAccessor) ((Child) searchFrom).getParent());
-    }
-
-    private static ContentAccessor findInsertableParent(ContentAccessor searchFrom) {
-        if (!(searchFrom instanceof Tc || searchFrom instanceof Body)) {
-            return findInsertableParent((ContentAccessor) ((Child) searchFrom).getParent());
-        }
-        return searchFrom;
-    }
-
-    private static boolean depthElementSearch(Object searchTarget, Object content) {
-        content = XmlUtils.unwrap(content);
-        if (searchTarget.equals(content)) {
-            return true;
-        } else if (content instanceof ContentAccessor) {
-            for (Object object : ((ContentAccessor) content).getContent()) {
-                Object unwrappedObject = XmlUtils.unwrap(object);
-                if (searchTarget.equals(unwrappedObject)
-                        || depthElementSearch(searchTarget, unwrappedObject)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
+	@Override
+	public void reset() {
+		contexts.clear();
+	}
 }

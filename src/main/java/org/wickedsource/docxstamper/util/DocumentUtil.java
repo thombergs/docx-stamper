@@ -6,6 +6,7 @@ import org.docx4j.dml.Graphic;
 import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.finders.ClassFinder;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
 import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
 import org.docx4j.openpackaging.parts.WordprocessingML.HeaderPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
@@ -15,255 +16,263 @@ import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toList;
 
 public class DocumentUtil {
-    private DocumentUtil() {
-        throw new DocxStamperException("Utility classes shouldn't be instantiated");
-    }
+	private DocumentUtil() {
+		throw new DocxStamperException("Utility classes shouldn't be instantiated");
+	}
 
-    /**
-     * Recursively walk through the content accessor to replace embedded images and import the matching
-     * files to the destination document before importing content.
-     *
-     * @param sourceDocument document to import.
-     * @param targetDocument document to add the source document content to.
-     * @return the whole content of the source document with imported images replaced.
-     */
-    public static List<Object> prepareDocumentForInsert(
-            WordprocessingMLPackage sourceDocument,
-            WordprocessingMLPackage targetDocument
-    ) throws Exception {
-        return walkObjectsAndImportImages(sourceDocument.getMainDocumentPart(), sourceDocument, targetDocument);
-    }
+	public static <T> List<T> extractElements(Object object, Class<T> elementClass) {
+		// we handle full documents slightly differently as they have headers and footers
+		if (object instanceof WordprocessingMLPackage document) {
+			return Stream.of(
+								 getElementStreamFrom(document, elementClass, Namespaces.HEADER),
+								 getElementStream(document.getMainDocumentPart(), elementClass),
+								 getElementStreamFrom(document, elementClass, Namespaces.FOOTER)
+						 )
+						 .flatMap(identity())
+						 .collect(toList());
+		}
 
-    /**
-     * Recursively walk through the content accessor to replace embedded images and import the matching
-     * files to the destination document.
-     *
-     * @param sourceContainer source container to walk.
-     * @param sourceDocument  source document containing image files.
-     * @param destDocument    destination document to add image files to.
-     * @return the list of imported objects from the source container.
-     */
-    public static List<Object> walkObjectsAndImportImages(
-            ContentAccessor sourceContainer,
-            WordprocessingMLPackage sourceDocument,
-            WordprocessingMLPackage destDocument
-    ) throws Exception {
-        List<Object> result = new ArrayList<>();
-        for (Object obj : sourceContainer.getContent()) {
-            if (obj instanceof R && isImageRun((R) obj)) {
-                DocxImageExtractor docxImageExtractor = new DocxImageExtractor(sourceDocument);
-                byte[] imageData = docxImageExtractor.getRunDrawingData((R) obj);
-                String filename = docxImageExtractor.getRunDrawingFilename((R) obj);
-                String alt = docxImageExtractor.getRunDrawingAltText((R) obj);
-                Integer maxWidth = docxImageExtractor.getRunDrawingMaxWidth((R) obj);
-                result.add(ImageResolver.createRunWithImage(destDocument, imageData, filename, alt, maxWidth));
-            } else if (obj instanceof ContentAccessor) {
-                List<Object> importedChildren = walkObjectsAndImportImages((ContentAccessor) obj, sourceDocument, destDocument);
-                ((ContentAccessor) obj).getContent().clear();
-                ((ContentAccessor) obj).getContent().addAll(importedChildren);
-                result.add(obj);
-            } else {
-                result.add(obj);
-            }
-        }
-        return result;
-    }
+		return getElementStream(object, elementClass)
+				.collect(toList());
+	}
 
-    /**
-     * Check if a run contains an embedded image.
-     *
-     * @param run the run to analyze
-     * @return true if the run contains an image, false otherwise.
-     */
-    private static boolean isImageRun(R run) {
-        return run.getContent()
-                .stream()
-                .filter(runElement -> runElement instanceof JAXBElement)
-                .map(JAXBElement.class::cast)
-                .map(JAXBElement::getValue)
-                .anyMatch(runValue -> runValue instanceof Drawing);
-    }
+	private static <T> Stream<T> getElementStreamFrom(
+			WordprocessingMLPackage document,
+			Class<T> clazz,
+			String relationshipType
+	) {
+		RelationshipsPart relationshipsPart = document
+				.getMainDocumentPart()
+				.getRelationshipsPart();
+		return relationshipsPart
+				.getRelationships()
+				.getRelationship()
+				.stream()
+				.filter(relationship -> relationship.getType().equals(relationshipType))
+				.map(relationshipsPart::getPart)
+				.flatMap(relationshipPart -> getElementStream(relationshipPart, clazz));
+	}
 
-    public static <T> List<T> extractElements(Object object, Class<T> elementClass) {
-        // we handle full documents slightly differently as they have headers and footers
-        if (object instanceof WordprocessingMLPackage) {
-            WordprocessingMLPackage document = (WordprocessingMLPackage) object;
+	private static <T> Stream<T> getElementStream(Object obj, Class<T> clazz) {
+		ClassFinder finder = new ClassFinder(clazz);
+		finder.walkJAXBElements(obj);
+		return finder.results
+				.stream()
+				.map(clazz::cast);
+	}
 
-            return Stream.of(
-                            getElementStreamFrom(document, elementClass, Namespaces.HEADER),
-                            getElementStream(document.getMainDocumentPart(), elementClass),
-                            getElementStreamFrom(document, elementClass, Namespaces.FOOTER)
-                    )
-                    .flatMap(identity())
-                    .collect(toList());
-        }
+	/**
+	 * Retrieve an embedded drawing relationship id.
+	 *
+	 * @param drawing the drawing to get the relationship id.
+	 * @return the id of the graphic
+	 */
+	public static String getImageRelationshipId(Drawing drawing) {
+		Graphic graphic = getInlineGraphic(drawing);
+		return graphic.getGraphicData().getPic().getBlipFill().getBlip().getEmbed();
+	}
 
-        return getElementStream(object, elementClass)
-                .collect(toList());
-    }
+	/**
+	 * Extract an inline graphic from a drawing.
+	 *
+	 * @param drawing the drawing containing the graphic.
+	 * @return the graphic
+	 */
+	private static Graphic getInlineGraphic(Drawing drawing) {
+		if (drawing.getAnchorOrInline().isEmpty()) {
+			throw new RuntimeException("Anchor or Inline is empty !");
+		}
+		Object anchorOrInline = drawing.getAnchorOrInline().get(0);
+		if (anchorOrInline instanceof Inline inline) {
+			return inline.getGraphic();
+		} else {
+			throw new RuntimeException("Don't know how to process anchor !");
+		}
+	}
 
-    /**
-     * Retrieve an embedded drawing relationship id.
-     *
-     * @param drawing the drawing to get the relationship id.
-     * @return the id of the graphic
-     */
-    public static String getImageRelationshipId(Drawing drawing) {
-        Graphic graphic = getInlineGraphic(drawing);
-        return graphic.getGraphicData().getPic().getBlipFill().getBlip().getEmbed();
-    }
+	public static List<P> getParagraphsFromObject(Object parentObject) {
+		List<P> paragraphList = new ArrayList<>();
+		for (Object object : getElementsFromObject(parentObject, P.class)) {
+			if (object instanceof P) {
+				paragraphList.add((P) object);
+			}
+		}
+		return paragraphList;
+	}
 
-    /**
-     * Extract an inline graphic from a drawing.
-     *
-     * @param drawing the drawing containing the graphic.
-     * @return the graphic
-     */
-    private static Graphic getInlineGraphic(Drawing drawing) {
-        if (drawing.getAnchorOrInline().isEmpty()) {
-            throw new RuntimeException("Anchor or Inline is empty !");
-        }
-        Object anchorOrInline = drawing.getAnchorOrInline().get(0);
-        if (anchorOrInline instanceof Inline) {
-            Inline inline = ((Inline) anchorOrInline);
-            return inline.getGraphic();
-        } else {
-            throw new RuntimeException("Don't know how to process anchor !");
-        }
-    }
+	private static List<Object> getElementsFromObject(Object object, Class<?> elementClass) {
+		List<Object> documentElements = new ArrayList<>();
+		// we handle full documents slightly differently as they have headers and footers
+		if (object instanceof WordprocessingMLPackage) {
+			documentElements.addAll(getElementsFromHeader(((WordprocessingMLPackage) object), elementClass));
+			documentElements.addAll(getElements(((WordprocessingMLPackage) object).getMainDocumentPart(),
+												elementClass));
+			documentElements.addAll(getElementsForFooter(((WordprocessingMLPackage) object), elementClass));
+		} else {
+			documentElements.addAll(getElements(object, elementClass));
+		}
+		return documentElements;
+	}
 
-    private static <T> Stream<T> getElementStreamFrom(
-            WordprocessingMLPackage document,
-            Class<T> clazz,
-            String relationshipType
-    ) {
-        RelationshipsPart relationshipsPart = document
-                .getMainDocumentPart()
-                .getRelationshipsPart();
-        return relationshipsPart
-                .getRelationships()
-                .getRelationship()
-                .stream()
-                .filter(relationship -> relationship.getType().equals(relationshipType))
-                .map(relationshipsPart::getPart)
-                .flatMap(relationshipPart -> getElementStream(relationshipPart, clazz));
-    }
+	private static List<Object> getElementsFromHeader(WordprocessingMLPackage document, Class<?> elementClass) {
+		List<Object> paragraphs = new ArrayList<>();
+		RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
 
-    private static <T> Stream<T> getElementStream(Object obj, Class<T> clazz) {
-        ClassFinder finder = new ClassFinder(clazz);
-        finder.walkJAXBElements(obj);
-        return finder.results
-                .stream()
-                .map(clazz::cast);
-    }
+		// walk through elements in headers
+		List<Relationship> relationships = getRelationshipsOfType(document, Namespaces.HEADER);
+		for (Relationship header : relationships) {
+			HeaderPart headerPart = (HeaderPart) relationshipsPart.getPart(header.getId());
+			paragraphs.addAll(getElements(headerPart, elementClass));
+		}
+		return paragraphs;
+	}
 
-    public static List<P> getParagraphsFromObject(Object parentObject) {
-        List<P> paragraphList = new ArrayList<>();
-        for (Object object : getElementsFromObject(parentObject, P.class)) {
-            if (object instanceof P) {
-                paragraphList.add((P) object);
-            }
-        }
-        return paragraphList;
-    }
+	private static List<Object> getElements(Object obj, Class<?> elementClass) {
+		ClassFinder finder = new ClassFinder(elementClass);
+		TraversalUtil.visit(obj, finder);
+		return finder.results;
+	}
 
-    private static List<Object> getElementsFromObject(Object object, Class<?> elementClass) {
-        List<Object> documentElements = new ArrayList<>();
-        // we handle full documents slightly differently as they have headers and footers
-        if (object instanceof WordprocessingMLPackage) {
-            documentElements.addAll(getElementsFromHeader(((WordprocessingMLPackage)  object), elementClass));
-            documentElements.addAll(getElements(((WordprocessingMLPackage)  object).getMainDocumentPart(), elementClass));
-            documentElements.addAll(getElementsForFooter(((WordprocessingMLPackage)  object), elementClass));
-        } else {
-            documentElements.addAll(getElements(object, elementClass));
-        }
-        return documentElements;
-    }
+	private static List<Object> getElementsForFooter(WordprocessingMLPackage document, Class<?> elementClass) {
+		List<Object> paragraphs = new ArrayList<>();
+		RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
 
-    private static List<Object> getElementsFromHeader(WordprocessingMLPackage document, Class<?> elementClass) {
-        List<Object> paragraphs = new ArrayList<>();
-        RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
+		// walk through elements in footers
+		List<Relationship> relationships = getRelationshipsOfType(document, Namespaces.FOOTER);
+		for (Relationship footer : relationships) {
+			FooterPart footerPart = (FooterPart) relationshipsPart.getPart(footer.getId());
+			paragraphs.addAll(getElements(footerPart, elementClass));
+		}
 
-        // walk through elements in headers
-        List<Relationship> relationships = getRelationshipsOfType(document, Namespaces.HEADER);
-        for (Relationship header : relationships) {
-            HeaderPart headerPart = (HeaderPart) relationshipsPart.getPart(header.getId());
-            paragraphs.addAll(getElements(headerPart, elementClass));
-        }
+		return paragraphs;
+	}
 
-        return paragraphs;
-    }
+	private static List<Relationship> getRelationshipsOfType(WordprocessingMLPackage document, String type) {
+		List<Relationship> relationshipList = document
+				.getMainDocumentPart()
+				.getRelationshipsPart()
+				.getRelationships()
+				.getRelationship();
+		List<Relationship> headerRelationships = new ArrayList<>();
+		for (Relationship r : relationshipList) {
+			if (r.getType().equals(type)) {
+				headerRelationships.add(r);
+			}
+		}
+		return headerRelationships;
+	}
 
-    private static List<Object> getElementsForFooter(WordprocessingMLPackage document, Class<?> elementClass) {
-        List<Object> paragraphs = new ArrayList<>();
-        RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
+	public static List<Tbl> getTableFromObject(Object parentObject) {
+		List<Tbl> tableList = new ArrayList<>();
+		for (Object object : getElementsFromObject(parentObject, Tbl.class)) {
+			if (object instanceof Tbl) {
+				tableList.add((Tbl) object);
+			}
+		}
+		return tableList;
+	}
 
-        // walk through elements in footers
-        List<Relationship> relationships = getRelationshipsOfType(document, Namespaces.FOOTER);
-        for (Relationship footer : relationships) {
-            FooterPart footerPart = (FooterPart) relationshipsPart.getPart(footer.getId());
-            paragraphs.addAll(getElements(footerPart, elementClass));
-        }
+	public static List<Tr> getTableRowsFromObject(Object parentObject) {
+		List<Tr> tableRowList = new ArrayList<>();
+		for (Object object : getElementsFromObject(parentObject, Tr.class)) {
+			if (object instanceof Tr) {
+				tableRowList.add((Tr) object);
+			}
+		}
+		return tableRowList;
+	}
 
-        return paragraphs;
-    }
+	public static List<Tc> getTableCellsFromObject(Object parentObject) {
+		return getElementsFromObject(parentObject, Tc.class)
+				.stream()
+				.filter(object -> object instanceof Tc)
+				.map(object -> (Tc) object)
+				.toList();
+	}
 
-    private static List<Relationship> getRelationshipsOfType(WordprocessingMLPackage document, String type) {
-        List<Relationship> relationshipList = document
-                .getMainDocumentPart()
-                .getRelationshipsPart()
-                .getRelationships()
-                .getRelationship();
-        List<Relationship> headerRelationships = new ArrayList<>();
-        for (Relationship r : relationshipList) {
-            if (r.getType().equals(type)) {
-                headerRelationships.add(r);
-            }
-        }
-        return headerRelationships;
-    }
+	public static Object lastElement(WordprocessingMLPackage subDocument) {
+		List<Object> content = subDocument.getMainDocumentPart().getContent();
+		return content.get(content.size() - 1);
+	}
 
-    private static List<Object> getElements(Object obj, Class<?> elementClass) {
-        ClassFinder finder = new ClassFinder(elementClass);
-        new TraversalUtil(obj, finder);
-        return finder.results;
-    }
+	public static List<Object> allElements(WordprocessingMLPackage subDocument) {
+		return subDocument.getMainDocumentPart().getContent();
+	}
 
-    public static List<Tbl> getTableFromObject(Object parentObject) {
-        List<Tbl> tableList = new ArrayList<>();
-        for (Object object : getElementsFromObject(parentObject, Tbl.class)) {
-            if (object instanceof Tbl) {
-                tableList.add((Tbl) object);
-            }
-        }
-        return tableList;
-    }
+	/**
+	 * Recursively walk through source to find embedded images and import them in the target document.
+	 *
+	 * @param source source document containing image files.
+	 * @param target target document to add image files to.
+	 */
+	public static Map<R, R> walkObjectsAndImportImages(WordprocessingMLPackage source, WordprocessingMLPackage target) {
+		return walkObjectsAndImportImages(source.getMainDocumentPart(), source, target);
+	}
 
-    public static List<Tr> getTableRowsFromObject(Object parentObject) {
-        List<Tr> tableRowList = new ArrayList<>();
-        for (Object object : getElementsFromObject(parentObject, Tr.class)) {
-            if (object instanceof Tr) {
-                tableRowList.add((Tr) object);
-            }
-        }
-        return tableRowList;
-    }
+	/**
+	 * Recursively walk through source accessor to find embedded images and import the target document.
+	 *
+	 * @param container source container to walk.
+	 * @param source    source document containing image files.
+	 * @param target    target document to add image files to.
+	 */
+	public static Map<R, R> walkObjectsAndImportImages(
+			ContentAccessor container,
+			WordprocessingMLPackage source,
+			WordprocessingMLPackage target
+	) {
+		Map<R, R> replacements = new HashMap<>();
+		for (Object obj : container.getContent()) {
+			Queue<Object> queue = new ArrayDeque<>();
+			queue.add(obj);
 
-    public static List<Tc> getTableCellsFromObject(Object parentObject) {
-        List<Tc> tableCellList = new ArrayList<>();
-        for (Object object : getElementsFromObject(parentObject, Tc.class)) {
-            if (object instanceof Tc) {
-                tableCellList.add((Tc) object);
-            }
-        }
-        return tableCellList;
-    }
+			while (!queue.isEmpty()) {
+				Object currentObj = queue.remove();
+
+				if (currentObj instanceof R currentR && isImageRun(currentR)) {
+					DocxImageExtractor docxImageExtractor = new DocxImageExtractor(source);
+					byte[] imageData = docxImageExtractor.getRunDrawingData(currentR);
+					String filename = docxImageExtractor.getRunDrawingFilename(currentR);
+					String alt = docxImageExtractor.getRunDrawingAltText(currentR);
+					Integer maxWidth = docxImageExtractor.getRunDrawingMaxWidth(currentR);
+					BinaryPartAbstractImage imagePart = tryCreateImagePart(target, imageData);
+					replacements.put(currentR, ImageResolver.createRunWithImage(filename, alt, maxWidth, imagePart));
+				} else if (currentObj instanceof ContentAccessor contentAccessor)
+					queue.addAll(contentAccessor.getContent());
+			}
+		}
+		return replacements;
+	}
+
+	/**
+	 * Check if a run contains an embedded image.
+	 *
+	 * @param run the run to analyze
+	 * @return true if the run contains an image, false otherwise.
+	 */
+	private static boolean isImageRun(R run) {
+		return run.getContent()
+				  .stream()
+				  .filter(runElement -> runElement instanceof JAXBElement)
+				  .map(JAXBElement.class::cast)
+				  .map(JAXBElement::getValue)
+				  .anyMatch(runValue -> runValue instanceof Drawing);
+	}
+
+	private static BinaryPartAbstractImage tryCreateImagePart(WordprocessingMLPackage destDocument, byte[] imageData) {
+		try {
+			return BinaryPartAbstractImage.createImagePart(destDocument, imageData);
+		} catch (Exception e) {
+			throw new DocxStamperException(e);
+		}
+	}
+
+
 }

@@ -19,6 +19,8 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toSet;
+
 public class CommentUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(CommentUtil.class);
@@ -222,17 +224,18 @@ public class CommentUtil {
 	}
 
 	private static Set<CommentWrapper> cleanMalformedComments(Set<CommentWrapper> children) {
-		return children.stream().filter(comment -> {
-			if (isCommentMalformed(comment)) {
-				logger.error(
-						"Skipping malformed comment, missing range start and/or range end : {}",
-						getCommentContent(comment)
-				);
-				return false;
-			}
-			comment.setChildren(cleanMalformedComments(comment.getChildren()));
-			return true;
-		}).collect(Collectors.toSet());
+		return children.stream()
+					   .filter(comment -> {
+						   if (isCommentMalformed(comment)) {
+							   logger.error(
+									   "Skipping malformed comment, missing range start and/or range end : {}",
+									   getCommentContent(comment)
+							   );
+							   return false;
+						   }
+						   comment.setChildren(cleanMalformedComments(comment.getChildren()));
+						   return true;
+					   }).collect(toSet());
 	}
 
 	private static String getCommentContent(CommentWrapper comment) {

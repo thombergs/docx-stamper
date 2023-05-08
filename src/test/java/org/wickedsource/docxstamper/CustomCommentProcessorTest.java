@@ -6,8 +6,8 @@ import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
-import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
 import java.io.IOException;
@@ -21,8 +21,10 @@ public class CustomCommentProcessorTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
 		var template = getClass().getResourceAsStream("CustomCommentProcessorTest.docx");
+
 		var config = new DocxStamperConfiguration()
-				.addCommentProcessor(ICustomCommentProcessor.class, CustomCommentProcessor.class);
+				.addCommentProcessor(ICustomCommentProcessor.class, CustomCommentProcessor::new);
+
 		var stamper = new TestDocxStamper<>(config);
 		stamper.stampAndLoad(template, new EmptyContext());
 
@@ -42,8 +44,8 @@ public class CustomCommentProcessorTest {
 
 		private P currentParagraph;
 
-		public CustomCommentProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
-			super(config, typeResolverRegistry);
+		public CustomCommentProcessor(PlaceholderReplacer placeholderReplacer) {
+			super(placeholderReplacer);
 		}
 
 		public static List<P> getVisitedParagraphs() {

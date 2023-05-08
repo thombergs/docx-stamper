@@ -3,8 +3,7 @@ package org.wickedsource.docxstamper;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
-import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
-import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
+import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
@@ -17,64 +16,86 @@ import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import java.util.Map;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * <p>
  * Main class of the docx-stamper library. This class can be used to "stamp" .docx templates
  * to create a .docx document filled with custom data at runtime.
  * </p>
- *
- * @param <T> the class of the context object used to resolve expressions against.
  */
-public class DocxStamper<T> {
+public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
+	private final List<PreProcessor> preprocessors;
+	private final PlaceholderReplacer placeholderReplacer;
+	private final CommentProcessorRegistry commentProcessorRegistry;
+	protected DocxStamperConfiguration configuration;
 
-	private PlaceholderReplacer placeholderReplacer;
-
-	private CommentProcessorRegistry commentProcessorRegistry;
-
-	private TypeResolverRegistry typeResolverRegistry;
-
-	private DocxStamperConfiguration config = new DocxStamperConfiguration();
-
+	/**
+	 * @deprecated should use DocxStamper.createInstance
+	 */
+	@Deprecated(since = "1.6.4", forRemoval = true)
 	public DocxStamper() {
-		initFields();
+		this(new DocxStamperConfiguration());
 	}
 
-	private void initFields() {
-		typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
+	public DocxStamper(DocxStamperConfiguration configuration) {
+		var failOnUnresolvedExpression = configuration.isFailOnUnresolvedExpression();
+		var replaceUnresolvedExpressions = configuration.isReplaceUnresolvedExpressions();
+		var leaveEmptyOnExpressionError = configuration.isLeaveEmptyOnExpressionError();
+
+		var unresolvedExpressionsDefaultValue = configuration.getUnresolvedExpressionsDefaultValue();
+		var lineBreakPlaceholder = configuration.getLineBreakPlaceholder();
+
+		var evaluationContextConfigurer = configuration.getEvaluationContextConfigurer();
+
+		var typeResolvers = configuration.getTypeResolvers();
+		var expressionFunctions = configuration.getExpressionFunctions();
+
+		var typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
 		typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
-		typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver("dd.MM.yyyy"));
-		for (Map.Entry<Class<?>, ITypeResolver> entry : config.getTypeResolvers().entrySet()) {
+		typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver());
+
+		for (var entry : typeResolvers.entrySet()) {
 			typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
 		}
 
-		ExpressionResolver expressionResolver = new ExpressionResolver(config);
-		placeholderReplacer = new PlaceholderReplacer(typeResolverRegistry, config);
+		var commentProcessors = new HashMap<Class<?>, Object>();
 
-		config.getCommentProcessorsToUse()
-			  .forEach((key, processor) -> config.putCommentProcessor(key, tryInstantiate(processor)));
+		var expressionResolver = new ExpressionResolver(
+				failOnUnresolvedExpression,
+				commentProcessors,
+				expressionFunctions,
+				evaluationContextConfigurer
+		);
 
-		commentProcessorRegistry = new CommentProcessorRegistry(placeholderReplacer, config);
-		commentProcessorRegistry.setExpressionResolver(expressionResolver);
-	}
+		var placeholderReplacer = new PlaceholderReplacer(
+				typeResolverRegistry,
+				expressionResolver,
+				configuration.isReplaceNullValues(),
+				configuration.getNullValuesDefault(),
+				failOnUnresolvedExpression,
+				replaceUnresolvedExpressions,
+				unresolvedExpressionsDefaultValue,
+				leaveEmptyOnExpressionError,
+				lineBreakPlaceholder
+		);
 
-	private Object tryInstantiate(Class<?> processor) {
-		try {
-			return instantiate(processor);
-		} catch (ReflectiveOperationException e) {
-			throw new RuntimeException(e);
+		for (var entry : configuration.getCommentProcessors().entrySet()) {
+			commentProcessors.put(entry.getKey(), entry.getValue().create(placeholderReplacer));
 		}
-	}
 
-	private Object instantiate(Class<?> processor) throws ReflectiveOperationException {
-		var constructor = processor.getDeclaredConstructor(DocxStamperConfiguration.class, TypeResolverRegistry.class);
-		return constructor.newInstance(config, typeResolverRegistry);
-	}
+		var commentProcessorRegistry = new CommentProcessorRegistry(
+				placeholderReplacer,
+				expressionResolver,
+				commentProcessors,
+				failOnUnresolvedExpression
+		);
 
-	public DocxStamper(DocxStamperConfiguration config) {
-		this.config = config;
-		initFields();
+		this.configuration = configuration;
+		this.placeholderReplacer = placeholderReplacer;
+		this.commentProcessorRegistry = commentProcessorRegistry;
+		this.preprocessors = configuration.getPreprocessors().stream().toList();
 	}
 
 	/**
@@ -110,7 +131,7 @@ public class DocxStamper<T> {
 	 * @param out         the output stream in which to write the resulting .docx document.
 	 * @throws DocxStamperException in case of an error.
 	 */
-	public void stamp(InputStream template, T contextRoot, OutputStream out) throws DocxStamperException {
+	public void stamp(InputStream template, Object contextRoot, OutputStream out) throws DocxStamperException {
 		try {
 			WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 			stamp(document, contextRoot, out);
@@ -118,6 +139,7 @@ public class DocxStamper<T> {
 			throw new DocxStamperException(e);
 		}
 	}
+
 
 	/**
 	 * Same as stamp(InputStream, T, OutputStream) except that you may pass in a DOCX4J document as a template instead
@@ -128,8 +150,10 @@ public class DocxStamper<T> {
 	 * @param out         the output stream in which to write the resulting .docx document.
 	 * @throws DocxStamperException in case of an error.
 	 */
-	public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
+	@Override
+	public void stamp(WordprocessingMLPackage document, Object contextRoot, OutputStream out) throws DocxStamperException {
 		try {
+			preprocess(document);
 			processComments(document, contextRoot);
 			replaceExpressions(document, contextRoot);
 			document.save(out);
@@ -139,22 +163,19 @@ public class DocxStamper<T> {
 		}
 	}
 
-	private void processComments(final WordprocessingMLPackage document, T contextObject) {
+	private void preprocess(WordprocessingMLPackage document) {
+		for (PreProcessor preprocessor : preprocessors) {
+			preprocessor.process(document);
+		}
+	}
+
+	private void processComments(final WordprocessingMLPackage document, Object contextObject) {
 		commentProcessorRegistry.runProcessors(document, contextObject);
 	}
 
-	private void replaceExpressions(WordprocessingMLPackage document, T contextObject) {
+	private void replaceExpressions(WordprocessingMLPackage document, Object contextObject) {
 		placeholderReplacer.resolveExpressions(document, contextObject);
 	}
 
-	/**
-	 * This method allows getting comment processors instances in use to access their internal state. Useful for
-	 * testing purposes.
-	 *
-	 * @param interfaceToGet ICommentProcessor interface to lookup.
-	 * @return ICommentProcessor implementation instance or null if not used.
-	 */
-	public ICommentProcessor getCommentProcessorInstance(Class<?> interfaceToGet) {
-		return (ICommentProcessor) config.getCommentProcessors().get(interfaceToGet);
-	}
+
 }

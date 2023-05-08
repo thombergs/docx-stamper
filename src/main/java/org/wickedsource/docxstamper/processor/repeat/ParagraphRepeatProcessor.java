@@ -3,9 +3,10 @@ package org.wickedsource.docxstamper.processor.repeat;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.*;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
-import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.api.DocxStamperException;
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
@@ -13,157 +14,169 @@ import org.wickedsource.docxstamper.util.SectionUtil;
 
 import java.math.BigInteger;
 import java.util.*;
+import java.util.function.Supplier;
+
+import static java.util.Collections.singletonList;
 
 public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IParagraphRepeatProcessor {
+	private final Supplier<? extends List<? extends P>> nullSupplier;
+	private Map<P, Paragraphs> pToRepeat = new HashMap<>();
 
-    private static class ParagraphsToRepeat {
-        CommentWrapper commentWrapper;
-        List<Object> data;
-        List<P> paragraphs;
-        // hasOddSectionBreaks is true if the paragraphs to repeat contain an odd number of section breaks
-        // changing the layout, false otherwise
-        boolean hasOddSectionBreaks;
-        // section break right before the first paragraph to repeat if present, or null
-        SectPr sectionBreakBefore;
-        // section break on the first paragraph to repeat if present, or null
-        SectPr firstParagraphSectionBreak;
-    }
+	private ParagraphRepeatProcessor(
+			PlaceholderReplacer placeholderReplacer,
+			Supplier<? extends List<? extends P>> nullSupplier
+	) {
+		super(placeholderReplacer);
+		this.nullSupplier = nullSupplier;
+	}
 
-    private Map<P, ParagraphsToRepeat> pToRepeat = new HashMap<>();
+	public static ICommentProcessor newInstance(PlaceholderReplacer pr, String nullReplacement) {
+		return new ParagraphRepeatProcessor(pr, () -> singletonList(ParagraphUtil.create(nullReplacement)));
+	}
 
-    public ParagraphRepeatProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
-        super(config, typeResolverRegistry);
-    }
+	public static ICommentProcessor newInstance(PlaceholderReplacer placeholderReplacer) {
+		return new ParagraphRepeatProcessor(placeholderReplacer, Collections::emptyList);
+	}
 
-    @Override
-    public void repeatParagraph(List<Object> objects) {
-        P paragraph = getParagraph();
+	@Override
+	public void repeatParagraph(List<Object> objects) {
+		P paragraph = getParagraph();
 
-        List<P> paragraphs = getParagraphsInsideComment(paragraph);
+		Deque<P> paragraphs = getParagraphsInsideComment(paragraph);
 
-        ParagraphsToRepeat toRepeat = new ParagraphsToRepeat();
-        toRepeat.commentWrapper = getCurrentCommentWrapper();
-        toRepeat.data = objects;
-        toRepeat.paragraphs = paragraphs;
-        toRepeat.sectionBreakBefore = SectionUtil.getPreviousSectionBreakIfPresent(paragraph, (ContentAccessor) paragraph.getParent());
-        toRepeat.firstParagraphSectionBreak = SectionUtil.getParagraphSectionBreak(paragraph);
-        toRepeat.hasOddSectionBreaks = SectionUtil.isOddNumberOfSectionBreaks(new ArrayList<>(toRepeat.paragraphs));
+		Paragraphs toRepeat = new Paragraphs();
+		toRepeat.commentWrapper = getCurrentCommentWrapper();
+		toRepeat.data = new ArrayDeque<>(objects);
+		toRepeat.paragraphs = paragraphs;
+		toRepeat.sectionBreakBefore = SectionUtil.getPreviousSectionBreakIfPresent(paragraph,
+																				   (ContentAccessor) paragraph.getParent());
+		toRepeat.firstParagraphSectionBreak = SectionUtil.getParagraphSectionBreak(paragraph);
+		toRepeat.hasOddSectionBreaks = SectionUtil.isOddNumberOfSectionBreaks(new ArrayList<>(toRepeat.paragraphs));
 
-        if (paragraph.getPPr() != null && paragraph.getPPr().getSectPr() != null) {
-            // we need to clear the first paragraph's section break to be able to control how to repeat it
-            paragraph.getPPr().setSectPr(null);
-        }
+		if (paragraph.getPPr() != null && paragraph.getPPr().getSectPr() != null) {
+			// we need to clear the first paragraph's section break to be able to control how to repeat it
+			paragraph.getPPr().setSectPr(null);
+		}
 
-        pToRepeat.put(paragraph, toRepeat);
-    }
+		pToRepeat.put(paragraph, toRepeat);
+	}
 
-    @Override
-    public void commitChanges(WordprocessingMLPackage document) {
-        pToRepeat.forEach((currentP, paragraphsToRepeat) -> {
-            List<Object> expressionContexts = Objects.requireNonNull(paragraphsToRepeat).data;
-            List<P> paragraphsToAdd = new ArrayList<>();
-            // paragraphs generation
-            if (expressionContexts != null) {
-                paragraphsToAdd.addAll(generateParagraphsToAdd(document, paragraphsToRepeat, expressionContexts));
-            } else if (configuration.isReplaceNullValues() && configuration.getNullValuesDefault() != null) {
-                paragraphsToAdd.add(ParagraphUtil.create(configuration.getNullValuesDefault()));
-            }
-            restoreFirstSectionBreakIfNeeded(paragraphsToRepeat, paragraphsToAdd);
-            // paragraphs insertion into the document
-            ContentAccessor parent = (ContentAccessor) currentP.getParent();
-            int index = parent.getContent().indexOf(currentP);
-            if (index >= 0) {
-                parent.getContent().addAll(index, paragraphsToAdd);
-            }
-            // removing template from document
-            parent.getContent().removeAll(paragraphsToRepeat.paragraphs);
-        });
-    }
+	public static Deque<P> getParagraphsInsideComment(P paragraph) {
+		BigInteger commentId = null;
+		boolean foundEnd = false;
 
-    private static void restoreFirstSectionBreakIfNeeded(ParagraphsToRepeat paragraphsToRepeat, List<P> paragraphsToAdd) {
-        if (paragraphsToRepeat.firstParagraphSectionBreak != null) {
-            P breakP = paragraphsToAdd.get(paragraphsToAdd.size() - 1);
-            SectionUtil.applySectionBreakToParagraph(paragraphsToRepeat.firstParagraphSectionBreak, breakP);
-        }
-    }
+		Deque<P> paragraphs = new ArrayDeque<>();
+		paragraphs.add(paragraph);
 
-    private List<P> generateParagraphsToAdd(WordprocessingMLPackage document, ParagraphsToRepeat paragraphsToRepeat, List<Object> expressionContexts) {
-        List<P> paragraphsToAdd = new ArrayList<>();
-        Object lastExpressionContext = expressionContexts.get(expressionContexts.size() - 1);
+		for (Object object : paragraph.getContent()) {
+			if (object instanceof CommentRangeStart crs) commentId = crs.getId();
+			if (object instanceof CommentRangeEnd cre && Objects.equals(commentId, cre.getId())) foundEnd = true;
+		}
+		if (foundEnd || commentId == null) return paragraphs;
 
-        for (Object expressionContext : expressionContexts) {
-            P lastParagraph = paragraphsToRepeat.paragraphs.get(paragraphsToRepeat.paragraphs.size() - 1);
+		Object parent = paragraph.getParent();
+		if (parent instanceof ContentAccessor contentAccessor) {
+			int index = contentAccessor.getContent().indexOf(paragraph);
+			for (int i = index + 1; i < contentAccessor.getContent().size() && !foundEnd; i++) {
+				Object next = contentAccessor.getContent().get(i);
 
-            for (P paragraphToClone : paragraphsToRepeat.paragraphs) {
-                P pClone = XmlUtils.deepCopy(paragraphToClone);
+				if (next instanceof CommentRangeEnd && ((CommentRangeEnd) next).getId().equals(commentId)) {
+					foundEnd = true;
+				} else {
+					if (next instanceof P) {
+						paragraphs.add((P) next);
+					}
+					if (next instanceof ContentAccessor childContent) {
+						for (Object child : childContent.getContent()) {
+							if (child instanceof CommentRangeEnd cre && cre.getId().equals(commentId)) {
+								foundEnd = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		return paragraphs;
+	}
 
-                if (shouldResetPageOrientationBeforeNextIteration(paragraphsToRepeat, lastExpressionContext, expressionContext, lastParagraph, paragraphToClone)) {
-                    SectionUtil.applySectionBreakToParagraph(paragraphsToRepeat.sectionBreakBefore, pClone);
-                }
+	@Override
+	public void commitChanges(WordprocessingMLPackage document) {
+		for (Map.Entry<P, Paragraphs> entry : pToRepeat.entrySet()) {
+			P currentP = entry.getKey();
+			ContentAccessor parent = (ContentAccessor) currentP.getParent();
+			List<Object> parentContent = parent.getContent();
+			int index = parentContent.indexOf(currentP);
+			if (index < 0) throw new DocxStamperException("Impossible");
 
-                CommentUtil.deleteCommentFromElement(pClone, paragraphsToRepeat.commentWrapper.getComment().getId());
-                placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
-                paragraphsToAdd.add(pClone);
-            }
-        }
+			Paragraphs paragraphsToRepeat = entry.getValue();
+			Deque<Object> expressionContexts = Objects.requireNonNull(paragraphsToRepeat).data;
+			Deque<P> collection = expressionContexts == null
+					? new ArrayDeque<>(nullSupplier.get())
+					: generateParagraphsToAdd(document, paragraphsToRepeat, expressionContexts);
+			restoreFirstSectionBreakIfNeeded(paragraphsToRepeat, collection);
+			parentContent.addAll(index, collection);
+			parentContent.removeAll(paragraphsToRepeat.paragraphs);
+		}
+	}
 
-        return paragraphsToAdd;
-    }
+	private Deque<P> generateParagraphsToAdd(WordprocessingMLPackage document, Paragraphs paragraphs, Deque<Object> expressionContexts) {
+		Deque<P> paragraphsToAdd = new ArrayDeque<>();
+		Object lastExpressionContext = expressionContexts.peekLast();
 
-    private static boolean shouldResetPageOrientationBeforeNextIteration(ParagraphsToRepeat paragraphsToRepeat, Object lastExpressionContext, Object expressionContext, P lastParagraph, P paragraphToClone) {
-        return paragraphsToRepeat.sectionBreakBefore != null
-                && paragraphsToRepeat.hasOddSectionBreaks
-                && expressionContext != lastExpressionContext
-                && paragraphToClone == lastParagraph;
-    }
+		for (Object expressionContext : expressionContexts) {
+			P lastParagraph = paragraphs.paragraphs.peekLast();
 
-    @Override
-    public void reset() {
-        pToRepeat = new HashMap<>();
-    }
+			for (P paragraphToClone : paragraphs.paragraphs) {
+				P pClone = XmlUtils.deepCopy(paragraphToClone);
 
-    public static List<P> getParagraphsInsideComment(P paragraph) {
-        BigInteger commentId = null;
-        boolean foundEnd = false;
+				if (shouldResetPageOrientationBeforeNextIteration(
+						paragraphs,
+						lastExpressionContext,
+						expressionContext,
+						lastParagraph,
+						paragraphToClone)
+				) {
+					SectionUtil.applySectionBreakToParagraph(paragraphs.sectionBreakBefore, pClone);
+				}
 
-        List<P> paragraphs = new ArrayList<>();
-        paragraphs.add(paragraph);
+				CommentUtil.deleteCommentFromElement(pClone, paragraphs.commentWrapper.getComment().getId());
+				placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
+				paragraphsToAdd.add(pClone);
+			}
+		}
+		return paragraphsToAdd;
+	}
 
-        for (Object object : paragraph.getContent()) {
-            if (object instanceof CommentRangeStart) {
-                commentId = ((CommentRangeStart) object).getId();
-            }
-            if (object instanceof CommentRangeEnd && commentId != null && commentId.equals(((CommentRangeEnd) object).getId())) {
-                foundEnd = true;
-            }
-        }
-        if (!foundEnd && commentId != null) {
-            Object parent = paragraph.getParent();
-            if (parent instanceof ContentAccessor) {
-                ContentAccessor contentAccessor = (ContentAccessor) parent;
-                int index = contentAccessor.getContent().indexOf(paragraph);
-                for (int i = index + 1; i < contentAccessor.getContent().size() && !foundEnd; i++) {
-                    Object next = contentAccessor.getContent().get(i);
+	private static void restoreFirstSectionBreakIfNeeded(Paragraphs paragraphs, Deque<P> paragraphsToAdd) {
+		if (paragraphs.firstParagraphSectionBreak != null) {
+			P breakP = paragraphsToAdd.getLast();
+			SectionUtil.applySectionBreakToParagraph(paragraphs.firstParagraphSectionBreak, breakP);
+		}
+	}
 
-                    if (next instanceof CommentRangeEnd && ((CommentRangeEnd) next).getId().equals(commentId)) {
-                        foundEnd = true;
-                    } else {
-                        if (next instanceof P) {
-                            paragraphs.add((P) next);
-                        }
-                        if (next instanceof ContentAccessor) {
-                            ContentAccessor childContent = (ContentAccessor) next;
-                            for (Object child : childContent.getContent()) {
-                                if (child instanceof CommentRangeEnd && ((CommentRangeEnd) child).getId().equals(commentId)) {
-                                    foundEnd = true;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return paragraphs;
-    }
+	private static boolean shouldResetPageOrientationBeforeNextIteration(Paragraphs paragraphs, Object lastExpressionContext, Object expressionContext, P lastParagraph, P paragraphToClone) {
+		return paragraphs.sectionBreakBefore != null
+				&& paragraphs.hasOddSectionBreaks
+				&& expressionContext != lastExpressionContext
+				&& paragraphToClone == lastParagraph;
+	}
+
+	@Override
+	public void reset() {
+		pToRepeat = new HashMap<>();
+	}
+
+	private static class Paragraphs {
+		CommentWrapper commentWrapper;
+		Deque<Object> data;
+		Deque<P> paragraphs;
+		// hasOddSectionBreaks is true if the paragraphs to repeat contain an odd number of section breaks
+		// changing the layout, false otherwise
+		boolean hasOddSectionBreaks;
+		// section break right before the first paragraph to repeat if present, or null
+		SectPr sectionBreakBefore;
+		// section break on the first paragraph to repeat if present, or null
+		SectPr firstParagraphSectionBreak;
+	}
 }

@@ -1,15 +1,13 @@
 package org.wickedsource.docxstamper;
 
+import org.docx4j.dml.wordprocessingDrawing.Anchor;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.util.ParagraphUtil;
-import org.wickedsource.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;
+import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class ExpressionReplacementInTextBoxesTest {
 	@Test
@@ -17,19 +15,12 @@ public class ExpressionReplacementInTextBoxesTest {
 		var context = new Name("Bart Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInTextBoxesTest.docx");
 		var stamper = new TestDocxStamper<Name>();
-		var document = stamper.stampAndLoad(template, context);
-		resolvedExpressionsAreReplacedInFirstLevelTextBox(document);
-		unresolvedExpressionsAreNotReplacedInFirstTextBox(document);
-	}
-
-	private void resolvedExpressionsAreReplacedInFirstLevelTextBox(WordprocessingMLPackage document) {
-		P nameParagraph = (P) ParagraphUtil.getAllTextBoxes(document).get(0);
-		assertEquals("Bart Simpson", new ParagraphWrapper(nameParagraph).getText());
-	}
-
-	private void unresolvedExpressionsAreNotReplacedInFirstTextBox(WordprocessingMLPackage document) {
-		P nameParagraph = (P) ParagraphUtil.getAllTextBoxes(document).get(2);
-		assertEquals("${foo}", new ParagraphWrapper(nameParagraph).getText());
+		var actual = stamper.stampAndLoadAndExtract(template, context, Anchor.class);
+		List<String> expected = List.of(
+				"|Bart Simpson/color=auto|",
+				"|${foo}/color=auto|"
+		);
+		assertIterableEquals(expected, actual);
 	}
 
 	public record Name(String name) {

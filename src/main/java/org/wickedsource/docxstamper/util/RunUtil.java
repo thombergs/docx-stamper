@@ -112,11 +112,15 @@ public class RunUtil {
 	 */
 	public static void setText(R run, String text) {
 		run.getContent().clear();
+		Text textObj = createText(text);
+		run.getContent().add(textObj);
+	}
+
+	public static Text createText(String text) {
 		Text textObj = factory.createText();
-		textObj.setSpace(PRESERVE);
 		textObj.setValue(text);
 		textObj.setSpace(PRESERVE); // make the text preserve spaces
-		run.getContent().add(textObj);
+		return textObj;
 	}
 
 	public static R createRun(String text) {

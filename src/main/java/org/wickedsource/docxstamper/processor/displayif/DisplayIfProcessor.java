@@ -5,10 +5,10 @@ import org.docx4j.wml.P;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
-import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.ObjectDeleter;
 
 import java.util.ArrayList;
@@ -19,10 +19,13 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 	private List<P> paragraphsToBeRemoved = new ArrayList<>();
 	private List<Tbl> tablesToBeRemoved = new ArrayList<>();
 	private List<Tr> tableRowsToBeRemoved = new ArrayList<>();
-	private List<Object> objectsToBeRemoved = new ArrayList<>();
 
-	public DisplayIfProcessor(DocxStamperConfiguration config, TypeResolverRegistry typeResolverRegistry) {
-		super(config, typeResolverRegistry);
+	private DisplayIfProcessor(PlaceholderReplacer placeholderReplacer) {
+		super(placeholderReplacer);
+	}
+
+	public static ICommentProcessor newInstance(PlaceholderReplacer pr) {
+		return new DisplayIfProcessor(pr);
 	}
 
 	@Override
@@ -31,7 +34,6 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 		removeParagraphs(deleter);
 		removeTables(deleter);
 		removeTableRows(deleter);
-		removeObjects(deleter);
 	}
 
 	@Override
@@ -39,7 +41,6 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 		paragraphsToBeRemoved = new ArrayList<>();
 		tablesToBeRemoved = new ArrayList<>();
 		tableRowsToBeRemoved = new ArrayList<>();
-		objectsToBeRemoved = new ArrayList<>();
 	}
 
 	private void removeParagraphs(ObjectDeleter deleter) {
@@ -57,12 +58,6 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 	private void removeTableRows(ObjectDeleter deleter) {
 		for (Tr row : tableRowsToBeRemoved) {
 			deleter.deleteTableRow(row);
-		}
-	}
-
-	private void removeObjects(ObjectDeleter deleter) {
-		for (Object object : objectsToBeRemoved) {
-			deleter.deleteObject(object);
 		}
 	}
 

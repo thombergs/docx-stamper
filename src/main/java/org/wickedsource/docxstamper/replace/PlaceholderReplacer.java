@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
@@ -24,19 +23,37 @@ import java.util.List;
 import java.util.Optional;
 
 public class PlaceholderReplacer {
-
 	private final Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
-
-	private final DocxStamperConfiguration configuration;
-
 	private final ExpressionResolver expressionResolver;
-
 	private final TypeResolverRegistry typeResolverRegistry;
+	private final boolean replaceNullValues;
+	private final String nullValuesDefault;
+	private final boolean failOnUnresolvedExpression;
+	private final boolean leaveEmptyOnExpressionError;
+	private final boolean replaceUnresolvedExpressions;
+	private final String unresolvedExpressionsDefaultValue;
+	private final String lineBreakPlaceholder;
 
-	public PlaceholderReplacer(TypeResolverRegistry typeResolverRegistry, DocxStamperConfiguration configuration) {
+	public PlaceholderReplacer(
+			TypeResolverRegistry typeResolverRegistry,
+			ExpressionResolver resolver,
+			boolean replaceNullValues,
+			String nullValuesDefault,
+			boolean failOnUnresolvedExpression1,
+			boolean replaceUnresolvedExpressions1,
+			String unresolvedExpressionsDefaultValue1,
+			boolean leaveEmptyOnExpressionError1,
+			String lineBreakPlaceholder1
+	) {
 		this.typeResolverRegistry = typeResolverRegistry;
-		this.configuration = configuration;
-		this.expressionResolver = new ExpressionResolver(configuration);
+		this.expressionResolver = resolver;
+		this.replaceNullValues = replaceNullValues;
+		this.nullValuesDefault = nullValuesDefault;
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression1;
+		this.replaceUnresolvedExpressions = replaceUnresolvedExpressions1;
+		this.unresolvedExpressionsDefaultValue = unresolvedExpressionsDefaultValue1;
+		this.leaveEmptyOnExpressionError = leaveEmptyOnExpressionError1;
+		this.lineBreakPlaceholder = lineBreakPlaceholder1;
 	}
 
 	/**
@@ -70,16 +87,16 @@ public class PlaceholderReplacer {
 					logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s",
 											   placeholder,
 											   resolver.getClass()));
-				} else if (configuration.isReplaceNullValues()) {
+				} else if (replaceNullValues) {
 					ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
-					R replacementObject = resolver.resolve(document, configuration.getNullValuesDefault());
+					R replacementObject = resolver.resolve(document, nullValuesDefault);
 					replace(paragraphWrapper, placeholder, replacementObject);
 					logger.debug(String.format("Replaced expression '%s' with value provided by TypeResolver %s",
 											   placeholder,
 											   resolver.getClass()));
 				}
 			} catch (SpelEvaluationException | SpelParseException e) {
-				if (configuration.isFailOnUnresolvedExpression()) {
+				if (isFailOnUnresolvedExpression()) {
 					throw new UnresolvedExpressionException(
 							String.format(
 									"Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
@@ -95,15 +112,15 @@ public class PlaceholderReplacer {
 							e.getMessage()));
 					logger.trace("Reason for skipping expression:", e);
 
-					if (configuration.isLeaveEmptyOnExpressionError()) {
+					if (leaveEmptyOnExpressionError()) {
 						replace(paragraphWrapper, placeholder, "");
-					} else if (configuration.isReplaceUnresolvedExpressions()) {
-						replace(paragraphWrapper, placeholder, configuration.getUnresolvedExpressionsDefaultValue());
+					} else if (replaceUnresolvedExpressions()) {
+						replace(paragraphWrapper, placeholder, unresolvedExpressionsDefaultValue());
 					}
 				}
 			}
 		}
-		if (configuration.getLineBreakPlaceholder() != null) {
+		if (lineBreakPlaceholder() != null) {
 			replaceLineBreaks(paragraphWrapper);
 		}
 	}
@@ -112,18 +129,37 @@ public class PlaceholderReplacer {
 		p.replace(placeholder, replacementRun == null ? RunUtil.create("") : replacementRun);
 	}
 
+	private boolean isFailOnUnresolvedExpression() {
+		return failOnUnresolvedExpression;
+	}
+
+	private boolean leaveEmptyOnExpressionError() {
+		return leaveEmptyOnExpressionError;
+	}
+
 	public void replace(ParagraphWrapper p, String placeholder, String replacementObject) {
 		Optional.ofNullable(replacementObject)
 				.map(replacementStr -> RunUtil.create(replacementStr, p.getParagraph()))
 				.ifPresent(replacementRun -> replace(p, placeholder, replacementRun));
 	}
 
+	private boolean replaceUnresolvedExpressions() {
+		return replaceUnresolvedExpressions;
+	}
+
+	private String unresolvedExpressionsDefaultValue() {
+		return unresolvedExpressionsDefaultValue;
+	}
+
+	private String lineBreakPlaceholder() {
+		return lineBreakPlaceholder;
+	}
+
 	private void replaceLineBreaks(ParagraphWrapper paragraphWrapper) {
 		Br lineBreak = Context.getWmlObjectFactory().createBr();
 		R run = RunUtil.create(lineBreak);
-		while (paragraphWrapper.getText().contains(configuration.getLineBreakPlaceholder())) {
-			replace(paragraphWrapper, configuration.getLineBreakPlaceholder(), run);
+		while (paragraphWrapper.getText().contains(lineBreakPlaceholder())) {
+			replace(paragraphWrapper, lineBreakPlaceholder(), run);
 		}
 	}
-
 }

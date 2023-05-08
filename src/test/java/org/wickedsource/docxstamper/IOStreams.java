@@ -29,8 +29,8 @@ public class IOStreams {
 			return out;
 		} else {
 			ByteArrayOutputStream out = new ByteArrayOutputStream();
-			Supplier<InputStream> in = () -> new ByteArrayInputStream(out.toByteArray());
-			streams.put(out, in);
+			Supplier<InputStream> inSupplier = () -> new ByteArrayInputStream(out.toByteArray());
+			streams.put(out, inSupplier);
 			return out;
 		}
 	}

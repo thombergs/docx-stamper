@@ -4,16 +4,28 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
+
+import java.util.Map;
 
 import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
 
 public class ExpressionResolver {
+	private final boolean failOnUnresolvedExpression;
+	private final Map<Class<?>, Object> commentProcessors;
+	private final Map<Class<?>, Object> expressionFunctions;
+	private final EvaluationContextConfigurer evaluationContextConfigurer;
 
-	private final DocxStamperConfiguration configuration;
-
-	public ExpressionResolver(DocxStamperConfiguration configuration) {
-		this.configuration = configuration;
+	public ExpressionResolver(
+			boolean failOnUnresolvedExpression1,
+			Map<Class<?>, Object> commentProcessors1,
+			Map<Class<?>, Object> expressionFunctions1,
+			EvaluationContextConfigurer evaluationContextConfigurer1
+	) {
+		failOnUnresolvedExpression = failOnUnresolvedExpression1;
+		commentProcessors = commentProcessors1;
+		expressionFunctions = expressionFunctions1;
+		evaluationContextConfigurer = evaluationContextConfigurer1;
 	}
 
 	/**
@@ -27,10 +39,14 @@ public class ExpressionResolver {
 		if ((expressionString.startsWith("${") || expressionString.startsWith("#{")) && expressionString.endsWith("}")) {
 			expressionString = stripExpression(expressionString);
 		}
-		ExpressionParser parser = new SpelExpressionParser();
 		StandardEvaluationContext evaluationContext = new StandardEvaluationContext(contextRoot);
-		evaluationContext.addMethodResolver(new StandardMethodResolver(configuration));
-		configuration.getEvaluationContextConfigurer().configureEvaluationContext(evaluationContext);
+		StandardMethodResolver methodResolver = new StandardMethodResolver(
+				failOnUnresolvedExpression,
+				commentProcessors,
+				expressionFunctions);
+		evaluationContext.addMethodResolver(methodResolver);
+		evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
+		ExpressionParser parser = new SpelExpressionParser();
 		Expression expression = parser.parseExpression(expressionString);
 		return expression.getValue(evaluationContext);
 	}

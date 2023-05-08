@@ -4,20 +4,34 @@ import org.springframework.core.convert.TypeDescriptor;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
+import org.springframework.expression.TypedValue;
 import org.springframework.lang.NonNull;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.lang.reflect.Method;
-import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class StandardMethodResolver implements MethodResolver {
-	private final DocxStamperConfiguration configuration;
+	private final boolean failOnUnresolvedExpression;
+	private final Map<Class<?>, Object> commentProcessors;
+	private final Map<Class<?>, Object> expressionFunctions;
 
-	public StandardMethodResolver(DocxStamperConfiguration configuration) {
-		this.configuration = configuration;
+	public StandardMethodResolver(
+			boolean failOnUnresolvedExpression1,
+			Map<Class<?>, Object> commentProcessors1,
+			Map<Class<?>, Object> expressionFunctions1
+	) {
+		failOnUnresolvedExpression = failOnUnresolvedExpression1;
+		commentProcessors = commentProcessors1;
+		expressionFunctions = expressionFunctions1;
+	}
+
+	private static TypedValue throwException(String name, ReflectiveOperationException exception) {
+		String message = String.format("Error calling method %s", name);
+		throw new DocxStamperException(message, exception);
 	}
 
 	@Override
@@ -27,30 +41,30 @@ public class StandardMethodResolver implements MethodResolver {
 			@NonNull String name,
 			@NonNull List<TypeDescriptor> argumentTypes
 	) {
+		Function<ReflectiveOperationException, TypedValue> onFail = failOnUnresolvedExpression
+				? exception -> throwException(name, exception)
+				: exception -> new TypedValue(null);
+
 		return findCommentProcessorMethod(name, argumentTypes)
 				.or(() -> findExpressionContextMethod(name, argumentTypes))
-				.map(methodEntry -> new StandardMethodExecutor(
-						methodEntry.getKey().getName(),
-						(args) -> methodEntry.getKey().invoke(methodEntry.getValue(), args),
-						configuration.isFailOnUnresolvedExpression()))
+				.map(invoker -> new StandardMethodExecutor(invoker, onFail))
 				.orElse(null);
-
 	}
 
-	private Optional<Map.Entry<Method, Object>> findCommentProcessorMethod(String expectedName, List<TypeDescriptor> expectedArguments) {
-		return findMethodInMap(configuration.getCommentProcessors(), expectedName, expectedArguments);
+	private Optional<StandardMethodExecutor.Invoker> findCommentProcessorMethod(String expectedName, List<TypeDescriptor> expectedArguments) {
+		return findMethodInMap(commentProcessors, expectedName, expectedArguments);
 	}
 
-	private Optional<Map.Entry<Method, Object>> findExpressionContextMethod(String expectedName, List<TypeDescriptor> expectedArguments) {
-		return findMethodInMap(configuration.getExpressionFunctions(), expectedName, expectedArguments);
+	private Optional<StandardMethodExecutor.Invoker> findExpressionContextMethod(String expectedName, List<TypeDescriptor> expectedArguments) {
+		return findMethodInMap(expressionFunctions, expectedName, expectedArguments);
 	}
 
-	private Optional<Map.Entry<Method, Object>> findMethodInMap(Map<Class<?>, Object> methodMap, String expectedName, List<TypeDescriptor> expectedArguments) {
+	private Optional<StandardMethodExecutor.Invoker> findMethodInMap(Map<Class<?>, Object> methodMap, String expectedName, List<TypeDescriptor> expectedArguments) {
 		for (Map.Entry<Class<?>, Object> entry : methodMap.entrySet()) {
 			Class<?> iface = entry.getKey();
 			for (Method actualMethod : iface.getDeclaredMethods()) {
 				if (methodEquals(actualMethod, expectedName, expectedArguments)) {
-					return Optional.of(new AbstractMap.SimpleEntry<>(actualMethod, entry.getValue()));
+					return Optional.of((args) -> actualMethod.invoke(entry.getValue(), args));
 				}
 			}
 		}
@@ -69,7 +83,6 @@ public class StandardMethodResolver implements MethodResolver {
 				return false;
 			}
 		}
-
 		return true;
 	}
 }

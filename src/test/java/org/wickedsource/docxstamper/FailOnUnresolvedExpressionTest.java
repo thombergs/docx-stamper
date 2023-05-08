@@ -22,9 +22,9 @@ public class FailOnUnresolvedExpressionTest {
 	public void doesNotFail() {
 		Name context = new Name("Homer");
 		InputStream template = getClass().getResourceAsStream("FailOnUnresolvedExpressionTest.docx");
-		DocxStamper<Name> stamper = new DocxStamperConfiguration()
-				.setFailOnUnresolvedExpression(false)
-				.build();
+		var config = new DocxStamperConfiguration()
+				.setFailOnUnresolvedExpression(false);
+		var stamper = new DocxStamper<Name>(config);
 		stamper.stamp(template, context, new ByteArrayOutputStream());
 		// no exception
 	}

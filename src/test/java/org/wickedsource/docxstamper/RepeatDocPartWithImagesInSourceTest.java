@@ -2,7 +2,10 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
+import org.docx4j.openpackaging.io3.stores.PartStore;
 import org.docx4j.openpackaging.parts.Part;
+import org.docx4j.openpackaging.parts.WordprocessingML.MainDocumentPart;
+import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.wml.ContentAccessor;
 import org.docx4j.wml.Drawing;
 import org.junit.jupiter.api.Test;
@@ -13,6 +16,7 @@ import org.wickedsource.docxstamper.util.DocumentUtil;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,42 +44,39 @@ public class RepeatDocPartWithImagesInSourceTest {
 		var stamper = new TestDocxStamper<Map<String, Object>>(config);
 		var document = stamper.stampAndLoad(template, context);
 
-		assertEquals(document.getMainDocumentPart().getContent().size(), 11);
+		MainDocumentPart mainDocumentPart = document.getMainDocumentPart();
+		List<Object> content = mainDocumentPart.getContent();
 
-		assertEquals(document.getMainDocumentPart().getContent().get(0).toString(), "This is not repeated");
-		assertEquals(document.getMainDocumentPart().getContent().get(2).toString(),
-					 "This should be repeated : first doc part");
-		assertEquals(document.getMainDocumentPart().getContent().get(4).toString(),
-					 "This should be repeated too");
-		assertEquals(document.getMainDocumentPart().getContent().get(5).toString(),
-					 "This should be repeated : second doc part");
-		assertEquals(document.getMainDocumentPart().getContent().get(7).toString(),
-					 "This should be repeated too");
-		assertEquals(document.getMainDocumentPart().getContent().get(9).toString(), "Not this");
+		assertEquals(content.size(), 8);
+		ContentAccessor line2 = (ContentAccessor) content.get(2);
+		ContentAccessor line2c0 = (ContentAccessor) line2.getContent().get(0);
+		ContentAccessor line5 = (ContentAccessor) content.get(5);
+		ContentAccessor line5c0 = (ContentAccessor) line5.getContent().get(0);
 
-		Drawing image1 = (Drawing) XmlUtils.unwrap(((ContentAccessor) ((ContentAccessor) document.getMainDocumentPart()
-																								 .getContent()
-																								 .get(3)).getContent()
-																										 .get(0)).getContent()
-																												 .get(0));
-		Drawing image2 = (Drawing) XmlUtils.unwrap(((ContentAccessor) ((ContentAccessor) document.getMainDocumentPart()
-																								 .getContent()
-																								 .get(6)).getContent()
-																										 .get(0)).getContent()
-																												 .get(0));
+		assertEquals(content.get(0).toString(), "This is not repeated");
+		assertEquals(content.get(1).toString(), "This should be repeated : first doc part");
+		assertEquals(content.get(3).toString(), "This should be repeated too");
+		assertEquals(content.get(4).toString(), "This should be repeated : second doc part");
+		assertEquals(content.get(6).toString(), "This should be repeated too");
+		assertEquals(content.get(7).toString(), "This is not repeated");
+
+		Drawing image1 = (Drawing) XmlUtils.unwrap(line2c0.getContent().get(0));
+		Drawing image2 = (Drawing) XmlUtils.unwrap(line5c0.getContent().get(0));
 
 		String image1RelId = DocumentUtil.getImageRelationshipId(image1);
 		String image2RelId = DocumentUtil.getImageRelationshipId(image2);
 
-		Part image1RelPart = document.getMainDocumentPart().getRelationshipsPart().getPart(image1RelId);
-		Part image2RelPart = document.getMainDocumentPart().getRelationshipsPart().getPart(image2RelId);
+		RelationshipsPart relationshipsPart = mainDocumentPart.getRelationshipsPart();
+		Part image1RelPart = relationshipsPart.getPart(image1RelId);
+		Part image2RelPart = relationshipsPart.getPart(image2RelId);
 
 		assertNotNull(image1RelPart);
 		assertNotNull(image2RelPart);
 
-		assertNotEquals(document.getSourcePartStore()
-								.getPartSize(image1RelPart.getPartName().getName().substring(1)), 0);
-		assertNotEquals(document.getSourcePartStore()
-								.getPartSize(image2RelPart.getPartName().getName().substring(1)), 0);
+		PartStore sourcePartStore = document.getSourcePartStore();
+		String relPart1 = image1RelPart.getPartName().getName().substring(1);
+		String relPart2 = image2RelPart.getPartName().getName().substring(1);
+		assertNotEquals(0, sourcePartStore.getPartSize(relPart1));
+		assertNotEquals(0, sourcePartStore.getPartSize(relPart2));
 	}
 }

@@ -1,7 +1,7 @@
 package org.wickedsource.docxstamper.replace.typeresolver;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 /**
@@ -9,29 +9,23 @@ import java.util.Date;
  */
 public class DateResolver extends AbstractToTextResolver<Date> {
 
-    private final String formatString;
+	private final DateTimeFormatter formatter;
 
-    private final DateFormat dateFormat;
+	public DateResolver() {
+		this(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+	}
 
-    /**
-     * Creates a new DateResolver.
-     *
-     * @param formatString the format to use for date formatting. See java.text.SimpleDateFormat.
-     */
-    public DateResolver(String formatString) {
-        this.formatString = formatString;
-        this.dateFormat = new SimpleDateFormat(formatString);
-    }
+	/**
+	 * Creates a new DateResolver.
+	 *
+	 * @param formatter the format to use for date formatting. See java.text.SimpleDateFormat.
+	 */
+	public DateResolver(DateTimeFormatter formatter) {
+		this.formatter = formatter;
+	}
 
-    @Override
-    protected String resolveStringForObject(Date date) {
-        synchronized (dateFormat) {
-            return dateFormat.format(date);
-        }
-    }
-
-    public String getFormatString() {
-        return formatString;
-    }
-
+	@Override
+	protected String resolveStringForObject(Date date) {
+		return formatter.format(date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+	}
 }

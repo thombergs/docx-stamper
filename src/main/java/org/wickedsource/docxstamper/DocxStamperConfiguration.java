@@ -1,29 +1,31 @@
 package org.wickedsource.docxstamper;
 
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
+import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer;
-import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
+import org.wickedsource.docxstamper.preprocessor.MergeSameStyleRuns;
+import org.wickedsource.docxstamper.preprocessor.RemoveProofErrors;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
-import org.wickedsource.docxstamper.processor.repeat.*;
+import org.wickedsource.docxstamper.processor.repeat.IParagraphRepeatProcessor;
+import org.wickedsource.docxstamper.processor.repeat.IRepeatDocPartProcessor;
+import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
-import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.table.ITableResolver;
-import org.wickedsource.docxstamper.processor.table.TableResolver;
+import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Provides configuration parameters for DocxStamper.
  */
 public class DocxStamperConfiguration {
 
-	private final Map<Class<?>, Class<?>> commentProcessorsToUse = new HashMap<>();
-	private final Map<Class<?>, Object> commentProcessors = new HashMap<>();
+	private final Map<Class<?>, CommentProcessorFactory> commentProcessors = new HashMap<>();
 	private final Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
 	private final Map<Class<?>, Object> expressionFunctions = new HashMap<>();
+	private final List<PreProcessor> preprocessors = new ArrayList<>();
 	private String lineBreakPlaceholder;
 	private EvaluationContextConfigurer evaluationContextConfigurer = new NoOpEvaluationContextConfigurer();
 	private boolean failOnUnresolvedExpression = true;
@@ -35,38 +37,93 @@ public class DocxStamperConfiguration {
 	private ITypeResolver defaultTypeResolver = new FallbackResolver();
 
 	public DocxStamperConfiguration() {
-		commentProcessorsToUse.put(IRepeatProcessor.class, RepeatProcessor.class);
-		commentProcessorsToUse.put(IParagraphRepeatProcessor.class, ParagraphRepeatProcessor.class);
-		commentProcessorsToUse.put(IRepeatDocPartProcessor.class, RepeatDocPartProcessor.class);
-		commentProcessorsToUse.put(ITableResolver.class, TableResolver.class);
-		commentProcessorsToUse.put(IDisplayIfProcessor.class, DisplayIfProcessor.class);
-		commentProcessorsToUse.put(IReplaceWithProcessor.class, ReplaceWithProcessor.class);
+		org.wickedsource.docxstamper.processor.CommentProcessorFactory pf = new org.wickedsource.docxstamper.processor.CommentProcessorFactory(
+				this);
+		commentProcessors.put(IRepeatProcessor.class, pf::repeat);
+		commentProcessors.put(IParagraphRepeatProcessor.class, pf::repeatParagraph);
+		commentProcessors.put(IRepeatDocPartProcessor.class, pf::repeatDocPart);
+		commentProcessors.put(ITableResolver.class, pf::tableResolver);
+		commentProcessors.put(IDisplayIfProcessor.class, pf::displayIf);
+		commentProcessors.put(IReplaceWithProcessor.class, pf::replaceWith);
+
+		preprocessors.add(new RemoveProofErrors());
+		preprocessors.add(new MergeSameStyleRuns());
+	}
+
+	public boolean isReplaceNullValues() {
+		return replaceNullValues;
+	}
+
+	public String getNullValuesDefault() {
+		return nullValuesDefault;
+	}
+
+	public Optional<String> nullReplacementValue() {
+		return replaceNullValues
+				? Optional.ofNullable(nullValuesDefault)
+				: Optional.empty();
+	}
+
+	public boolean isFailOnUnresolvedExpression() {
+		return failOnUnresolvedExpression;
 	}
 
 	/**
-	 * Copy operator for the whole DocxStamperConfiguration, including creating self comment processors instances
-	 * to avoid unexpected resets, since comment processors are stateful their instances cannot be shared over
-	 * multiple stampings.
-	 *
-	 * @return copied DocxStamperConfiguration.
+	 * If set to true, stamper will throw an {@link org.wickedsource.docxstamper.api.UnresolvedExpressionException}
+	 * if a variable expression or processor expression within the document or within the comments is encountered that cannot be resolved. Is set to true by default.
 	 */
-	public DocxStamperConfiguration copy() {
-		DocxStamperConfiguration newConfig = new DocxStamperConfiguration()
-				.setLineBreakPlaceholder(lineBreakPlaceholder)
-				.setEvaluationContextConfigurer(evaluationContextConfigurer)
-				.setFailOnUnresolvedExpression(failOnUnresolvedExpression)
-				.leaveEmptyOnExpressionError(leaveEmptyOnExpressionError)
-				.replaceUnresolvedExpressions(replaceUnresolvedExpressions)
-				.unresolvedExpressionsDefaultValue(unresolvedExpressionsDefaultValue)
-				.replaceNullValues(replaceNullValues)
-				.nullValuesDefault(nullValuesDefault)
-				.setDefaultTypeResolver(defaultTypeResolver);
+	public DocxStamperConfiguration setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
+		return this;
+	}
 
-		typeResolvers.forEach(newConfig::addTypeResolver);
-		expressionFunctions.forEach(newConfig::exposeInterfaceToExpressionLanguage);
-		commentProcessorsToUse.forEach(newConfig::addCommentProcessor);
+	public boolean isReplaceUnresolvedExpressions() {
+		return replaceUnresolvedExpressions;
+	}
 
-		return newConfig;
+	public String getUnresolvedExpressionsDefaultValue() {
+		return unresolvedExpressionsDefaultValue;
+	}
+
+	public boolean isLeaveEmptyOnExpressionError() {
+		return leaveEmptyOnExpressionError;
+	}
+
+	public String getLineBreakPlaceholder() {
+		return lineBreakPlaceholder;
+	}
+
+	/**
+	 * The String provided as lineBreakPlaceholder will be replaces with a line break
+	 * when stamping a document. If no lineBreakPlaceholder is provided, no replacement
+	 * will take place.
+	 *
+	 * @param lineBreakPlaceholder the String that should be replaced with line breaks during stamping.
+	 * @return the configuration object for chaining.
+	 */
+	public DocxStamperConfiguration setLineBreakPlaceholder(String lineBreakPlaceholder) {
+		this.lineBreakPlaceholder = lineBreakPlaceholder;
+		return this;
+	}
+
+	public Map<Class<?>, Object> getExpressionFunctions() {
+		return expressionFunctions;
+	}
+
+	public EvaluationContextConfigurer getEvaluationContextConfigurer() {
+		return evaluationContextConfigurer;
+	}
+
+	/**
+	 * Provides an {@link EvaluationContextConfigurer} which may change the configuration of a Spring
+	 * {@link org.springframework.expression.EvaluationContext} which is used for evaluating expressions
+	 * in comments and text.
+	 *
+	 * @param evaluationContextConfigurer the configurer to use.
+	 */
+	public DocxStamperConfiguration setEvaluationContextConfigurer(EvaluationContextConfigurer evaluationContextConfigurer) {
+		this.evaluationContextConfigurer = evaluationContextConfigurer;
+		return this;
 	}
 
 	/**
@@ -157,57 +214,29 @@ public class DocxStamperConfiguration {
 	 * Registers the specified ICommentProcessor as an implementation of the
 	 * specified interface.
 	 *
-	 * @param interfaceClass            the Interface which is implemented by the commentProcessor.
-	 * @param commentProcessorImplClass the commentProcessor class implementing the specified interface.
+	 * @param interfaceClass          the Interface which is implemented by the commentProcessor.
+	 * @param commentProcessorFactory the commentProcessor factory generating the specified interface.
 	 */
-	public DocxStamperConfiguration addCommentProcessor(Class<?> interfaceClass,
-														Class<?> commentProcessorImplClass) {
-		this.commentProcessorsToUse.put(interfaceClass, commentProcessorImplClass);
+	public DocxStamperConfiguration addCommentProcessor(
+			Class<?> interfaceClass,
+			CommentProcessorFactory commentProcessorFactory
+	) {
+		this.commentProcessors.put(interfaceClass, commentProcessorFactory);
 		return this;
 	}
 
 	/**
 	 * Creates a {@link DocxStamper} instance configured with this configuration.
-	 */
-	public DocxStamper build() {
-		return new DocxStamper(this);
-	}
-
-	public EvaluationContextConfigurer getEvaluationContextConfigurer() {
-		return evaluationContextConfigurer;
-	}
-
-	/**
-	 * Provides an {@link EvaluationContextConfigurer} which may change the configuration of a Spring
-	 * {@link org.springframework.expression.EvaluationContext} which is used for evaluating expressions
-	 * in comments and text.
 	 *
-	 * @param evaluationContextConfigurer the configurer to use.
+	 * @deprecated use new DocxStamper(DocxStamperConfiguration configuration) instead
 	 */
-	public DocxStamperConfiguration setEvaluationContextConfigurer(EvaluationContextConfigurer evaluationContextConfigurer) {
-		this.evaluationContextConfigurer = evaluationContextConfigurer;
-		return this;
+	@Deprecated(forRemoval = true, since = "1.6.4")
+	public <T> DocxStamper<T> build() {
+		return new DocxStamper<>(this);
 	}
 
-	public boolean isFailOnUnresolvedExpression() {
-		return failOnUnresolvedExpression;
-	}
-
-	/**
-	 * If set to true, stamper will throw an {@link org.wickedsource.docxstamper.api.UnresolvedExpressionException}
-	 * if a variable expression or processor expression within the document or within the comments is encountered that cannot be resolved. Is set to true by default.
-	 */
-	public DocxStamperConfiguration setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
-		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
-		return this;
-	}
-
-	public Map<Class<?>, Object> getCommentProcessors() {
+	public Map<Class<?>, CommentProcessorFactory> getCommentProcessors() {
 		return commentProcessors;
-	}
-
-	public Map<Class<?>, Class<?>> getCommentProcessorsToUse() {
-		return commentProcessorsToUse;
 	}
 
 	Map<Class<?>, ITypeResolver> getTypeResolvers() {
@@ -223,48 +252,11 @@ public class DocxStamperConfiguration {
 		return this;
 	}
 
-	public boolean isLeaveEmptyOnExpressionError() {
-		return leaveEmptyOnExpressionError;
+	public List<PreProcessor> getPreprocessors() {
+		return preprocessors;
 	}
 
-	public boolean isReplaceNullValues() {
-		return replaceNullValues;
-	}
-
-	public String getNullValuesDefault() {
-		return nullValuesDefault;
-	}
-
-	public boolean isReplaceUnresolvedExpressions() {
-		return replaceUnresolvedExpressions;
-	}
-
-	public String getUnresolvedExpressionsDefaultValue() {
-		return unresolvedExpressionsDefaultValue;
-	}
-
-	public String getLineBreakPlaceholder() {
-		return lineBreakPlaceholder;
-	}
-
-	/**
-	 * The String provided as lineBreakPlaceholder will be replaces with a line break
-	 * when stamping a document. If no lineBreakPlaceholder is provided, no replacement
-	 * will take place.
-	 *
-	 * @param lineBreakPlaceholder the String that should be replaced with line breaks during stamping.
-	 * @return the configuration object for chaining.
-	 */
-	public DocxStamperConfiguration setLineBreakPlaceholder(String lineBreakPlaceholder) {
-		this.lineBreakPlaceholder = lineBreakPlaceholder;
-		return this;
-	}
-
-	public Map<Class<?>, Object> getExpressionFunctions() {
-		return expressionFunctions;
-	}
-
-	public void putCommentProcessor(Class<?> key, Object processorInstance) {
-		this.commentProcessors.put(key, processorInstance);
+	interface CommentProcessorFactory {
+		Object create(PlaceholderReplacer placeholderReplacer);
 	}
 }

@@ -48,7 +48,6 @@ public class RepeatDocPartTest {
 						assertEquals(expected, new ParagraphWrapper(paragraph).getText());
 					}
 					case 1 -> {
-
 						final List<Tc> cells = new ArrayList<>();
 						DocumentWalker cellWalker = new BaseDocumentWalker((ContentAccessor) object) {
 							@Override

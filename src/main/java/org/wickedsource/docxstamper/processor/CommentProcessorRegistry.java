@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.lang.NonNull;
-import org.wickedsource.docxstamper.DocxStamperConfiguration;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -34,18 +33,16 @@ import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
  */
 public class CommentProcessorRegistry {
 	private final Logger logger = LoggerFactory.getLogger(CommentProcessorRegistry.class);
-	private final DocxStamperConfiguration configuration;
 	private final PlaceholderReplacer placeholderReplacer;
-	private ExpressionResolver expressionResolver;
+	private final Map<Class<?>, Object> commentProcessors;
+	private final boolean failOnUnresolvedExpression;
+	private final ExpressionResolver expressionResolver;
 
-	public CommentProcessorRegistry(PlaceholderReplacer placeholderReplacer, DocxStamperConfiguration configuration) {
+	public CommentProcessorRegistry(PlaceholderReplacer placeholderReplacer, ExpressionResolver expressionResolver1, Map<Class<?>, Object> commentProcessors1, boolean failOnUnresolvedExpression1) {
 		this.placeholderReplacer = placeholderReplacer;
-		this.configuration = configuration;
-		this.expressionResolver = new ExpressionResolver(configuration);
-	}
-
-	public void setExpressionResolver(ExpressionResolver expressionResolver) {
-		this.expressionResolver = expressionResolver;
+		this.expressionResolver = expressionResolver1;
+		commentProcessors = commentProcessors1;
+		failOnUnresolvedExpression = failOnUnresolvedExpression1;
 	}
 
 	/**
@@ -78,7 +75,7 @@ public class CommentProcessorRegistry {
 		};
 		walker.walk();
 
-		for (Object processor : configuration.getCommentProcessors().values()) {
+		for (Object processor : commentProcessors.values()) {
 			((ICommentProcessor) processor).commitChanges(document);
 		}
 		for (CommentWrapper commentWrapper : proceedComments) {
@@ -103,13 +100,9 @@ public class CommentProcessorRegistry {
 			T expressionContext,
 			P paragraph
 	) {
-		return CommentUtil.getCommentFor(paragraph, document)
-						  .flatMap(c -> this.runCommentProcessors(comments,
-																  expressionContext,
-																  c,
-																  paragraph,
-																  null,
-																  document));
+		return CommentUtil
+				.getCommentFor(paragraph, document)
+				.flatMap(c -> this.runCommentProcessors(comments, expressionContext, c, paragraph, null, document));
 	}
 
 	/**
@@ -130,7 +123,7 @@ public class CommentProcessorRegistry {
 		for (String processorExpression : processorExpressions) {
 			String strippedExpression = stripExpression(processorExpression);
 
-			for (final Object processor : configuration.getCommentProcessors().values()) {
+			for (final Object processor : commentProcessors.values()) {
 				((ICommentProcessor) processor).setParagraph(paragraph);
 			}
 
@@ -140,7 +133,7 @@ public class CommentProcessorRegistry {
 				logger.debug("Processor expression '{}' has been successfully processed by a comment processor.",
 							 processorExpression);
 			} catch (SpelEvaluationException | SpelParseException e) {
-				if (configuration.isFailOnUnresolvedExpression()) {
+				if (failOnUnresolvedExpression) {
 					throw new UnresolvedExpressionException(strippedExpression, e);
 				} else {
 					logger.warn(String.format(
@@ -181,7 +174,7 @@ public class CommentProcessorRegistry {
 
 		String commentString = CommentUtil.getCommentString(comment);
 
-		for (final Object processor : configuration.getCommentProcessors().values()) {
+		for (final Object processor : commentProcessors.values()) {
 			((ICommentProcessor) processor).setParagraph(paragraph);
 			((ICommentProcessor) processor).setCurrentRun(run);
 			((ICommentProcessor) processor).setCurrentCommentWrapper(commentWrapper);
@@ -196,7 +189,7 @@ public class CommentProcessorRegistry {
 								  commentString));
 			return Optional.of(commentWrapper);
 		} catch (SpelEvaluationException | SpelParseException e) {
-			if (configuration.isFailOnUnresolvedExpression()) {
+			if (failOnUnresolvedExpression) {
 				throw new UnresolvedExpressionException(commentString, e);
 			} else {
 				logger.warn(String.format(
@@ -210,7 +203,7 @@ public class CommentProcessorRegistry {
 	}
 
 	public void reset() {
-		for (Object processor : configuration.getCommentProcessors().values()) {
+		for (Object processor : commentProcessors.values()) {
 			((ICommentProcessor) processor).reset();
 		}
 	}
