@@ -26,7 +26,7 @@ public final class TestDocxStamper<T> {
 	}
 
 	public TestDocxStamper(DocxStamperConfiguration config) {
-		stamper = new DocxStamper<>(config);
+		stamper = new DocxStamper<>(config.setFailOnUnresolvedExpression(false));
 	}
 
 	/**
@@ -42,18 +42,16 @@ public final class TestDocxStamper<T> {
 	}
 
 	public List<String> stampAndLoadAndExtract(InputStream template, T context) {
-		DocxStamperConfiguration configuration = this.stamper.configuration.setFailOnUnresolvedExpression(false);
 		Stringifier stringifier = new Stringifier(() -> document);
-		return streamElements(template, context, P.class, configuration)
+		return streamElements(template, context, P.class)
 				.map(stringifier::stringify)
 				.toList();
 	}
 
-	private <C> Stream<C> streamElements(InputStream template, T context, Class<C> clazz, DocxStamperConfiguration configuration) {
+	private <C> Stream<C> streamElements(InputStream template, T context, Class<C> clazz) {
 		Stream<C> elements;
 		try {
 			var out = IOStreams.getOutputStream();
-			var stamper = new DocxStamper<T>(configuration);
 			stamper.stamp(template, context, out);
 			var in = IOStreams.getInputStream(out);
 			document = WordprocessingMLPackage.load(in);
@@ -73,10 +71,8 @@ public final class TestDocxStamper<T> {
 	}
 
 	public <C> List<String> stampAndLoadAndExtract(InputStream template, T context, Class<C> clazz) {
-		var configuration = new DocxStamperConfiguration()
-				.setFailOnUnresolvedExpression(false);
 		Stringifier stringifier = new Stringifier(() -> document);
-		return streamElements(template, context, clazz, configuration)
+		return streamElements(template, context, clazz)
 				.map(stringifier::extractDocumentRuns)
 				.toList();
 	}

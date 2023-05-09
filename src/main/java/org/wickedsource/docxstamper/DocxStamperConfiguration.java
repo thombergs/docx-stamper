@@ -4,8 +4,6 @@ import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer;
-import org.wickedsource.docxstamper.preprocessor.MergeSameStyleRuns;
-import org.wickedsource.docxstamper.preprocessor.RemoveProofErrors;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IParagraphRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatDocPartProcessor;
@@ -45,9 +43,6 @@ public class DocxStamperConfiguration {
 		commentProcessors.put(ITableResolver.class, pf::tableResolver);
 		commentProcessors.put(IDisplayIfProcessor.class, pf::displayIf);
 		commentProcessors.put(IReplaceWithProcessor.class, pf::replaceWith);
-
-		preprocessors.add(new RemoveProofErrors());
-		preprocessors.add(new MergeSameStyleRuns());
 	}
 
 	public boolean isReplaceNullValues() {
@@ -254,6 +249,10 @@ public class DocxStamperConfiguration {
 
 	public List<PreProcessor> getPreprocessors() {
 		return preprocessors;
+	}
+
+	public void addPreprocessor(PreProcessor preprocessor) {
+		preprocessors.add(preprocessor);
 	}
 
 	interface CommentProcessorFactory {

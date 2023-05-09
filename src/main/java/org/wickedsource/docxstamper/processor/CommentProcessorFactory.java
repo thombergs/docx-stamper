@@ -3,7 +3,6 @@ package org.wickedsource.docxstamper.processor;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.DocxStamper;
 import org.wickedsource.docxstamper.DocxStamperConfiguration;
-import org.wickedsource.docxstamper.OpcStamper;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.ParagraphRepeatProcessor;
@@ -12,6 +11,7 @@ import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.table.TableResolver;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
+import pro.verron.docxstamper.OpcStamper;
 
 public class CommentProcessorFactory {
 	private final DocxStamperConfiguration configuration;

@@ -3,21 +3,28 @@ package org.wickedsource.docxstamper;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
+import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
+import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
-import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
-import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
+import org.wickedsource.docxstamper.replace.typeresolver.*;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
+import pro.verron.docxstamper.OpcStamper;
+import pro.verron.docxstamper.StamperFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -29,36 +36,51 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	private final List<PreProcessor> preprocessors;
 	private final PlaceholderReplacer placeholderReplacer;
 	private final CommentProcessorRegistry commentProcessorRegistry;
-	protected DocxStamperConfiguration configuration;
 
 	/**
-	 * @deprecated should use DocxStamper.createInstance
+	 * Creates a new DocxStamper with the default configuration.
+	 *
+	 * @deprecated since 1.6.4, use {@link StamperFactory#newDocxStamper()} or {@link StamperFactory#nopreprocessingDocxStamper()} instead.
 	 */
 	@Deprecated(since = "1.6.4", forRemoval = true)
 	public DocxStamper() {
 		this(new DocxStamperConfiguration());
 	}
 
+	/**
+	 * Creates a new DocxStamper with the given configuration.
+	 *
+	 * @param configuration the configuration to use for this DocxStamper.
+	 */
 	public DocxStamper(DocxStamperConfiguration configuration) {
-		var failOnUnresolvedExpression = configuration.isFailOnUnresolvedExpression();
-		var replaceUnresolvedExpressions = configuration.isReplaceUnresolvedExpressions();
-		var leaveEmptyOnExpressionError = configuration.isLeaveEmptyOnExpressionError();
+		this(
+				configuration.isFailOnUnresolvedExpression(),
+				configuration.isReplaceUnresolvedExpressions(),
+				configuration.isLeaveEmptyOnExpressionError(),
+				configuration.getUnresolvedExpressionsDefaultValue(),
+				configuration.getLineBreakPlaceholder(),
+				configuration.getEvaluationContextConfigurer(),
+				configuration.getExpressionFunctions(),
+				configureTypeResolverRegistry(configuration.getTypeResolvers(), new FallbackResolver()),
+				configuration.getCommentProcessors(),
+				configuration.isReplaceNullValues(),
+				configuration.getNullValuesDefault(),
+				configuration.getPreprocessors());
+	}
 
-		var unresolvedExpressionsDefaultValue = configuration.getUnresolvedExpressionsDefaultValue();
-		var lineBreakPlaceholder = configuration.getLineBreakPlaceholder();
-
-		var evaluationContextConfigurer = configuration.getEvaluationContextConfigurer();
-
-		var typeResolvers = configuration.getTypeResolvers();
-		var expressionFunctions = configuration.getExpressionFunctions();
-
-		var typeResolverRegistry = new TypeResolverRegistry(new FallbackResolver());
-		typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
-		typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver());
-
-		for (var entry : typeResolvers.entrySet()) {
-			typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
-		}
+	private DocxStamper(
+			boolean failOnUnresolvedExpression,
+			boolean replaceUnresolvedExpressions,
+			boolean leaveEmptyOnExpressionError,
+			String unresolvedExpressionsDefaultValue,
+			String lineBreakPlaceholder,
+			EvaluationContextConfigurer evaluationContextConfigurer,
+			Map<Class<?>, Object> expressionFunctions,
+			TypeResolverRegistry typeResolverRegistry,
+			Map<Class<?>, DocxStamperConfiguration.CommentProcessorFactory> configurationCommentProcessors,
+			boolean replaceNullValues, String nullValuesDefault,
+			List<PreProcessor> preprocessors
+	) {
 
 		var commentProcessors = new HashMap<Class<?>, Object>();
 
@@ -72,8 +94,8 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 		var placeholderReplacer = new PlaceholderReplacer(
 				typeResolverRegistry,
 				expressionResolver,
-				configuration.isReplaceNullValues(),
-				configuration.getNullValuesDefault(),
+				replaceNullValues,
+				nullValuesDefault,
 				failOnUnresolvedExpression,
 				replaceUnresolvedExpressions,
 				unresolvedExpressionsDefaultValue,
@@ -81,7 +103,7 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 				lineBreakPlaceholder
 		);
 
-		for (var entry : configuration.getCommentProcessors().entrySet()) {
+		for (var entry : configurationCommentProcessors.entrySet()) {
 			commentProcessors.put(entry.getKey(), entry.getValue().create(placeholderReplacer));
 		}
 
@@ -92,10 +114,26 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 				failOnUnresolvedExpression
 		);
 
-		this.configuration = configuration;
 		this.placeholderReplacer = placeholderReplacer;
 		this.commentProcessorRegistry = commentProcessorRegistry;
-		this.preprocessors = configuration.getPreprocessors().stream().toList();
+		this.preprocessors = preprocessors.stream().toList();
+	}
+
+	private static TypeResolverRegistry configureTypeResolverRegistry(
+			Map<Class<?>, ITypeResolver> typeResolvers,
+			ITypeResolver<Object> defaultResolver
+	) {
+		var typeResolverRegistry = new TypeResolverRegistry(defaultResolver);
+		typeResolverRegistry.registerTypeResolver(Image.class, new ImageResolver());
+		typeResolverRegistry.registerTypeResolver(Date.class, new DateResolver());
+		typeResolverRegistry.registerTypeResolver(LocalDate.class, new LocalDateResolver());
+		typeResolverRegistry.registerTypeResolver(LocalDateTime.class, new LocalDateTimeResolver());
+		typeResolverRegistry.registerTypeResolver(LocalTime.class, new LocalTimeResolver());
+
+		for (var entry : typeResolvers.entrySet()) {
+			typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
+		}
+		return typeResolverRegistry;
 	}
 
 	/**
@@ -176,6 +214,4 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	private void replaceExpressions(WordprocessingMLPackage document, Object contextObject) {
 		placeholderReplacer.resolveExpressions(document, contextObject);
 	}
-
-
 }

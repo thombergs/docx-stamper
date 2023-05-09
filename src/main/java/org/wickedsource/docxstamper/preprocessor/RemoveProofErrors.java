@@ -10,6 +10,9 @@ import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Removes all {@link ProofErr} elements from the document.
+ */
 public class RemoveProofErrors implements PreProcessor {
 
 	private final List<ProofErr> proofErrs = new ArrayList<>();
