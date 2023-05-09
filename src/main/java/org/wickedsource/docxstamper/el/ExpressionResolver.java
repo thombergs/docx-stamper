@@ -17,15 +17,15 @@ public class ExpressionResolver {
 	private final EvaluationContextConfigurer evaluationContextConfigurer;
 
 	public ExpressionResolver(
-			boolean failOnUnresolvedExpression1,
-			Map<Class<?>, Object> commentProcessors1,
-			Map<Class<?>, Object> expressionFunctions1,
-			EvaluationContextConfigurer evaluationContextConfigurer1
+			boolean failOnUnresolvedExpression,
+			Map<Class<?>, Object> commentProcessors,
+			Map<Class<?>, Object> expressionFunctions,
+			EvaluationContextConfigurer evaluationContextConfigurer
 	) {
-		failOnUnresolvedExpression = failOnUnresolvedExpression1;
-		commentProcessors = commentProcessors1;
-		expressionFunctions = expressionFunctions1;
-		evaluationContextConfigurer = evaluationContextConfigurer1;
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
+		this.commentProcessors = commentProcessors;
+		this.expressionFunctions = expressionFunctions;
+		this.evaluationContextConfigurer = evaluationContextConfigurer;
 	}
 
 	/**

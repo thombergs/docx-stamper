@@ -20,13 +20,13 @@ public class StandardMethodResolver implements MethodResolver {
 	private final Map<Class<?>, Object> expressionFunctions;
 
 	public StandardMethodResolver(
-			boolean failOnUnresolvedExpression1,
-			Map<Class<?>, Object> commentProcessors1,
-			Map<Class<?>, Object> expressionFunctions1
+			boolean failOnUnresolvedExpression,
+			Map<Class<?>, Object> commentProcessors,
+			Map<Class<?>, Object> expressionFunctions
 	) {
-		failOnUnresolvedExpression = failOnUnresolvedExpression1;
-		commentProcessors = commentProcessors1;
-		expressionFunctions = expressionFunctions1;
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
+		this.commentProcessors = commentProcessors;
+		this.expressionFunctions = expressionFunctions;
 	}
 
 	private static TypedValue throwException(String name, ReflectiveOperationException exception) {
