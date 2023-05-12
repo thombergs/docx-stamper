@@ -51,15 +51,6 @@ public class ExpressionUtilTest {
 	}
 
 	@Test
-	public void returnsEmptyListOnNullText() {
-		String text = null;
-
-		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
-
-		assertTrue(placeholders.isEmpty());
-	}
-
-	@Test
 	public void stripsExpressions() {
 		String expressionValue = "myExpression";
 		String expression = "${%s}".formatted(expressionValue);

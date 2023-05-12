@@ -20,7 +20,7 @@ public class ExpressionReplacementInTablesTest {
 		var context = new Name("Bart Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInTablesTest.docx");
 
-		var stamper = new TestDocxStamper<Name>();
+		var stamper = new TestDocxStamper<Name>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));
 		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInFirstLevelTable(document);
 		unresolvedExpressionsAreNotReplacedInFirstLevelTable(document);

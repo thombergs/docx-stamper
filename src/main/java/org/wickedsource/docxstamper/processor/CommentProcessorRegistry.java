@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.lang.NonNull;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
@@ -38,11 +39,16 @@ public class CommentProcessorRegistry {
 	private final boolean failOnUnresolvedExpression;
 	private final ExpressionResolver expressionResolver;
 
-	public CommentProcessorRegistry(PlaceholderReplacer placeholderReplacer, ExpressionResolver expressionResolver1, Map<Class<?>, Object> commentProcessors1, boolean failOnUnresolvedExpression1) {
+	public CommentProcessorRegistry(
+			PlaceholderReplacer placeholderReplacer,
+			StandardEvaluationContext standardEvaluationContext,
+			Map<Class<?>, Object> commentProcessors,
+			boolean failOnUnresolvedExpression
+	) {
 		this.placeholderReplacer = placeholderReplacer;
-		this.expressionResolver = expressionResolver1;
-		commentProcessors = commentProcessors1;
-		failOnUnresolvedExpression = failOnUnresolvedExpression1;
+		this.expressionResolver = new ExpressionResolver(standardEvaluationContext);
+		this.commentProcessors = commentProcessors;
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
 	}
 
 	/**

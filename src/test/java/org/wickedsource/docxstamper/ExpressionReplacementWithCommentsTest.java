@@ -15,7 +15,7 @@ public class ExpressionReplacementWithCommentsTest {
 	public void test() throws Docx4JException, IOException {
 		var context = new Name("Homer Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementWithCommentsTest.docx");
-		var stamper = new TestDocxStamper<Name>();
+		var stamper = new TestDocxStamper<Name>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));
 		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplaced(document);
 		unresolvedExpressionsAreNotReplaced(document);

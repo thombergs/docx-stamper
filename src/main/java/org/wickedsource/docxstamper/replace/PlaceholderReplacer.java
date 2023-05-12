@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
@@ -36,7 +37,7 @@ public class PlaceholderReplacer {
 
 	public PlaceholderReplacer(
 			TypeResolverRegistry typeResolverRegistry,
-			ExpressionResolver resolver,
+			StandardEvaluationContext standardEvaluationContext,
 			boolean replaceNullValues,
 			String nullValuesDefault,
 			boolean failOnUnresolvedExpression1,
@@ -46,7 +47,7 @@ public class PlaceholderReplacer {
 			String lineBreakPlaceholder1
 	) {
 		this.typeResolverRegistry = typeResolverRegistry;
-		this.expressionResolver = resolver;
+		this.expressionResolver = new ExpressionResolver(standardEvaluationContext);
 		this.replaceNullValues = replaceNullValues;
 		this.nullValuesDefault = nullValuesDefault;
 		this.failOnUnresolvedExpression = failOnUnresolvedExpression1;
@@ -81,6 +82,7 @@ public class PlaceholderReplacer {
 			try {
 				Object replacement = expressionResolver.resolveExpression(placeholder, expressionContext);
 				if (replacement != null) {
+					//noinspection rawtypes
 					ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
 					R replacementObject = resolver.resolve(document, replacement);
 					replace(paragraphWrapper, placeholder, replacementObject);
@@ -88,6 +90,7 @@ public class PlaceholderReplacer {
 											   placeholder,
 											   resolver.getClass()));
 				} else if (replaceNullValues) {
+					//noinspection rawtypes
 					ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
 					R replacementObject = resolver.resolve(document, nullValuesDefault);
 					replace(paragraphWrapper, placeholder, replacementObject);

@@ -21,7 +21,7 @@ import java.util.*;
 public class DocxStamperConfiguration {
 
 	private final Map<Class<?>, CommentProcessorFactory> commentProcessors = new HashMap<>();
-	private final Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
+	private final Map<Class<?>, ITypeResolver<?>> typeResolvers = new HashMap<>();
 	private final Map<Class<?>, Object> expressionFunctions = new HashMap<>();
 	private final List<PreProcessor> preprocessors = new ArrayList<>();
 	private String lineBreakPlaceholder;
@@ -32,7 +32,7 @@ public class DocxStamperConfiguration {
 	private String unresolvedExpressionsDefaultValue = null;
 	private boolean replaceNullValues = false;
 	private String nullValuesDefault = null;
-	private ITypeResolver defaultTypeResolver = new FallbackResolver();
+	private ITypeResolver<Object> defaultTypeResolver = new FallbackResolver();
 
 	public DocxStamperConfiguration() {
 		org.wickedsource.docxstamper.processor.CommentProcessorFactory pf = new org.wickedsource.docxstamper.processor.CommentProcessorFactory(
@@ -188,7 +188,7 @@ public class DocxStamperConfiguration {
 	 * @param resolver     the resolver to resolve objects of the given type.
 	 * @param <T>          the type resolved by the ITypeResolver.
 	 */
-	public <T> DocxStamperConfiguration addTypeResolver(Class<T> resolvedType, ITypeResolver resolver) {
+	public <T> DocxStamperConfiguration addTypeResolver(Class<T> resolvedType, ITypeResolver<T> resolver) {
 		this.typeResolvers.put(resolvedType, resolver);
 		return this;
 	}
@@ -234,15 +234,15 @@ public class DocxStamperConfiguration {
 		return commentProcessors;
 	}
 
-	Map<Class<?>, ITypeResolver> getTypeResolvers() {
+	Map<Class<?>, ITypeResolver<?>> getTypeResolvers() {
 		return typeResolvers;
 	}
 
-	ITypeResolver getDefaultTypeResolver() {
+	ITypeResolver<Object> getDefaultTypeResolver() {
 		return defaultTypeResolver;
 	}
 
-	public DocxStamperConfiguration setDefaultTypeResolver(ITypeResolver defaultTypeResolver) {
+	public DocxStamperConfiguration setDefaultTypeResolver(ITypeResolver<? super Object> defaultTypeResolver) {
 		this.defaultTypeResolver = defaultTypeResolver;
 		return this;
 	}

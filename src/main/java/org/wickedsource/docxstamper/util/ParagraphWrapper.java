@@ -18,7 +18,6 @@ import static java.util.stream.Collectors.joining;
  * call getText() or getRuns() to get the modified text or the list of modified runs.<p/>
  */
 public class ParagraphWrapper {
-
 	private final List<IndexedRun> runs = new ArrayList<>();
 	private final P paragraph;
 	private int currentPosition = 0;

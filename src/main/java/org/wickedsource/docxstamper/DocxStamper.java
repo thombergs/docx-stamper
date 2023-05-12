@@ -2,15 +2,20 @@ package org.wickedsource.docxstamper;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
+import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
-import org.wickedsource.docxstamper.el.ExpressionResolver;
+import org.wickedsource.docxstamper.el.StandardMethodResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
-import org.wickedsource.docxstamper.replace.typeresolver.*;
+import org.wickedsource.docxstamper.replace.typeresolver.DateResolver;
+import org.wickedsource.docxstamper.replace.typeresolver.LocalDateResolver;
+import org.wickedsource.docxstamper.replace.typeresolver.LocalDateTimeResolver;
+import org.wickedsource.docxstamper.replace.typeresolver.LocalTimeResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 import pro.verron.docxstamper.OpcStamper;
@@ -25,6 +30,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * <p>
@@ -61,11 +67,12 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 				configuration.getLineBreakPlaceholder(),
 				configuration.getEvaluationContextConfigurer(),
 				configuration.getExpressionFunctions(),
-				configureTypeResolverRegistry(configuration.getTypeResolvers(), new FallbackResolver()),
+				configureTypeResolverRegistry(configuration.getTypeResolvers(), configuration.getDefaultTypeResolver()),
 				configuration.getCommentProcessors(),
 				configuration.isReplaceNullValues(),
 				configuration.getNullValuesDefault(),
-				configuration.getPreprocessors());
+				configuration.getPreprocessors()
+		);
 	}
 
 	private DocxStamper(
@@ -81,19 +88,24 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 			boolean replaceNullValues, String nullValuesDefault,
 			List<PreProcessor> preprocessors
 	) {
-
 		var commentProcessors = new HashMap<Class<?>, Object>();
 
-		var expressionResolver = new ExpressionResolver(
-				failOnUnresolvedExpression,
+		Function<ReflectiveOperationException, TypedValue> onResolutionFail = failOnUnresolvedExpression
+				? DocxStamper::throwException
+				: exception -> new TypedValue(null);
+
+		final StandardMethodResolver methodResolver = new StandardMethodResolver(
 				commentProcessors,
 				expressionFunctions,
-				evaluationContextConfigurer
-		);
+				onResolutionFail);
+
+		var evaluationContext = new StandardEvaluationContext();
+		evaluationContext.addMethodResolver(methodResolver);
+		evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
 
 		var placeholderReplacer = new PlaceholderReplacer(
 				typeResolverRegistry,
-				expressionResolver,
+				evaluationContext,
 				replaceNullValues,
 				nullValuesDefault,
 				failOnUnresolvedExpression,
@@ -109,7 +121,7 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 
 		var commentProcessorRegistry = new CommentProcessorRegistry(
 				placeholderReplacer,
-				expressionResolver,
+				evaluationContext,
 				commentProcessors,
 				failOnUnresolvedExpression
 		);
@@ -120,7 +132,7 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	}
 
 	private static TypeResolverRegistry configureTypeResolverRegistry(
-			Map<Class<?>, ITypeResolver> typeResolvers,
+			Map<Class<?>, ITypeResolver<?>> typeResolvers,
 			ITypeResolver<Object> defaultResolver
 	) {
 		var typeResolverRegistry = new TypeResolverRegistry(defaultResolver);
@@ -131,9 +143,14 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 		typeResolverRegistry.registerTypeResolver(LocalTime.class, new LocalTimeResolver());
 
 		for (var entry : typeResolvers.entrySet()) {
-			typeResolverRegistry.registerTypeResolver(entry.getKey(), entry.getValue());
+			//noinspection unchecked,rawtypes
+			typeResolverRegistry.registerTypeResolver((Class) entry.getKey(), (ITypeResolver) entry.getValue());
 		}
 		return typeResolverRegistry;
+	}
+
+	private static TypedValue throwException(ReflectiveOperationException exception) {
+		throw new DocxStamperException("Error calling method", exception);
 	}
 
 	/**

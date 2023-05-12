@@ -14,7 +14,7 @@ public class ExpressionReplacementInTextBoxesTest {
 	public void test() throws Docx4JException, IOException {
 		var context = new Name("Bart Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInTextBoxesTest.docx");
-		var stamper = new TestDocxStamper<Name>();
+		var stamper = new TestDocxStamper<Name>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));
 		var actual = stamper.stampAndLoadAndExtract(template, context, Anchor.class);
 		List<String> expected = List.of(
 				"|Bart Simpson/color=auto|",

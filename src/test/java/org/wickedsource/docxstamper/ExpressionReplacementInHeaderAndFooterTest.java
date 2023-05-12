@@ -20,7 +20,7 @@ public class ExpressionReplacementInHeaderAndFooterTest {
 	public void test() throws Docx4JException, IOException {
 		var context = new Name("Homer Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInHeaderAndFooterTest.docx");
-		var stamper = new TestDocxStamper<Name>();
+		var stamper = new TestDocxStamper<Name>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));
 		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInHeader(document);
 		resolvedExpressionsAreReplacedInFooter(document);

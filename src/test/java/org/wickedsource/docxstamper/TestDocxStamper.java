@@ -21,12 +21,11 @@ public final class TestDocxStamper<T> {
 	private WordprocessingMLPackage document;
 
 	public TestDocxStamper() {
-		this(new DocxStamperConfiguration()
-					 .setFailOnUnresolvedExpression(false));
+		this(new DocxStamperConfiguration());
 	}
 
 	public TestDocxStamper(DocxStamperConfiguration config) {
-		stamper = new DocxStamper<>(config.setFailOnUnresolvedExpression(false));
+		stamper = new DocxStamper<>(config);
 	}
 
 	/**
