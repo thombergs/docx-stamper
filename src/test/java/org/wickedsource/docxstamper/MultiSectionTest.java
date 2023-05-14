@@ -25,7 +25,7 @@ public class MultiSectionTest {
 	}
 
 	private void assertTableRows(WordprocessingMLPackage document) {
-		final List<R> runs = DocumentUtil.extractElements(document, R.class);
+		final List<R> runs = DocumentUtil.streamElements(document, R.class).toList();
 		assertTrue(runs.stream().map(TextUtils::getText).anyMatch(s -> s.contains("Homer")));
 		assertTrue(runs.stream().map(TextUtils::getText).anyMatch(s -> s.contains("Marge")));
 	}

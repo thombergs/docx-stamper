@@ -7,11 +7,8 @@ import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.finders.ClassFinder;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
-import org.docx4j.openpackaging.parts.WordprocessingML.FooterPart;
-import org.docx4j.openpackaging.parts.WordprocessingML.HeaderPart;
 import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
-import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
@@ -19,53 +16,9 @@ import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toList;
-
 public class DocumentUtil {
 	private DocumentUtil() {
 		throw new DocxStamperException("Utility classes shouldn't be instantiated");
-	}
-
-	public static <T> List<T> extractElements(Object object, Class<T> elementClass) {
-		// we handle full documents slightly differently as they have headers and footers
-		if (object instanceof WordprocessingMLPackage document) {
-			return Stream.of(
-								 getElementStreamFrom(document, elementClass, Namespaces.HEADER),
-								 getElementStream(document.getMainDocumentPart(), elementClass),
-								 getElementStreamFrom(document, elementClass, Namespaces.FOOTER)
-						 )
-						 .flatMap(identity())
-						 .collect(toList());
-		}
-
-		return getElementStream(object, elementClass)
-				.collect(toList());
-	}
-
-	private static <T> Stream<T> getElementStreamFrom(
-			WordprocessingMLPackage document,
-			Class<T> clazz,
-			String relationshipType
-	) {
-		RelationshipsPart relationshipsPart = document
-				.getMainDocumentPart()
-				.getRelationshipsPart();
-		return relationshipsPart
-				.getRelationships()
-				.getRelationship()
-				.stream()
-				.filter(relationship -> relationship.getType().equals(relationshipType))
-				.map(relationshipsPart::getPart)
-				.flatMap(relationshipPart -> getElementStream(relationshipPart, clazz));
-	}
-
-	private static <T> Stream<T> getElementStream(Object obj, Class<T> clazz) {
-		ClassFinder finder = new ClassFinder(clazz);
-		finder.walkJAXBElements(obj);
-		return finder.results
-				.stream()
-				.map(clazz::cast);
 	}
 
 	/**
@@ -98,108 +51,61 @@ public class DocumentUtil {
 	}
 
 	public static List<P> getParagraphsFromObject(Object parentObject) {
-		List<P> paragraphList = new ArrayList<>();
-		for (Object object : getElementsFromObject(parentObject, P.class)) {
-			if (object instanceof P) {
-				paragraphList.add((P) object);
-			}
-		}
-		return paragraphList;
+		return streamElements(parentObject, P.class).toList();
 	}
 
-	private static List<Object> getElementsFromObject(Object object, Class<?> elementClass) {
-		List<Object> documentElements = new ArrayList<>();
-		// we handle full documents slightly differently as they have headers and footers
-		if (object instanceof WordprocessingMLPackage) {
-			documentElements.addAll(getElementsFromHeader(((WordprocessingMLPackage) object), elementClass));
-			documentElements.addAll(getElements(((WordprocessingMLPackage) object).getMainDocumentPart(),
-												elementClass));
-			documentElements.addAll(getElementsForFooter(((WordprocessingMLPackage) object), elementClass));
-		} else {
-			documentElements.addAll(getElements(object, elementClass));
-		}
-		return documentElements;
+	public static <T> Stream<T> streamElements(Object object, Class<T> elementClass) {
+		return object instanceof WordprocessingMLPackage document
+				? streamDocumentElements(document, elementClass)
+				: streamObjectElements(object, elementClass);
 	}
 
-	private static List<Object> getElementsFromHeader(WordprocessingMLPackage document, Class<?> elementClass) {
-		List<Object> paragraphs = new ArrayList<>();
-		RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
-
-		// walk through elements in headers
-		List<Relationship> relationships = getRelationshipsOfType(document, Namespaces.HEADER);
-		for (Relationship header : relationships) {
-			HeaderPart headerPart = (HeaderPart) relationshipsPart.getPart(header.getId());
-			paragraphs.addAll(getElements(headerPart, elementClass));
-		}
-		return paragraphs;
+	/**
+	 * we handle full documents slightly differently as they have headers and footers,
+	 * and we want to get all the elements from them as well
+	 *
+	 * @param document     the document to get the elements from
+	 * @param elementClass the class of the elements to get
+	 * @param <T>          the type of the elements to get
+	 * @return a stream of the elements
+	 */
+	private static <T> Stream<T> streamDocumentElements(WordprocessingMLPackage document, Class<T> elementClass) {
+		RelationshipsPart mainParts = document.getMainDocumentPart().getRelationshipsPart();
+		return Stream.of(
+							 streamElements(mainParts, Namespaces.HEADER, elementClass),
+							 streamObjectElements(document.getMainDocumentPart(), elementClass),
+							 streamElements(mainParts, Namespaces.FOOTER, elementClass)
+					 )
+					 .reduce(Stream.empty(), Stream::concat);
 	}
 
-	private static List<Object> getElements(Object obj, Class<?> elementClass) {
+	private static <T> Stream<T> streamObjectElements(Object obj, Class<T> elementClass) {
 		ClassFinder finder = new ClassFinder(elementClass);
 		TraversalUtil.visit(obj, finder);
-		return finder.results;
+		return finder.results.stream().map(elementClass::cast);
 	}
 
-	private static List<Object> getElementsForFooter(WordprocessingMLPackage document, Class<?> elementClass) {
-		List<Object> paragraphs = new ArrayList<>();
-		RelationshipsPart relationshipsPart = document.getMainDocumentPart().getRelationshipsPart();
-
-		// walk through elements in footers
-		List<Relationship> relationships = getRelationshipsOfType(document, Namespaces.FOOTER);
-		for (Relationship footer : relationships) {
-			FooterPart footerPart = (FooterPart) relationshipsPart.getPart(footer.getId());
-			paragraphs.addAll(getElements(footerPart, elementClass));
-		}
-
-		return paragraphs;
-	}
-
-	private static List<Relationship> getRelationshipsOfType(WordprocessingMLPackage document, String type) {
-		List<Relationship> relationshipList = document
-				.getMainDocumentPart()
-				.getRelationshipsPart()
-				.getRelationships()
-				.getRelationship();
-		List<Relationship> headerRelationships = new ArrayList<>();
-		for (Relationship r : relationshipList) {
-			if (r.getType().equals(type)) {
-				headerRelationships.add(r);
-			}
-		}
-		return headerRelationships;
+	private static <T> Stream<T> streamElements(RelationshipsPart mainParts, String namespace, Class<T> elementClass) {
+		return mainParts
+				.getRelationshipsByType(namespace).stream()
+				.map(mainParts::getPart)
+				.flatMap(part -> streamObjectElements(part, elementClass));
 	}
 
 	public static List<Tbl> getTableFromObject(Object parentObject) {
-		List<Tbl> tableList = new ArrayList<>();
-		for (Object object : getElementsFromObject(parentObject, Tbl.class)) {
-			if (object instanceof Tbl) {
-				tableList.add((Tbl) object);
-			}
-		}
-		return tableList;
+		return streamElements(parentObject, Tbl.class).toList();
 	}
 
 	public static List<Tr> getTableRowsFromObject(Object parentObject) {
-		List<Tr> tableRowList = new ArrayList<>();
-		for (Object object : getElementsFromObject(parentObject, Tr.class)) {
-			if (object instanceof Tr) {
-				tableRowList.add((Tr) object);
-			}
-		}
-		return tableRowList;
+		return streamElements(parentObject, Tr.class).toList();
 	}
 
 	public static List<Tc> getTableCellsFromObject(Object parentObject) {
-		return getElementsFromObject(parentObject, Tc.class)
-				.stream()
-				.filter(object -> object instanceof Tc)
-				.map(object -> (Tc) object)
-				.toList();
+		return streamElements(parentObject, Tc.class).toList();
 	}
 
 	public static Object lastElement(WordprocessingMLPackage subDocument) {
-		List<Object> content = subDocument.getMainDocumentPart().getContent();
-		return content.get(content.size() - 1);
+		return new ArrayDeque<>(subDocument.getMainDocumentPart().getContent()).getLast();
 	}
 
 	public static List<Object> allElements(WordprocessingMLPackage subDocument) {
@@ -273,6 +179,4 @@ public class DocumentUtil {
 			throw new DocxStamperException(e);
 		}
 	}
-
-
 }

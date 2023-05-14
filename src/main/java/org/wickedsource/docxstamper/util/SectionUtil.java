@@ -6,6 +6,8 @@ import org.docx4j.wml.*;
 
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 public class SectionUtil {
 	private static final ObjectFactory factory = Context.getWmlObjectFactory();
 
@@ -44,8 +46,8 @@ public class SectionUtil {
 	}
 
 	public static void applySectionBreakToParagraph(SectPr sectPr, P paragraph) {
-		PPr pPpr = paragraph.getPPr();
-		PPr nextPPr = pPpr != null ? pPpr : factory.createPPr();
+		PPr nextPPr = ofNullable(paragraph.getPPr())
+				.orElseGet(factory::createPPr);
 		nextPPr.setSectPr(XmlUtils.deepCopy(sectPr));
 		paragraph.setPPr(nextPPr);
 	}

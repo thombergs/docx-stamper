@@ -77,7 +77,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 			List<Object> expressionContexts = entry.getValue();
 			ContentAccessor gcp = Objects.requireNonNull(commentWrapper.getParent());
 			List<Object> repeatElements = commentWrapper.getRepeatElements();
-			WordprocessingMLPackage subTemplate = commentWrapper.tryBuildingSubtemplate(this.getDocument());
+			WordprocessingMLPackage subTemplate = commentWrapper.tryBuildingSubtemplate(document);
 			SectPr previousSectionBreak = SectionUtil.getPreviousSectionBreakIfPresent(repeatElements.get(0), gcp);
 			boolean oddNumberOfBreaks = SectionUtil.isOddNumberOfSectionBreaks(repeatElements);
 

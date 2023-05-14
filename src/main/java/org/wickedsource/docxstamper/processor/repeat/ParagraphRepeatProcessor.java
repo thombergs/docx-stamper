@@ -122,20 +122,18 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 
 	private Deque<P> generateParagraphsToAdd(WordprocessingMLPackage document, Paragraphs paragraphs, Deque<Object> expressionContexts) {
 		Deque<P> paragraphsToAdd = new ArrayDeque<>();
+
 		Object lastExpressionContext = expressionContexts.peekLast();
+		P lastParagraph = paragraphs.paragraphs.peekLast();
 
 		for (Object expressionContext : expressionContexts) {
-			P lastParagraph = paragraphs.paragraphs.peekLast();
-
 			for (P paragraphToClone : paragraphs.paragraphs) {
 				P pClone = XmlUtils.deepCopy(paragraphToClone);
 
-				if (shouldResetPageOrientationBeforeNextIteration(
-						paragraphs,
-						lastExpressionContext,
-						expressionContext,
-						lastParagraph,
-						paragraphToClone)
+				if (paragraphs.sectionBreakBefore != null
+						&& paragraphs.hasOddSectionBreaks
+						&& expressionContext != lastExpressionContext
+						&& paragraphToClone == lastParagraph
 				) {
 					SectionUtil.applySectionBreakToParagraph(paragraphs.sectionBreakBefore, pClone);
 				}
@@ -153,13 +151,6 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 			P breakP = paragraphsToAdd.getLast();
 			SectionUtil.applySectionBreakToParagraph(paragraphs.firstParagraphSectionBreak, breakP);
 		}
-	}
-
-	private static boolean shouldResetPageOrientationBeforeNextIteration(Paragraphs paragraphs, Object lastExpressionContext, Object expressionContext, P lastParagraph, P paragraphToClone) {
-		return paragraphs.sectionBreakBefore != null
-				&& paragraphs.hasOddSectionBreaks
-				&& expressionContext != lastExpressionContext
-				&& paragraphToClone == lastParagraph;
 	}
 
 	@Override

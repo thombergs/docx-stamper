@@ -33,10 +33,10 @@ public class RepeatTableRowTest {
 		var document = stamper.stampAndLoad(template, context);
 
 		var rows = DocumentUtil.getTableRowsFromObject(document);
-		var tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
+		var tablesFromObject = DocumentUtil.streamElements(document, Tbl.class).toList();
 		assertEquals(1, tablesFromObject.size());
 
-		var parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
+		var parentTableRows = DocumentUtil.streamElements(tablesFromObject.get(0), Tr.class).toList();
 		// 1 header row + 1 row per character in list
 		assertEquals(7, rows.size());
 

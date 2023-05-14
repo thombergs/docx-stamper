@@ -74,6 +74,12 @@ public class CustomCommentProcessorTest {
 		public void setCurrentCommentWrapper(CommentWrapper commentWrapper) {
 		}
 
+		/**
+		 * @param document DocX template being processed.
+		 * @deprecated the document is passed to the processor through the commitChange method now,
+		 * and will probably pe passed through the constructor in the future
+		 */
+		@Deprecated(since = "1.6.5", forRemoval = true)
 		@Override
 		public void setDocument(WordprocessingMLPackage document) {
 		}

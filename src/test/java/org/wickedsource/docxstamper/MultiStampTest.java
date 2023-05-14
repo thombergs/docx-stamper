@@ -36,10 +36,10 @@ public class MultiStampTest {
 	}
 
 	private void assertTableRows(WordprocessingMLPackage document) {
-		final List<Tbl> tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
+		final List<Tbl> tablesFromObject = DocumentUtil.streamElements(document, Tbl.class).toList();
 		assertEquals(1, tablesFromObject.size());
 
-		final List<Tr> tableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
+		final List<Tr> tableRows = DocumentUtil.streamElements(tablesFromObject.get(0), Tr.class).toList();
 		assertEquals(5, tableRows.size());
 
 		assertRowContainsText(tableRows.get(0), "Homer");
@@ -50,7 +50,7 @@ public class MultiStampTest {
 	}
 
 	private static void assertRowContainsText(Tr row, String text) {
-		final List<Tc> cell0 = DocumentUtil.extractElements(row, Tc.class);
+		final List<Tc> cell0 = DocumentUtil.streamElements(row, Tc.class).toList();
 		String cellContent = TextUtils.getText(cell0.get(0));
 		String message = String.format("'%s' is not contained in '%s'", text, cellContent);
 		assertTrue(cellContent.contains(text), message);
