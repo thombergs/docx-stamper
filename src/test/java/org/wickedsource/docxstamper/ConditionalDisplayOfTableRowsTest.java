@@ -21,7 +21,7 @@ public class ConditionalDisplayOfTableRowsTest {
 		var template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
 		var stamper = new TestDocxStamper<Name>();
 		var document = stamper.stampAndLoad(template, context);
-		
+
 		var tablesFromObject = DocumentUtil.streamElements(document, Tbl.class).toList();
 		assertEquals(2, tablesFromObject.size());
 
