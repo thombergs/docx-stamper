@@ -17,7 +17,6 @@ import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -63,7 +62,13 @@ public class CommentProcessorRegistry {
 		final Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
 		final List<CommentWrapper> proceedComments = new ArrayList<>();
 
-		CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
+		new BaseCoordinatesWalker() {
+			@Override
+			protected void onRun(R run, P paragraph) {
+				runProcessorsOnRunComment(document, comments, expressionContext, paragraph, run)
+						.ifPresent(proceedComments::add);
+			}
+
 			@Override
 			protected void onParagraph(P paragraph) {
 				runProcessorsOnParagraphComment(document, comments, expressionContext, paragraph)
@@ -71,14 +76,7 @@ public class CommentProcessorRegistry {
 				runProcessorsOnInlineContent(expressionContext, paragraph);
 			}
 
-			@Override
-			protected void onRun(R run, P paragraph) {
-				runProcessorsOnRunComment(document, comments, expressionContext, paragraph, run)
-						.ifPresent(proceedComments::add);
-			}
-
-		};
-		walker.walk();
+		}.walk(document);
 
 		for (Object processor : commentProcessors.values()) {
 			((ICommentProcessor) processor).commitChanges(document);
@@ -86,6 +84,17 @@ public class CommentProcessorRegistry {
 		for (CommentWrapper commentWrapper : proceedComments) {
 			CommentUtil.deleteComment(commentWrapper);
 		}
+	}
+
+	private <T> Optional<CommentWrapper> runProcessorsOnRunComment(
+			WordprocessingMLPackage document,
+			Map<BigInteger, CommentWrapper> comments,
+			T expressionContext,
+			P paragraph,
+			R run
+	) {
+		var comment = CommentUtil.getCommentAround(run, document);
+		return comment.flatMap(c -> runCommentProcessors(comments, expressionContext, c, paragraph, run, document));
 	}
 
 	/**
@@ -149,17 +158,6 @@ public class CommentProcessorRegistry {
 				}
 			}
 		}
-	}
-
-	private <T> Optional<CommentWrapper> runProcessorsOnRunComment(
-			WordprocessingMLPackage document,
-			Map<BigInteger, CommentWrapper> comments,
-			T expressionContext,
-			P paragraph,
-			R run
-	) {
-		var comment = CommentUtil.getCommentAround(run, document);
-		return comment.flatMap(c -> runCommentProcessors(comments, expressionContext, c, paragraph, run, document));
 	}
 
 	private <T> Optional<CommentWrapper> runCommentProcessors(

@@ -179,4 +179,8 @@ public class DocumentUtil {
 			throw new DocxStamperException(e);
 		}
 	}
+
+	public static Stream<P> streamParagraphs(WordprocessingMLPackage document) {
+		return streamElements(document, P.class);
+	}
 }

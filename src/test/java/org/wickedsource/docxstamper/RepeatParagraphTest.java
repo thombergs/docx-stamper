@@ -31,7 +31,7 @@ public class RepeatParagraphTest {
 
 		var titleCoords = new ArrayList<P>();
 		var quotationCoords = new ArrayList<P>();
-		var walker = new BaseCoordinatesWalker(document) {
+		new BaseCoordinatesWalker() {
 			@Override
 			protected void onParagraph(P paragraph) {
 				if ("Titre2".equals(paragraph.getPPr().getPStyle().getVal())) {
@@ -40,8 +40,7 @@ public class RepeatParagraphTest {
 					quotationCoords.add(paragraph);
 				}
 			}
-		};
-		walker.walk();
+		}.walk(document);
 
 		// 6 titles and 6 quotations are expected
 		assertEquals(6, titleCoords.size());

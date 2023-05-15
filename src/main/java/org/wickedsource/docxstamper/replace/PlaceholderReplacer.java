@@ -17,7 +17,6 @@ import org.wickedsource.docxstamper.el.ExpressionUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.RunUtil;
 import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 import java.util.List;
 import java.util.Optional;
@@ -64,13 +63,12 @@ public class PlaceholderReplacer {
 	 * @param expressionContext the context root
 	 */
 	public void resolveExpressions(final WordprocessingMLPackage document, Object expressionContext) {
-		CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
+		new BaseCoordinatesWalker() {
 			@Override
 			protected void onParagraph(P paragraph) {
 				resolveExpressionsForParagraph(paragraph, expressionContext, document);
 			}
-		};
-		walker.walk();
+		}.walk(document);
 	}
 
 	@SuppressWarnings("unchecked")
