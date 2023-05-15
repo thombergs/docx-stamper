@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper.el;
 
 import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 
@@ -11,9 +12,10 @@ public class ExpressionResolver {
 	private final StandardEvaluationContext evaluationContext;
 
 	public ExpressionResolver(
-			StandardEvaluationContext standardEvaluationContext
+			StandardEvaluationContext standardEvaluationContext,
+			SpelParserConfiguration spelParserConfiguration
 	) {
-		this.parser = new SpelExpressionParser();
+		this.parser = new SpelExpressionParser(spelParserConfiguration);
 		this.evaluationContext = standardEvaluationContext;
 	}
 

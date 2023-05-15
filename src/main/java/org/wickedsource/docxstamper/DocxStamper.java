@@ -3,12 +3,14 @@ package org.wickedsource.docxstamper;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.springframework.expression.TypedValue;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
+import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.el.StandardMethodResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
@@ -71,7 +73,8 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 				configuration.getCommentProcessors(),
 				configuration.isReplaceNullValues(),
 				configuration.getNullValuesDefault(),
-				configuration.getPreprocessors()
+				configuration.getPreprocessors(),
+				configuration.getSpelParserConfiguration()
 		);
 	}
 
@@ -86,7 +89,8 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 			TypeResolverRegistry typeResolverRegistry,
 			Map<Class<?>, DocxStamperConfiguration.CommentProcessorFactory> configurationCommentProcessors,
 			boolean replaceNullValues, String nullValuesDefault,
-			List<PreProcessor> preprocessors
+			List<PreProcessor> preprocessors,
+			SpelParserConfiguration spelParserConfiguration
 	) {
 		var commentProcessors = new HashMap<Class<?>, Object>();
 
@@ -103,9 +107,14 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 		evaluationContext.addMethodResolver(methodResolver);
 		evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
 
+		var expressionResolver = new ExpressionResolver(
+				evaluationContext,
+				spelParserConfiguration
+		);
+
 		var placeholderReplacer = new PlaceholderReplacer(
 				typeResolverRegistry,
-				evaluationContext,
+				expressionResolver,
 				replaceNullValues,
 				nullValuesDefault,
 				failOnUnresolvedExpression,
@@ -119,9 +128,10 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 			commentProcessors.put(entry.getKey(), entry.getValue().create(placeholderReplacer));
 		}
 
+
 		var commentProcessorRegistry = new CommentProcessorRegistry(
 				placeholderReplacer,
-				evaluationContext,
+				expressionResolver,
 				commentProcessors,
 				failOnUnresolvedExpression
 		);

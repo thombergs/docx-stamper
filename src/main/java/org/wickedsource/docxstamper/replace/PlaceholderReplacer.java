@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
-import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
@@ -37,24 +36,24 @@ public class PlaceholderReplacer {
 
 	public PlaceholderReplacer(
 			TypeResolverRegistry typeResolverRegistry,
-			StandardEvaluationContext standardEvaluationContext,
+			ExpressionResolver expressionResolver,
 			boolean replaceNullValues,
 			String nullValuesDefault,
-			boolean failOnUnresolvedExpression1,
-			boolean replaceUnresolvedExpressions1,
-			String unresolvedExpressionsDefaultValue1,
-			boolean leaveEmptyOnExpressionError1,
-			String lineBreakPlaceholder1
+			boolean failOnUnresolvedExpression,
+			boolean replaceUnresolvedExpressions,
+			String unresolvedExpressionsDefaultValue,
+			boolean leaveEmptyOnExpressionError,
+			String lineBreakPlaceholder
 	) {
 		this.typeResolverRegistry = typeResolverRegistry;
-		this.expressionResolver = new ExpressionResolver(standardEvaluationContext);
+		this.expressionResolver = expressionResolver;
 		this.replaceNullValues = replaceNullValues;
 		this.nullValuesDefault = nullValuesDefault;
-		this.failOnUnresolvedExpression = failOnUnresolvedExpression1;
-		this.replaceUnresolvedExpressions = replaceUnresolvedExpressions1;
-		this.unresolvedExpressionsDefaultValue = unresolvedExpressionsDefaultValue1;
-		this.leaveEmptyOnExpressionError = leaveEmptyOnExpressionError1;
-		this.lineBreakPlaceholder = lineBreakPlaceholder1;
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
+		this.replaceUnresolvedExpressions = replaceUnresolvedExpressions;
+		this.unresolvedExpressionsDefaultValue = unresolvedExpressionsDefaultValue;
+		this.leaveEmptyOnExpressionError = leaveEmptyOnExpressionError;
+		this.lineBreakPlaceholder = lineBreakPlaceholder;
 	}
 
 	/**

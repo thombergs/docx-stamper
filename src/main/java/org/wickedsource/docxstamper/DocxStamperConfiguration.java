@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
@@ -33,6 +34,7 @@ public class DocxStamperConfiguration {
 	private boolean replaceNullValues = false;
 	private String nullValuesDefault = null;
 	private ITypeResolver<Object> defaultTypeResolver = new FallbackResolver();
+	private SpelParserConfiguration spelParserConfiguration = new SpelParserConfiguration();
 
 	public DocxStamperConfiguration() {
 		org.wickedsource.docxstamper.processor.CommentProcessorFactory pf = new org.wickedsource.docxstamper.processor.CommentProcessorFactory(
@@ -253,6 +255,15 @@ public class DocxStamperConfiguration {
 
 	public void addPreprocessor(PreProcessor preprocessor) {
 		preprocessors.add(preprocessor);
+	}
+
+	public SpelParserConfiguration getSpelParserConfiguration() {
+		return this.spelParserConfiguration;
+	}
+
+	public DocxStamperConfiguration setSpelParserConfiguration(SpelParserConfiguration spelParserConfiguration) {
+		this.spelParserConfiguration = spelParserConfiguration;
+		return this;
 	}
 
 	interface CommentProcessorFactory {
