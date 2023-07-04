@@ -6,13 +6,13 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Character;
-import org.wickedsource.docxstamper.context.CharactersContext;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RepeatTableRowTest {
 	@Test
 	public void test() throws Docx4JException, IOException {
-		var context = new CharactersContext();
+		var context = new Characters();
 		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
 		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
 		context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
@@ -29,7 +29,7 @@ public class RepeatTableRowTest {
 		context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
 		InputStream template = getClass().getResourceAsStream("RepeatTableRowTest.docx");
 
-		var stamper = new TestDocxStamper<CharactersContext>();
+		var stamper = new TestDocxStamper<Characters>();
 		var document = stamper.stampAndLoad(template, context);
 
 		var rows = DocumentUtil.getTableRowsFromObject(document);
@@ -56,5 +56,34 @@ public class RepeatTableRowTest {
 		assertEquals("Hank Azaria", new ParagraphWrapper((P) cells.get(11).getContent().get(0)).getText());
 		assertEquals("Krusty the Clown", new ParagraphWrapper((P) cells.get(12).getContent().get(0)).getText());
 		assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(13).getContent().get(0)).getText());
+	}
+
+	public static class Character {
+
+		private final String name;
+
+		private final String actor;
+
+		public Character(String name, String actor) {
+			this.name = name;
+			this.actor = actor;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getActor() {
+			return actor;
+		}
+	}
+
+	public class Characters {
+
+		private final List<Character> characters = new ArrayList<>();
+
+		public List<Character> getCharacters() {
+			return characters;
+		}
 	}
 }

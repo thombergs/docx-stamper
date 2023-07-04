@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper.util;
+package pro.verron.docxstamper.utils;
 
 import java.util.function.Supplier;
 

@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper;
 
 import org.junit.jupiter.api.Test;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.util.List;
 
@@ -26,5 +27,4 @@ public class TernaryOperatorTest {
 
 	public record Name(String name) {
 	}
-
 }

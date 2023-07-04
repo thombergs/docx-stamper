@@ -6,6 +6,7 @@ import org.docx4j.wml.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.io.InputStream;

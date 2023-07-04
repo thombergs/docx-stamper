@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import org.junit.jupiter.api.Test;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.util.List;
 

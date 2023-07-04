@@ -2,7 +2,7 @@ package org.wickedsource.docxstamper.integration;
 
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.TestDocxStamper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.io.InputStream;

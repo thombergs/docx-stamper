@@ -7,7 +7,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.IOStreams;
+import pro.verron.docxstamper.utils.IOStreams;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.wickedsource.docxstamper.util.DocumentUtil;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.util.ArrayList;

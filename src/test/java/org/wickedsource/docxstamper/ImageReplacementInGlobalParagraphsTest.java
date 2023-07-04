@@ -6,14 +6,27 @@ import org.docx4j.wml.Drawing;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.ImageContext;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ImageReplacementInGlobalParagraphsTest {
+
+	public static class ImageContext {
+
+		private Image monalisa;
+
+		public Image getMonalisa() {
+			return monalisa;
+		}
+
+		public void setMonalisa(Image monalisa) {
+			this.monalisa = monalisa;
+		}
+	}
 
 	@Test
 	public void test() throws Docx4JException, IOException {

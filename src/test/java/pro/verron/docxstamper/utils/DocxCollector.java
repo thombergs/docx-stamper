@@ -1,4 +1,4 @@
-package org.wickedsource.docxstamper;
+package pro.verron.docxstamper.utils;
 
 import org.docx4j.TraversalUtil;
 

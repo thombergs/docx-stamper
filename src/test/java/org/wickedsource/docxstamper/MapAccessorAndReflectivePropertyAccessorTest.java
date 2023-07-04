@@ -8,6 +8,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Text;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.util.ArrayList;

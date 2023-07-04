@@ -4,11 +4,10 @@ import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.*;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.context.Character;
-import org.wickedsource.docxstamper.context.CharactersContext;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
 import org.wickedsource.docxstamper.util.walk.DocumentWalker;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,10 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RepeatDocPartTest {
-
 	@Test
 	public void test() throws Docx4JException, IOException {
-		var context = new CharactersContext();
+		var context = new Characters();
 		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
 		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
 		context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
@@ -30,7 +28,7 @@ public class RepeatDocPartTest {
 		context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
 
 		var template = getClass().getResourceAsStream("RepeatDocPartTest.docx");
-		var stamper = new TestDocxStamper<CharactersContext>();
+		var stamper = new TestDocxStamper<Characters>();
 		var document = stamper.stampAndLoad(template, context);
 
 		var documentContent = document.getMainDocumentPart().getContent();
@@ -73,6 +71,35 @@ public class RepeatDocPartTest {
 					}
 				}
 			}
+		}
+	}
+
+	public static class Character {
+
+		private final String name;
+
+		private final String actor;
+
+		public Character(String name, String actor) {
+			this.name = name;
+			this.actor = actor;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getActor() {
+			return actor;
+		}
+	}
+
+	public class Characters {
+
+		private final List<Character> characters = new ArrayList<>();
+
+		public List<Character> getCharacters() {
+			return characters;
 		}
 	}
 }
