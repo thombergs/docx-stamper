@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import lombok.Getter;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
@@ -19,6 +20,7 @@ import java.util.*;
 /**
  * Provides configuration parameters for DocxStamper.
  */
+@Getter
 public class DocxStamperConfiguration {
 
 	private final Map<Class<?>, CommentProcessorFactory> commentProcessors = new HashMap<>();
@@ -47,22 +49,10 @@ public class DocxStamperConfiguration {
 		commentProcessors.put(IReplaceWithProcessor.class, pf::replaceWith);
 	}
 
-	public boolean isReplaceNullValues() {
-		return replaceNullValues;
-	}
-
-	public String getNullValuesDefault() {
-		return nullValuesDefault;
-	}
-
 	public Optional<String> nullReplacementValue() {
 		return replaceNullValues
 				? Optional.ofNullable(nullValuesDefault)
 				: Optional.empty();
-	}
-
-	public boolean isFailOnUnresolvedExpression() {
-		return failOnUnresolvedExpression;
 	}
 
 	/**
@@ -74,24 +64,8 @@ public class DocxStamperConfiguration {
 		return this;
 	}
 
-	public boolean isReplaceUnresolvedExpressions() {
-		return replaceUnresolvedExpressions;
-	}
-
-	public String getUnresolvedExpressionsDefaultValue() {
-		return unresolvedExpressionsDefaultValue;
-	}
-
-	public boolean isLeaveEmptyOnExpressionError() {
-		return leaveEmptyOnExpressionError;
-	}
-
-	public String getLineBreakPlaceholder() {
-		return lineBreakPlaceholder;
-	}
-
 	/**
-	 * The String provided as lineBreakPlaceholder will be replaces with a line break
+	 * The String provided as lineBreakPlaceholder will be replaced with a line break
 	 * when stamping a document. If no lineBreakPlaceholder is provided, no replacement
 	 * will take place.
 	 *
@@ -101,14 +75,6 @@ public class DocxStamperConfiguration {
 	public DocxStamperConfiguration setLineBreakPlaceholder(String lineBreakPlaceholder) {
 		this.lineBreakPlaceholder = lineBreakPlaceholder;
 		return this;
-	}
-
-	public Map<Class<?>, Object> getExpressionFunctions() {
-		return expressionFunctions;
-	}
-
-	public EvaluationContextConfigurer getEvaluationContextConfigurer() {
-		return evaluationContextConfigurer;
 	}
 
 	/**
@@ -234,33 +200,13 @@ public class DocxStamperConfiguration {
 		return new DocxStamper<>(this);
 	}
 
-	public Map<Class<?>, CommentProcessorFactory> getCommentProcessors() {
-		return commentProcessors;
-	}
-
-	Map<Class<?>, ITypeResolver<?>> getTypeResolvers() {
-		return typeResolvers;
-	}
-
-	ITypeResolver<Object> getDefaultTypeResolver() {
-		return defaultTypeResolver;
-	}
-
 	public DocxStamperConfiguration setDefaultTypeResolver(ITypeResolver<? super Object> defaultTypeResolver) {
 		this.defaultTypeResolver = defaultTypeResolver;
 		return this;
 	}
 
-	public List<PreProcessor> getPreprocessors() {
-		return preprocessors;
-	}
-
 	public void addPreprocessor(PreProcessor preprocessor) {
 		preprocessors.add(preprocessor);
-	}
-
-	public SpelParserConfiguration getSpelParserConfiguration() {
-		return this.spelParserConfiguration;
 	}
 
 	public DocxStamperConfiguration setSpelParserConfiguration(SpelParserConfiguration spelParserConfiguration) {
@@ -268,7 +214,7 @@ public class DocxStamperConfiguration {
 		return this;
 	}
 
-	interface CommentProcessorFactory {
+	public interface CommentProcessorFactory {
 		Object create(PlaceholderReplacer placeholderReplacer);
 	}
 }
