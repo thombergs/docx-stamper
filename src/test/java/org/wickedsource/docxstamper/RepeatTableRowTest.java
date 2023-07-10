@@ -1,27 +1,25 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.junit.jupiter.api.Test;
 import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class RepeatTableRowTest {
     @Test
     public void test() throws Docx4JException, IOException {
-        var context = new Characters();
-        context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
-        context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
-        context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
-        context.getCharacters().add(new Character("Kent Brockman", "Harry Shearer"));
-        context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
-        context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
+        var context = new Characters(List.of(
+                new Character("Homer Simpson", "Dan Castellaneta"),
+                new Character("Marge Simpson", "Julie Kavner"),
+                new Character("Bart Simpson", "Nancy Cartwright"),
+                new Character("Kent Brockman", "Harry Shearer"),
+                new Character("Disco Stu", "Hank Azaria"),
+                new Character("Krusty the Clown", "Dan Castellaneta")
+        ));
         var template = getClass().getResourceAsStream("RepeatTableRowTest.docx");
 
         var actual = new TestDocxStamper<>().stampAndLoadAndExtract(template, context);
@@ -53,8 +51,6 @@ public class RepeatTableRowTest {
     public record Character(String name, String actor) {
     }
 
-    @Getter
-    public static class Characters {
-        private final List<Character> characters = new ArrayList<>();
+    public record Characters(List<Character> characters) {
     }
 }
