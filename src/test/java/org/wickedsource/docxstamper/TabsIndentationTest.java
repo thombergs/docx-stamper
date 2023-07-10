@@ -5,36 +5,38 @@ import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import pro.verron.docxstamper.utils.TestDocxStamper;
+import pro.verron.docxstamper.utils.context.Contexts;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 public class TabsIndentationTest {
 	@Test
 	public void tabsArePreserved() throws Docx4JException, IOException {
-		var context = new Name("Homer Simpson");
+		var context = Contexts.name("Homer Simpson");
 		var template = getClass().getResourceAsStream("TabsIndentationTest.docx");
-		var stamper = new TestDocxStamper<Name>();
-		var document = stamper.stampAndLoad(template, context);
+		var actual = new TestDocxStamper<>().stampAndLoadAndExtract(template, context);
 
-		var nameParagraph = (P) document.getMainDocumentPart().getContent().get(0);
-		assertEquals("Tab\tHomer Simpson", new ParagraphWrapper(nameParagraph).getText());
+		var expected = List.of(
+				"|Tab/lang=en-US|||TAB|/lang=en-US||Homer Simpson/lang=en-US|//rPr={lang=en-US}",
+				"|Space/lang=en-US|| /lang=en-US||Homer Simpson/lang=en-US|//rPr={lang=en-US}"
+		);
+		assertIterableEquals(expected, actual);
 	}
 
 	@Test
 	public void whiteSpacesArePreserved() throws Docx4JException, IOException {
-		var context = new Name("Homer Simpson");
+		var context = Contexts.name("Homer Simpson");
 		var template = getClass().getResourceAsStream("TabsIndentationTest.docx");
-		var stamper = new TestDocxStamper<Name>();
-		var document = stamper.stampAndLoad(template, context);
+		var actual = new TestDocxStamper<>().stampAndLoadAndExtract(template, context);
 
-		var nameParagraph = (P) document.getMainDocumentPart().getContent().get(1);
-		assertEquals("Space Homer Simpson", new ParagraphWrapper(nameParagraph).getText());
+		var expected = List.of(
+				"|Tab/lang=en-US|||TAB|/lang=en-US||Homer Simpson/lang=en-US|//rPr={lang=en-US}",
+				"|Space/lang=en-US|| /lang=en-US||Homer Simpson/lang=en-US|//rPr={lang=en-US}"
+		);
+		assertIterableEquals(expected, actual);
 	}
-
-	public record Name(String name) {
-	}
-
-
 }

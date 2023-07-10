@@ -97,6 +97,8 @@ public class Stringifier {
 			return ""; // do not serialize
 		if (o instanceof Br)
 			return "|BR|";
+		if (o instanceof R.Tab)
+			return "|TAB|";
 		if (o == null)
 			throw new RuntimeException("Unsupported run content: NULL");
 		throw new RuntimeException("Unsupported run content: " + o.getClass());

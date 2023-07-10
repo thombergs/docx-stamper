@@ -4,7 +4,7 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
-import org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer;
+import org.wickedsource.docxstamper.el.DefaultEvaluationContextConfigurer;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IParagraphRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatDocPartProcessor;
@@ -26,7 +26,7 @@ public class DocxStamperConfiguration {
 	private final Map<Class<?>, Object> expressionFunctions = new HashMap<>();
 	private final List<PreProcessor> preprocessors = new ArrayList<>();
 	private String lineBreakPlaceholder;
-	private EvaluationContextConfigurer evaluationContextConfigurer = new NoOpEvaluationContextConfigurer();
+	private EvaluationContextConfigurer evaluationContextConfigurer = new DefaultEvaluationContextConfigurer();
 	private boolean failOnUnresolvedExpression = true;
 	private boolean leaveEmptyOnExpressionError = false;
 	private boolean replaceUnresolvedExpressions = false;
@@ -117,6 +117,8 @@ public class DocxStamperConfiguration {
 	 * in comments and text.
 	 *
 	 * @param evaluationContextConfigurer the configurer to use.
+	 * @apiNote you can use {@link org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer} to get the
+	 * previous configuration working
 	 */
 	public DocxStamperConfiguration setEvaluationContextConfigurer(EvaluationContextConfigurer evaluationContextConfigurer) {
 		this.evaluationContextConfigurer = evaluationContextConfigurer;

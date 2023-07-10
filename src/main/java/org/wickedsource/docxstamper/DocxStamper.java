@@ -104,8 +104,9 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 				onResolutionFail);
 
 		var evaluationContext = new StandardEvaluationContext();
-		evaluationContext.addMethodResolver(methodResolver);
 		evaluationContextConfigurer.configureEvaluationContext(evaluationContext);
+		evaluationContext.addMethodResolver(methodResolver);
+
 
 		var expressionResolver = new ExpressionResolver(
 				evaluationContext,

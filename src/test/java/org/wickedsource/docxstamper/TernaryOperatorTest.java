@@ -2,6 +2,7 @@ package org.wickedsource.docxstamper;
 
 import org.junit.jupiter.api.Test;
 import pro.verron.docxstamper.utils.TestDocxStamper;
+import pro.verron.docxstamper.utils.context.Contexts;
 
 import java.util.List;
 
@@ -10,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 public class TernaryOperatorTest {
 	@Test
 	public void test() {
-		var context = new Name("Homer");
+		var context = Contexts.name("Homer");
 		var template = getClass().getResourceAsStream("TernaryOperatorTest.docx");
 
-		var actual = new TestDocxStamper<Name>().stampAndLoadAndExtract(template, context);
+		var actual = new TestDocxStamper<>().stampAndLoadAndExtract(template, context);
 
 		var expected = List.of(
 				"Expression Replacement with ternary operator",
@@ -25,6 +26,5 @@ public class TernaryOperatorTest {
 		assertIterableEquals(expected, actual);
 	}
 
-	public record Name(String name) {
-	}
+
 }

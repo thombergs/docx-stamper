@@ -30,7 +30,6 @@ public class RepeatTableRowKeepsFormatTest {
 				"4|th/vertAlign=superscript| Lisa Simpson-|Yeardley Smith/b=true|",
 				"5|th/vertAlign=superscript| Maggie Simpson-|Julie Kavner/b=true|",
 				"");
-
 		assertIterableEquals(expected, actual);
 	}
 
