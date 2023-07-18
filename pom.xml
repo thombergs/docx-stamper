@@ -205,6 +205,8 @@
                     </dependency>
                 </dependencies>
             </plugin>
+                 
+         
 
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -223,6 +225,11 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                                       <configuration>
+            <formats>
+              <format>XML</format>
+            </formats>
+          </configuration>
                     </execution>
                 </executions>
             </plugin>
