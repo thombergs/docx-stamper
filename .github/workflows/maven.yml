@@ -9,6 +9,9 @@ on:
   pull_request:
     branches: [ "master" ]
 
+permissions:
+  pull-requests: read
+
 jobs:
   build:
 
@@ -25,4 +28,14 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn  --batch-mode --no-transfer-progress package
+        run: mvn --batch-mode --no-transfer-progress package
+        
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@de2e56b42aa84d0b1c5b622644ac17e505c9a049
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args:
+            -Dsonar.projectKey=verronpro_docx-stamper
+            -Dsonar.organization=verronpro
