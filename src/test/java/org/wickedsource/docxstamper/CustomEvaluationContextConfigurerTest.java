@@ -13,10 +13,10 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomEvaluationContextConfigurerTest {
+class CustomEvaluationContextConfigurerTest {
 
 	@Test
-	public void customEvaluationContextConfigurerIsHonored() throws Docx4JException, IOException {
+	void customEvaluationContextConfigurerIsHonored() throws Docx4JException, IOException {
 		var config = new DocxStamperConfiguration();
 		config.setEvaluationContextConfigurer(context -> context.addPropertyAccessor(new SimpleGetter("foo", "bar")));
 

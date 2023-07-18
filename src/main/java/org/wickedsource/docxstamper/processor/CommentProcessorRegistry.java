@@ -187,9 +187,7 @@ public class CommentProcessorRegistry {
 		try {
 			expressionResolver.resolveExpression(commentString, expressionContext);
 			comments.remove(comment.getId());
-			logger.debug(
-					String.format("Comment '%s' has been successfully processed by a comment processor.",
-								  commentString));
+			logger.debug("Comment {} has been successfully processed by a comment processor.", commentString);
 			return Optional.of(commentWrapper);
 		} catch (SpelEvaluationException | SpelParseException e) {
 			if (failOnUnresolvedExpression) {

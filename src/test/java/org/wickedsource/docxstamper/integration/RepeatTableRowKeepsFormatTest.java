@@ -1,18 +1,16 @@
 package org.wickedsource.docxstamper.integration;
 
-import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.junit.jupiter.api.Test;
 import pro.verron.docxstamper.utils.TestDocxStamper;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class RepeatTableRowKeepsFormatTest {
+class RepeatTableRowKeepsFormatTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+	void test() {
 		Show context = new Show(List.of(
 				new Character(1, "st", "Homer Simpson", "Dan Castellaneta"),
 				new Character(2, "nd", "Marge Simpson", "Julie Kavner"),

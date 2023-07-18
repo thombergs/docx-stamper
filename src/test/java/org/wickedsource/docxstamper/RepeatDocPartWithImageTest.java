@@ -12,9 +12,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class RepeatDocPartWithImageTest {
+class RepeatDocPartWithImageTest {
 	@Test
-	public void shouldImportImageDataInTheMainDocument() throws IOException {
+	void shouldImportImageDataInTheMainDocument() throws IOException {
 		var context = Map.of(
 				"units",
 				Stream.of(new Image(getClass().getResourceAsStream("butterfly.png")),
