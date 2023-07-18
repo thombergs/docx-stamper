@@ -28,7 +28,7 @@ jobs:
           cache: 'maven'
 
       - name: Build with Maven
-        run: mvn --batch-mode --no-transfer-progress package sonar:sonar 
-             -Dsonar.host.url=https://sonarcloud.io 
-             -Dsonar.organization=verronpro
-             -Dsonar.projectKey=verronpro_docx-stamper
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn --batch-mode --no-transfer-progress package sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.organization=verronpro -Dsonar.projectKey=verronpro_docx-stamper
