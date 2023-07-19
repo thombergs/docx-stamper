@@ -16,9 +16,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MultiStampTest {
+class MultiStampTest {
 	@Test
-	public void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
+    void expressionsAreResolvedOnMultiStamp() throws Docx4JException, IOException {
 		var context = new NamesContext(List.of(
 				new Name("Homer"),
 				new Name("Marge"),

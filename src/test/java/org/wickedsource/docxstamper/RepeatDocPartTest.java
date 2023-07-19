@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import lombok.Getter;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.*;
@@ -16,9 +17,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class RepeatDocPartTest {
+class RepeatDocPartTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Characters();
 		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
 		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
@@ -41,8 +42,8 @@ public class RepeatDocPartTest {
 					case 0 -> {
 						P paragraph = (P) object;
 						String expected = String.format("Paragraph for test: %s - %s",
-														character.getName(),
-														character.getActor());
+                                character.name(),
+                                character.actor());
 						assertEquals(expected, new ParagraphWrapper(paragraph).getText());
 					}
 					case 1 -> {
@@ -55,9 +56,9 @@ public class RepeatDocPartTest {
 						};
 						cellWalker.walk();
 
-						assertEquals(character.getName(),
+                        assertEquals(character.name(),
 									 new ParagraphWrapper((P) cells.get(0).getContent().get(0)).getText());
-						assertEquals(character.getActor(),
+                        assertEquals(character.actor(),
 									 new ParagraphWrapper((P) cells.get(1).getContent().get(0)).getText());
 					}
 					case 2 -> {
@@ -74,32 +75,15 @@ public class RepeatDocPartTest {
 		}
 	}
 
-	public static class Character {
+    public record Character(String name, String actor) {
 
-		private final String name;
 
-		private final String actor;
-
-		public Character(String name, String actor) {
-			this.name = name;
-			this.actor = actor;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getActor() {
-			return actor;
-		}
 	}
 
-	public class Characters {
+    @Getter
+	public static class Characters {
 
 		private final List<Character> characters = new ArrayList<>();
 
-		public List<Character> getCharacters() {
-			return characters;
-		}
 	}
 }

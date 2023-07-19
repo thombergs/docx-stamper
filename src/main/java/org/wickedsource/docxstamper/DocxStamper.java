@@ -87,7 +87,7 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 			EvaluationContextConfigurer evaluationContextConfigurer,
 			Map<Class<?>, Object> expressionFunctions,
 			TypeResolverRegistry typeResolverRegistry,
-			Map<Class<?>, DocxStamperConfiguration.CommentProcessorFactory> configurationCommentProcessors,
+			Map<Class<?>, CommentProcessorBuilder> configurationCommentProcessors,
 			boolean replaceNullValues, String nullValuesDefault,
 			List<PreProcessor> preprocessors,
 			SpelParserConfiguration spelParserConfiguration
@@ -113,7 +113,7 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 				spelParserConfiguration
 		);
 
-		var placeholderReplacer = new PlaceholderReplacer(
+		var placeholderReplacerInstance = new PlaceholderReplacer(
 				typeResolverRegistry,
 				expressionResolver,
 				replaceNullValues,
@@ -126,19 +126,19 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 		);
 
 		for (var entry : configurationCommentProcessors.entrySet()) {
-			commentProcessors.put(entry.getKey(), entry.getValue().create(placeholderReplacer));
+			commentProcessors.put(entry.getKey(), entry.getValue().create(placeholderReplacerInstance));
 		}
 
 
-		var commentProcessorRegistry = new CommentProcessorRegistry(
-				placeholderReplacer,
+		var commentProcessorRegistryInstance = new CommentProcessorRegistry(
+				placeholderReplacerInstance,
 				expressionResolver,
 				commentProcessors,
 				failOnUnresolvedExpression
 		);
 
-		this.placeholderReplacer = placeholderReplacer;
-		this.commentProcessorRegistry = commentProcessorRegistry;
+		this.placeholderReplacer = placeholderReplacerInstance;
+		this.commentProcessorRegistry = commentProcessorRegistryInstance;
 		this.preprocessors = preprocessors.stream().toList();
 	}
 

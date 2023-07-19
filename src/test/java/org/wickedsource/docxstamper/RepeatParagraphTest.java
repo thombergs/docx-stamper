@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -14,80 +15,58 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RepeatParagraphTest {
-	@Test
-	public void test() throws Docx4JException, IOException {
-		var context = new Characters();
-		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
-		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
-		context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
-		context.getCharacters().add(new Character("Kent Brockman", "Harry Shearer"));
-		context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
-		context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
-		var template = getClass().getResourceAsStream("RepeatParagraphTest.docx");
-		var stamper = new TestDocxStamper<Characters>();
-		WordprocessingMLPackage document = stamper.stampAndLoad(template, context);
+class RepeatParagraphTest {
+    @Test
+    void test() throws Docx4JException, IOException {
+        var context = new Characters();
+        context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
+        context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
+        context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
+        context.getCharacters().add(new Character("Kent Brockman", "Harry Shearer"));
+        context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
+        context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
+        var template = getClass().getResourceAsStream("RepeatParagraphTest.docx");
+        var stamper = new TestDocxStamper<Characters>();
+        WordprocessingMLPackage document = stamper.stampAndLoad(template, context);
 
-		var titleCoords = new ArrayList<P>();
-		var quotationCoords = new ArrayList<P>();
-		new BaseCoordinatesWalker() {
-			@Override
-			protected void onParagraph(P paragraph) {
-				if ("Titre2".equals(paragraph.getPPr().getPStyle().getVal())) {
-					titleCoords.add(paragraph);
-				} else if ("Quotations".equals(paragraph.getPPr().getPStyle().getVal())) {
-					quotationCoords.add(paragraph);
-				}
-			}
-		}.walk(document);
+        var titleCoords = new ArrayList<P>();
+        var quotationCoords = new ArrayList<P>();
+        new BaseCoordinatesWalker() {
+            @Override
+            protected void onParagraph(P paragraph) {
+                if ("Titre2".equals(paragraph.getPPr().getPStyle().getVal())) {
+                    titleCoords.add(paragraph);
+                } else if ("Quotations".equals(paragraph.getPPr().getPStyle().getVal())) {
+                    quotationCoords.add(paragraph);
+                }
+            }
+        }.walk(document);
 
-		// 6 titles and 6 quotations are expected
-		assertEquals(6, titleCoords.size());
-		assertEquals(6, quotationCoords.size());
+        // 6 titles and 6 quotations are expected
+        assertEquals(6, titleCoords.size());
+        assertEquals(6, quotationCoords.size());
 
-		// Check paragraph's content
-		assertEquals("Homer Simpson", new ParagraphWrapper(titleCoords.get(0)).getText());
-		assertEquals("Dan Castellaneta", new ParagraphWrapper(quotationCoords.get(0)).getText());
-		assertEquals("Marge Simpson", new ParagraphWrapper(titleCoords.get(1)).getText());
-		assertEquals("Julie Kavner", new ParagraphWrapper(quotationCoords.get(1)).getText());
-		assertEquals("Bart Simpson", new ParagraphWrapper(titleCoords.get(2)).getText());
-		assertEquals("Nancy Cartwright", new ParagraphWrapper(quotationCoords.get(2)).getText());
-		assertEquals("Kent Brockman", new ParagraphWrapper(titleCoords.get(3)).getText());
-		assertEquals("Harry Shearer", new ParagraphWrapper(quotationCoords.get(3)).getText());
-		assertEquals("Disco Stu", new ParagraphWrapper(titleCoords.get(4)).getText());
-		assertEquals("Hank Azaria", new ParagraphWrapper(quotationCoords.get(4)).getText());
-		assertEquals("Krusty the Clown", new ParagraphWrapper(titleCoords.get(5)).getText());
-		assertEquals("Dan Castellaneta", new ParagraphWrapper(quotationCoords.get(5)).getText());
-	}
+        // Check paragraph's content
+        assertEquals("Homer Simpson", new ParagraphWrapper(titleCoords.get(0)).getText());
+        assertEquals("Dan Castellaneta", new ParagraphWrapper(quotationCoords.get(0)).getText());
+        assertEquals("Marge Simpson", new ParagraphWrapper(titleCoords.get(1)).getText());
+        assertEquals("Julie Kavner", new ParagraphWrapper(quotationCoords.get(1)).getText());
+        assertEquals("Bart Simpson", new ParagraphWrapper(titleCoords.get(2)).getText());
+        assertEquals("Nancy Cartwright", new ParagraphWrapper(quotationCoords.get(2)).getText());
+        assertEquals("Kent Brockman", new ParagraphWrapper(titleCoords.get(3)).getText());
+        assertEquals("Harry Shearer", new ParagraphWrapper(quotationCoords.get(3)).getText());
+        assertEquals("Disco Stu", new ParagraphWrapper(titleCoords.get(4)).getText());
+        assertEquals("Hank Azaria", new ParagraphWrapper(quotationCoords.get(4)).getText());
+        assertEquals("Krusty the Clown", new ParagraphWrapper(titleCoords.get(5)).getText());
+        assertEquals("Dan Castellaneta", new ParagraphWrapper(quotationCoords.get(5)).getText());
+    }
 
-	public static class Character {
+    public record Character(String name, String actor) {
+    }
 
-		private final String name;
+    @Getter
+    public static class Characters {
+        private final List<Character> characters = new ArrayList<>();
 
-		private final String actor;
-
-		public Character(String name, String actor) {
-			this.name = name;
-			this.actor = actor;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getActor() {
-			return actor;
-		}
-	}
-
-	public class Characters {
-
-		private final List<Character> characters = new ArrayList<>();
-
-		public List<Character> getCharacters() {
-			return characters;
-		}
-	}
-
-
+    }
 }

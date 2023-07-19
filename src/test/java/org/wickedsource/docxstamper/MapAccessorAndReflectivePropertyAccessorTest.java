@@ -17,9 +17,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class MapAccessorAndReflectivePropertyAccessorTest {
+class MapAccessorAndReflectivePropertyAccessorTest {
 	@Test
-	public void shouldResolveMapAndPropertyPlaceholders() throws Docx4JException, IOException {
+    void shouldResolveMapAndPropertyPlaceholders() throws Docx4JException, IOException {
 		var listProp = new ArrayList<Container>();
 		listProp.add(new Container("first value"));
 		listProp.add(new Container("second value"));

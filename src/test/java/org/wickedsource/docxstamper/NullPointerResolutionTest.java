@@ -8,28 +8,28 @@ import org.springframework.expression.spel.SpelParserConfiguration;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import pro.verron.docxstamper.utils.TestDocxStamper;
 
+import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class NullPointerResolutionTest {
+class NullPointerResolutionTest {
 	@Test
-	public void testThrowingCase() {
+    void testThrowingCase() throws IOException {
 		var subContext = new SubContext("Fullish2", List.of("Fullish3", "Fullish4", "Fullish5"));
 		var context = new NullishContext("Fullish1", subContext, null, null);
-		var template = getClass().getResourceAsStream("NullPointerResolution.docx");
-
-		var stamper = new TestDocxStamper<NullishContext>();
-
-		assertThrows(
-				UnresolvedExpressionException.class,
-				() -> stamper.stampAndLoadAndExtract(template, context)
-		);
+        try (var template = getClass().getResourceAsStream("NullPointerResolution.docx")) {
+            var stamper = new TestDocxStamper<NullishContext>();
+            assertThrows(
+                    UnresolvedExpressionException.class,
+                    () -> stamper.stampAndLoadAndExtract(template, context)
+            );
+        }
 	}
 
 	@Test
-	public void testWithDefaultSpel() {
+    void testWithDefaultSpel() {
 		var subContext = new SubContext("Fullish2", List.of("Fullish3", "Fullish4", "Fullish5"));
 		var context = new NullishContext("Fullish1", subContext, null, null);
 		var template = getClass().getResourceAsStream("NullPointerResolution.docx");
@@ -55,7 +55,7 @@ public class NullPointerResolutionTest {
 	}
 
 	@Test
-	public void testWithCustomSpel() {
+    void testWithCustomSpel() {
 		var subContext = new SubContext("Fullish2", List.of("Fullish3", "Fullish4", "Fullish5"));
 		var context = new NullishContext("Fullish1", subContext, null, null);
 		var template = getClass().getResourceAsStream("NullPointerResolution.docx");

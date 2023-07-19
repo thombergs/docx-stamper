@@ -80,11 +80,11 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 			for (int i = index + 1; i < contentAccessor.getContent().size() && !foundEnd; i++) {
 				Object next = contentAccessor.getContent().get(i);
 
-				if (next instanceof CommentRangeEnd && ((CommentRangeEnd) next).getId().equals(commentId)) {
+				if (next instanceof CommentRangeEnd cre && cre.getId().equals(commentId)) {
 					foundEnd = true;
 				} else {
-					if (next instanceof P) {
-						paragraphs.add((P) next);
+					if (next instanceof P p) {
+						paragraphs.add(p);
 					}
 					if (next instanceof ContentAccessor childContent) {
 						for (Object child : childContent.getContent()) {

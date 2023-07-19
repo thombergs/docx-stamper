@@ -15,9 +15,9 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionReplacementInTablesTest {
+class ExpressionReplacementInTablesTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Bart Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInTablesTest.docx");
 

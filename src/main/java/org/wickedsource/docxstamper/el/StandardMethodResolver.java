@@ -52,11 +52,9 @@ public class StandardMethodResolver implements MethodResolver {
 	private Optional<StandardMethodExecutor.Invoker> findMethodInMap(Map<Class<?>, Object> methodMap, String expectedName, List<TypeDescriptor> expectedArguments) {
 		for (Map.Entry<Class<?>, Object> entry : methodMap.entrySet()) {
 			Class<?> iface = entry.getKey();
-			for (Method actualMethod : iface.getDeclaredMethods()) {
-				if (methodEquals(actualMethod, expectedName, expectedArguments)) {
-					return Optional.of((args) -> actualMethod.invoke(entry.getValue(), args));
-				}
-			}
+			for (Method actualMethod : iface.getDeclaredMethods())
+				if (methodEquals(actualMethod, expectedName, expectedArguments))
+					return Optional.of(args -> actualMethod.invoke(entry.getValue(), args));
 		}
 		return Optional.empty();
 	}

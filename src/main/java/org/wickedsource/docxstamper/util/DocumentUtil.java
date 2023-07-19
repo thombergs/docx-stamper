@@ -40,13 +40,13 @@ public class DocumentUtil {
 	 */
 	private static Graphic getInlineGraphic(Drawing drawing) {
 		if (drawing.getAnchorOrInline().isEmpty()) {
-			throw new RuntimeException("Anchor or Inline is empty !");
+            throw new DocxStamperException("Anchor or Inline is empty !");
 		}
 		Object anchorOrInline = drawing.getAnchorOrInline().get(0);
 		if (anchorOrInline instanceof Inline inline) {
 			return inline.getGraphic();
 		} else {
-			throw new RuntimeException("Don't know how to process anchor !");
+            throw new DocxStamperException("Don't know how to process anchor !");
 		}
 	}
 
@@ -166,10 +166,10 @@ public class DocumentUtil {
 	private static boolean isImageRun(R run) {
 		return run.getContent()
 				  .stream()
-				  .filter(runElement -> runElement instanceof JAXBElement)
+                .filter(JAXBElement.class::isInstance)
 				  .map(JAXBElement.class::cast)
 				  .map(JAXBElement::getValue)
-				  .anyMatch(runValue -> runValue instanceof Drawing);
+                .anyMatch(Drawing.class::isInstance);
 	}
 
 	private static BinaryPartAbstractImage tryCreateImagePart(WordprocessingMLPackage destDocument, byte[] imageData) {

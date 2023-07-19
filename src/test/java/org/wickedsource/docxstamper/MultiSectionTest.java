@@ -13,10 +13,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class MultiSectionTest {
+class MultiSectionTest {
 
 	@Test
-	public void expressionsInMultipleSections() throws Docx4JException, IOException {
+    void expressionsInMultipleSections() throws Docx4JException, IOException {
 		var context = new NamesContext("Homer", "Marge");
 		var template = getClass().getResourceAsStream("MultiSectionTest.docx");
 		var stamper = new TestDocxStamper<NamesContext>();

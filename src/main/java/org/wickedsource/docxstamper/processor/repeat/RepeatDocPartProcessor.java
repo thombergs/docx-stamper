@@ -179,7 +179,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 			thread.join();
 			return wordprocessingMLPackage;
 
-		} catch (Docx4JException | InterruptedException | IOException e) {
+		} catch (Docx4JException | IOException | InterruptedException e) {
 			throw new DocxStamperException(e);
 		}
 	}

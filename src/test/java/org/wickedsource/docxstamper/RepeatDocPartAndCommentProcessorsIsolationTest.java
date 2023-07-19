@@ -11,10 +11,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class RepeatDocPartAndCommentProcessorsIsolationTest {
+class RepeatDocPartAndCommentProcessorsIsolationTest {
 
 	@Test
-	public void repeatDocPartShouldNotUseSameCommentProcessorInstancesForSubtemplate() {
+	void repeatDocPartShouldNotUseSameCommentProcessorInstancesForSubtemplate() {
 		var context = new HashMap<String, Object>();
 
 		var firstTable = new ArrayList<TableValue>();

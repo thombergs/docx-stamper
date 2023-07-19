@@ -36,12 +36,10 @@ public class TableResolver extends BaseCommentProcessor implements ITableResolve
 	@Override
 	public void resolveTable(StampTable givenTable) {
 		P p = getParagraph();
-
-		if (p.getParent() instanceof Tc && ((Tc) p.getParent()).getParent() instanceof Tr) {
-			Tbl table = (Tbl) ((Tr) ((Tc) p.getParent()).getParent()).getParent();
+		if (p.getParent() instanceof Tc tc && tc.getParent() instanceof Tr tr) {
+			Tbl table = (Tbl) tr.getParent();
 			cols.put(table, givenTable);
 		}
-
 		throw new CommentProcessingException("Paragraph is not within a table!", p);
 	}
 

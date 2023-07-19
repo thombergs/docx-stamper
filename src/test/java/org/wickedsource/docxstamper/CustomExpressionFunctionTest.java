@@ -10,9 +10,9 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomExpressionFunctionTest {
+class CustomExpressionFunctionTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Homer Simpson");
 		var template = getClass().getResourceAsStream("CustomExpressionFunction.docx");
 		var config = new DocxStamperConfiguration()

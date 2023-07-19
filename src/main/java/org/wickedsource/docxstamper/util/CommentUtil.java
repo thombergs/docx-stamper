@@ -84,8 +84,7 @@ public class CommentUtil {
         }
     }
 
-    public static String getCommentStringFor(ContentAccessor object,
-                                             WordprocessingMLPackage document) {
+    public static String getCommentStringFor(ContentAccessor object, WordprocessingMLPackage document) {
         Comments.Comment comment = getCommentFor(object, document).orElseThrow();
         return getCommentString(comment);
     }
@@ -144,26 +143,25 @@ public class CommentUtil {
     }
 
     public static void deleteComment(CommentWrapper comment) {
-        if (comment.getCommentRangeEnd() != null) {
-            ContentAccessor commentRangeEndParent = (ContentAccessor) comment
-                    .getCommentRangeEnd().getParent();
-            commentRangeEndParent.getContent().remove(comment.getCommentRangeEnd());
+        CommentRangeEnd end = comment.getCommentRangeEnd();
+        if (end != null) {
+            ContentAccessor endParent = (ContentAccessor) end.getParent();
+            endParent.getContent().remove(end);
         }
-        if (comment.getCommentRangeStart() != null) {
-            ContentAccessor commentRangeStartParent = (ContentAccessor) comment
-                    .getCommentRangeStart().getParent();
-            commentRangeStartParent.getContent().remove(comment.getCommentRangeStart());
+        CommentRangeStart start = comment.getCommentRangeStart();
+        if (start != null) {
+            ContentAccessor startParent = (ContentAccessor) start.getParent();
+            startParent.getContent().remove(start);
         }
-        if (comment.getCommentReference() != null) {
-            ContentAccessor commentReferenceParent = (ContentAccessor) comment
-                    .getCommentReference().getParent();
-            commentReferenceParent.getContent().remove(comment.getCommentReference());
+        R.CommentReference reference = comment.getCommentReference();
+        if (reference != null) {
+            ContentAccessor referenceParent = (ContentAccessor) reference.getParent();
+            referenceParent.getContent().remove(reference);
         }
     }
 
     public static void deleteCommentFromElement(ContentAccessor element, BigInteger commentId) {
         List<Object> elementsToRemove = new ArrayList<>();
-
         for (Object obj : element.getContent()) {
             Object unwrapped = XmlUtils.unwrap(obj);
             if (unwrapped instanceof CommentRangeStart crs) {
@@ -186,8 +184,7 @@ public class CommentUtil {
         element.getContent().removeAll(elementsToRemove);
     }
 
-    public static Map<BigInteger, CommentWrapper> getComments(
-            WordprocessingMLPackage document) {
+    public static Map<BigInteger, CommentWrapper> getComments(WordprocessingMLPackage document) {
         Map<BigInteger, CommentWrapper> rootComments = new HashMap<>();
         Map<BigInteger, CommentWrapper> allComments = new HashMap<>();
         collectCommentRanges(rootComments, allComments, document);
@@ -209,7 +206,6 @@ public class CommentUtil {
                 comment.setChildren(cleanMalformedComments(comment.getChildren()));
             }
         });
-
         return filteredCommentEntries;
     }
 

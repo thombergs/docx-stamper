@@ -15,9 +15,9 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ConditionalDisplayOfTableRowsTest {
+class ConditionalDisplayOfTableRowsTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Homer");
 		var template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
 		var stamper = new TestDocxStamper<Name>();

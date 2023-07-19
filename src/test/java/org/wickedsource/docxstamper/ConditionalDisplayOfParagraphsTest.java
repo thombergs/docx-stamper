@@ -18,9 +18,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
-public class ConditionalDisplayOfParagraphsTest {
+class ConditionalDisplayOfParagraphsTest {
 	@Test
-	public void processorExpressionsInCommentsAreResolved() throws Docx4JException, IOException {
+    void processorExpressionsInCommentsAreResolved() throws Docx4JException, IOException {
 		var context = new Name("Homer");
 		var template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsTest.docx");
 
@@ -62,7 +62,7 @@ public class ConditionalDisplayOfParagraphsTest {
 	}
 
 	@Test
-	public void inlineProcessorExpressionsAreResolved() throws Docx4JException, IOException {
+    void inlineProcessorExpressionsAreResolved() throws Docx4JException, IOException {
 		var context = new Name("Homer");
 		var template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
 		var stamper = new TestDocxStamper<Name>();
@@ -73,7 +73,7 @@ public class ConditionalDisplayOfParagraphsTest {
 	}
 
 	@Test
-	public void unresolvedInlineProcessorExpressionsAreRemoved() throws Docx4JException, IOException {
+    void unresolvedInlineProcessorExpressionsAreRemoved() throws Docx4JException, IOException {
 		var context = new Name("Bart");
 		var template = getClass().getResourceAsStream("ConditionalDisplayOfParagraphsWithoutCommentTest.docx");
 		var stamper = new TestDocxStamper<Name>();

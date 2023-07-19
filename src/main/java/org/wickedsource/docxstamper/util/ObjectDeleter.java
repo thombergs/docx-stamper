@@ -12,12 +12,12 @@ public class ObjectDeleter {
 	private final Logger logger = LoggerFactory.getLogger(ObjectDeleter.class);
 
 	public void deleteObject(Object object) {
-		if (object instanceof P) {
-			deleteParagraph((P) object);
+		if (object instanceof P p) {
+			deleteParagraph(p);
 		} else {
 			Object unwrappedObject = XmlUtils.unwrap(object);
-			if (unwrappedObject instanceof Tbl) {
-				deleteTable((Tbl) unwrappedObject);
+			if (unwrappedObject instanceof Tbl tbl) {
+				deleteTable(tbl);
 			}
 		}
 	}
@@ -42,7 +42,7 @@ public class ObjectDeleter {
 			for (Iterator<Object> iterator = ((ContentAccessor) table.getParent()).getContent()
 																				  .listIterator(); iterator.hasNext(); ) {
 				Object next = iterator.next();
-				if (next instanceof JAXBElement && ((JAXBElement) next).getValue().equals(table)) {
+				if (next instanceof JAXBElement element && element.getValue().equals(table)) {
 					iterator.remove();
 					break;
 				}

@@ -11,10 +11,10 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RunUtilTest {
+class RunUtilTest {
 
 	@Test
-	public void getTextReturnsTextOfRun() throws Docx4JException {
+	void getTextReturnsTextOfRun() throws Docx4JException {
 		var document = loadDocument("singleRun.docx");
 		var paragraph = (P) document.getMainDocumentPart().getContent().get(0);
 		var run = (R) paragraph.getContent().get(0);
@@ -27,7 +27,7 @@ public class RunUtilTest {
 	}
 
 	@Test
-	public void getTextReturnsValueDefinedBySetText() throws Docx4JException, IOException {
+	void getTextReturnsValueDefinedBySetText() throws Docx4JException, IOException {
 		var input = loadDocument("singleRun.docx");
 		var paragraphIn = (P) input.getMainDocumentPart().getContent().get(0);
 		var runIn = (R) paragraphIn.getContent().get(0);

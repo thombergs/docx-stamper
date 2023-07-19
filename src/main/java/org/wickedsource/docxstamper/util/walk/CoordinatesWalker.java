@@ -15,7 +15,7 @@ public abstract class CoordinatesWalker {
 	private void walk(P paragraph) {
 		paragraph.getContent().stream()
 				 .map(XmlUtils::unwrap)
-				 .filter(element -> element instanceof R)
+				.filter(R.class::isInstance)
 				 .map(R.class::cast)
 				 .forEach(run -> onRun(run, paragraph));
 		// we run the paragraph afterward so that the comments inside work before the whole paragraph comments

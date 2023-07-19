@@ -1,19 +1,17 @@
 package org.wickedsource.docxstamper.integration;
 
-import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.junit.jupiter.api.Test;
 import pro.verron.docxstamper.utils.TestDocxStamper;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class ReplaceWordWithIntegrationTest {
+class ReplaceWordWithIntegrationTest {
 
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() {
 		String name = "Simpsons";
 		Name context = new Name(name);
 		InputStream template = getClass().getResourceAsStream("ReplaceWordWithIntegrationTest.docx");

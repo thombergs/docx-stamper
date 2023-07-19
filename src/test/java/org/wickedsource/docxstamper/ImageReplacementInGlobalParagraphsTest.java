@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper;
 
 import jakarta.xml.bind.JAXBElement;
+import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.Drawing;
 import org.docx4j.wml.P;
@@ -13,15 +14,12 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class ImageReplacementInGlobalParagraphsTest {
+class ImageReplacementInGlobalParagraphsTest {
 
+	@Getter
 	public static class ImageContext {
 
 		private Image monalisa;
-
-		public Image getMonalisa() {
-			return monalisa;
-		}
 
 		public void setMonalisa(Image monalisa) {
 			this.monalisa = monalisa;
@@ -29,7 +27,7 @@ public class ImageReplacementInGlobalParagraphsTest {
 	}
 
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var monalisa = new Image(getClass().getResourceAsStream("monalisa.jpg"));
 		var context = new ImageContext();
 		context.setMonalisa(monalisa);
@@ -48,7 +46,7 @@ public class ImageReplacementInGlobalParagraphsTest {
 	}
 
 	@Test
-	public void testWithMaxWidth() throws Docx4JException, IOException {
+    void testWithMaxWidth() throws Docx4JException, IOException {
 		var monalisa = new Image(getClass().getResourceAsStream("monalisa.jpg"), 1000);
 		var context = new ImageContext();
 		context.setMonalisa(monalisa);

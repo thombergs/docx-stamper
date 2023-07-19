@@ -22,9 +22,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class RepeatDocPartWithImagesInSourceTest {
+class RepeatDocPartWithImagesInSourceTest {
 	@Test
-	public void shouldReplicateImageFromTheMainDocumentInTheSubTemplate() throws Docx4JException, IOException {
+    void shouldReplicateImageFromTheMainDocumentInTheSubTemplate() throws Docx4JException, IOException {
 		var context = new HashMap<String, Object>();
 		var subDocParts = new ArrayList<Map<String, Object>>();
 
@@ -48,18 +48,18 @@ public class RepeatDocPartWithImagesInSourceTest {
 		MainDocumentPart mainDocumentPart = document.getMainDocumentPart();
 		List<Object> content = mainDocumentPart.getContent();
 
-		assertEquals(content.size(), 8);
+        assertEquals(8, content.size());
 		ContentAccessor line2 = (ContentAccessor) content.get(2);
 		ContentAccessor line2c0 = (ContentAccessor) line2.getContent().get(0);
 		ContentAccessor line5 = (ContentAccessor) content.get(5);
 		ContentAccessor line5c0 = (ContentAccessor) line5.getContent().get(0);
 
-		assertEquals(content.get(0).toString(), "This is not repeated");
-		assertEquals(content.get(1).toString(), "This should be repeated : first doc part");
-		assertEquals(content.get(3).toString(), "This should be repeated too");
-		assertEquals(content.get(4).toString(), "This should be repeated : second doc part");
-		assertEquals(content.get(6).toString(), "This should be repeated too");
-		assertEquals(content.get(7).toString(), "This is not repeated");
+        assertEquals("This is not repeated", content.get(0).toString());
+        assertEquals("This should be repeated : first doc part", content.get(1).toString());
+        assertEquals("This should be repeated too", content.get(3).toString());
+        assertEquals("This should be repeated : second doc part", content.get(4).toString());
+        assertEquals("This should be repeated too", content.get(6).toString());
+        assertEquals("This is not repeated", content.get(7).toString());
 
 		Drawing image1 = (Drawing) XmlUtils.unwrap(line2c0.getContent().get(0));
 		Drawing image2 = (Drawing) XmlUtils.unwrap(line5c0.getContent().get(0));

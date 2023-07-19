@@ -10,10 +10,10 @@ import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionWithSurroundingSpacesTest {
+class ExpressionWithSurroundingSpacesTest {
 
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Context();
 		var template = getClass().getResourceAsStream("ExpressionWithSurroundingSpacesTest.docx");
 		var stamper = new TestDocxStamper<Context>();

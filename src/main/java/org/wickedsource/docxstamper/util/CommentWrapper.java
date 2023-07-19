@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.util;
 
+import lombok.Getter;
 import org.docx4j.XmlUtils;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -12,6 +13,7 @@ import org.wickedsource.docxstamper.api.DocxStamperException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Getter
 public class CommentWrapper {
 
 	private final Set<CommentWrapper> children = new HashSet<>();
@@ -20,43 +22,20 @@ public class CommentWrapper {
 	private CommentRangeEnd commentRangeEnd;
 	private R.CommentReference commentReference;
 
-	public CommentWrapper() {
-	}
-
-	public Comments.Comment getComment() {
-		return comment;
-	}
-
 	void setComment(Comments.Comment comment) {
 		this.comment = comment;
-	}
-
-	public CommentRangeStart getCommentRangeStart() {
-		return commentRangeStart;
 	}
 
 	void setCommentRangeStart(CommentRangeStart commentRangeStart) {
 		this.commentRangeStart = commentRangeStart;
 	}
 
-	public CommentRangeEnd getCommentRangeEnd() {
-		return commentRangeEnd;
-	}
-
 	void setCommentRangeEnd(CommentRangeEnd commentRangeEnd) {
 		this.commentRangeEnd = commentRangeEnd;
 	}
 
-	public R.CommentReference getCommentReference() {
-		return commentReference;
-	}
-
 	void setCommentReference(R.CommentReference commentReference) {
 		this.commentReference = commentReference;
-	}
-
-	public Set<CommentWrapper> getChildren() {
-		return children;
 	}
 
 	void setChildren(Set<CommentWrapper> children) {
@@ -81,8 +60,8 @@ public class CommentWrapper {
 		content = XmlUtils.unwrap(content);
 		if (searchTarget.equals(content)) {
 			return true;
-		} else if (content instanceof ContentAccessor) {
-			for (Object object : ((ContentAccessor) content).getContent()) {
+		} else if (content instanceof ContentAccessor contentAccessor) {
+			for (Object object : contentAccessor.getContent()) {
 				Object unwrappedObject = XmlUtils.unwrap(object);
 				if (searchTarget.equals(unwrappedObject)
 						|| depthElementSearch(searchTarget, unwrappedObject)) {

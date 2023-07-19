@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import lombok.Getter;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.ContentAccessor;
@@ -18,7 +19,7 @@ import java.util.List;
 import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RepeatDocPartNestingTest {
+class RepeatDocPartNestingTest {
 
     int initParagraphsNumber = 2;
     int schoolNameTitle = 1;
@@ -32,7 +33,7 @@ public class RepeatDocPartNestingTest {
     private List<Object> documentContent = null;
 
     @Test
-    public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
         var schoolContext = new SchoolContext("South Park Primary School");
         for (int i = 0; i < numberOfGrades; i++) {
             schoolContext.getGrades().add(createOneGrade(i));
@@ -114,6 +115,7 @@ public class RepeatDocPartNestingTest {
     public record AClass(int number, List<Student> students) {
     }
 
+    @Getter
     public static class Student {
         int number;
         String name;
@@ -128,23 +130,13 @@ public class RepeatDocPartNestingTest {
             this.age = age;
         }
 
-        public int getNumber() {
-            return number;
-        }
-
-        public String getName() {
-            return name;
-        }
-
         public void setName(String name) {
             this.name = name;
         }
 
-        public int getAge() {
-            return age;
-        }
     }
 
+    @Getter
     public static class SchoolContext {
         String schoolName;
         List<Grade> grades = new ArrayList<>();
@@ -156,16 +148,9 @@ public class RepeatDocPartNestingTest {
             this.schoolName = schoolName;
         }
 
-        public String getSchoolName() {
-            return schoolName;
-        }
-
-        public List<Grade> getGrades() {
-            return grades;
-        }
-
     }
 
+    @Getter
     public static class Grade {
         int number;
         List<AClass> classes = new ArrayList<>();
@@ -177,13 +162,6 @@ public class RepeatDocPartNestingTest {
             this.number = number;
         }
 
-        public int getNumber() {
-            return number;
-        }
-
-        public List<AClass> getClasses() {
-            return classes;
-        }
     }
 
 }

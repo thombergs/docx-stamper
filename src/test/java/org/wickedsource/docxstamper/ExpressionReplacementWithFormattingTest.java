@@ -9,10 +9,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class ExpressionReplacementWithFormattingTest {
+class ExpressionReplacementWithFormattingTest {
 
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Homer Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementWithFormattingTest.docx");
 		var stamper = new TestDocxStamper<Name>();

@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.docx4j.XmlUtils;
 import org.docx4j.jaxb.Context;
 import org.docx4j.wml.*;
@@ -8,6 +9,7 @@ import java.util.List;
 
 import static java.util.Optional.ofNullable;
 
+@Slf4j
 public class SectionUtil {
 	private static final ObjectFactory factory = Context.getWmlObjectFactory();
 
@@ -26,7 +28,7 @@ public class SectionUtil {
 			}
 			i--;
 		}
-		System.out.println("No previous section break found from : " + parent + ", first object index=" + pIndex);
+		log.info("No previous section break found from : {}, first object index={}", parent, pIndex);
 		return null;
 	}
 
@@ -38,8 +40,8 @@ public class SectionUtil {
 
 	public static boolean isOddNumberOfSectionBreaks(List<Object> objects) {
 		long count = objects.stream()
-							.filter(obj -> obj instanceof P)
-							.map(obj -> (P) obj)
+				.filter(P.class::isInstance)
+				.map(P.class::cast)
 							.filter(p -> p.getPPr() != null && p.getPPr().getSectPr() != null)
 							.count();
 		return count % 2 != 0;

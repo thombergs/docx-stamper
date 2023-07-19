@@ -12,7 +12,6 @@ import org.wickedsource.docxstamper.processor.repeat.IRepeatDocPartProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.table.ITableResolver;
-import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
 
 import java.util.*;
@@ -23,7 +22,7 @@ import java.util.*;
 @Getter
 public class DocxStamperConfiguration {
 
-	private final Map<Class<?>, CommentProcessorFactory> commentProcessors = new HashMap<>();
+	private final Map<Class<?>, CommentProcessorBuilder> commentProcessors = new HashMap<>();
 	private final Map<Class<?>, ITypeResolver<?>> typeResolvers = new HashMap<>();
 	private final Map<Class<?>, Object> expressionFunctions = new HashMap<>();
 	private final List<PreProcessor> preprocessors = new ArrayList<>();
@@ -184,7 +183,7 @@ public class DocxStamperConfiguration {
 	 */
 	public DocxStamperConfiguration addCommentProcessor(
 			Class<?> interfaceClass,
-			CommentProcessorFactory commentProcessorFactory
+			CommentProcessorBuilder commentProcessorFactory
 	) {
 		this.commentProcessors.put(interfaceClass, commentProcessorFactory);
 		return this;
@@ -214,7 +213,5 @@ public class DocxStamperConfiguration {
 		return this;
 	}
 
-	public interface CommentProcessorFactory {
-		Object create(PlaceholderReplacer placeholderReplacer);
-	}
+
 }
