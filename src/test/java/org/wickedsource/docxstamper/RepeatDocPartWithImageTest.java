@@ -3,6 +3,7 @@ package org.wickedsource.docxstamper;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.util.List;
@@ -11,9 +12,9 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class RepeatDocPartWithImageTest {
+class RepeatDocPartWithImageTest {
 	@Test
-	public void shouldImportImageDataInTheMainDocument() throws IOException {
+	void shouldImportImageDataInTheMainDocument() throws IOException {
 		var context = Map.of(
 				"units",
 				Stream.of(new Image(getClass().getResourceAsStream("butterfly.png")),

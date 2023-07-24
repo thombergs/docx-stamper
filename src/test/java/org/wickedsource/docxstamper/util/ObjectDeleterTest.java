@@ -7,7 +7,7 @@ import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
-import org.wickedsource.docxstamper.IOStreams;
+import pro.verron.docxstamper.utils.IOStreams;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,10 +17,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.wickedsource.docxstamper.util.DocumentUtil.getParagraphsFromObject;
 import static org.wickedsource.docxstamper.util.DocumentUtil.getTableFromObject;
 
-public class ObjectDeleterTest {
+class ObjectDeleterTest {
 
 	@Test
-	public void deletesCorrectGlobalParagraphs() throws Docx4JException, IOException {
+    void deletesCorrectGlobalParagraphs() throws Docx4JException, IOException {
 		var template = getClass().getResourceAsStream("ObjectDeleterTest-globalParagraphs.docx");
 		var in = WordprocessingMLPackage.load(template);
 		var coordinates = getParagraphsFromObject(in);
@@ -57,7 +57,7 @@ public class ObjectDeleterTest {
 	}
 
 	@Test
-	public void deletesCorrectParagraphsInTableCells() throws Docx4JException, IOException {
+    void deletesCorrectParagraphsInTableCells() throws Docx4JException, IOException {
 		InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-paragraphsInTableCells.docx");
 		WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 		final List<P> coordinates = getParagraphsFromObject(getTableFromObject(document));
@@ -89,7 +89,7 @@ public class ObjectDeleterTest {
 	}
 
 	@Test
-	public void deletesCorrectGlobalTables() throws Docx4JException, IOException {
+    void deletesCorrectGlobalTables() throws Docx4JException, IOException {
 		InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tables.docx");
 		WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 		final List<Tbl> coordinates = DocumentUtil.getTableFromObject(document);
@@ -113,7 +113,7 @@ public class ObjectDeleterTest {
 	}
 
 	@Test
-	public void deletesCorrectTableRows() throws Docx4JException, IOException {
+    void deletesCorrectTableRows() throws Docx4JException, IOException {
 		InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tableRows.docx");
 		WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
 		final List<Tr> rowCoordinates = DocumentUtil.getTableRowsFromObject(document);

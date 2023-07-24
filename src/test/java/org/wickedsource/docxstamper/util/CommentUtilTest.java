@@ -8,9 +8,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class CommentUtilTest {
+class CommentUtilTest {
 	@Test
-	public void onlyParagraphsWithCommentRangeStartAreCommented() throws Docx4JException {
+	void onlyParagraphsWithCommentRangeStartAreCommented() throws Docx4JException {
 		var in = getClass().getResourceAsStream("CommentUtilTest.docx");
 		var document = WordprocessingMLPackage.load(in);
 

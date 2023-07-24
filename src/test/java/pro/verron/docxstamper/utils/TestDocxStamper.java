@@ -1,10 +1,11 @@
-package org.wickedsource.docxstamper;
+package pro.verron.docxstamper.utils;
 
 import org.docx4j.TraversalUtil;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
-import pro.verron.docxstamper.Stringifier;
+import org.wickedsource.docxstamper.DocxStamper;
+import org.wickedsource.docxstamper.DocxStamperConfiguration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,12 +22,11 @@ public final class TestDocxStamper<T> {
 	private WordprocessingMLPackage document;
 
 	public TestDocxStamper() {
-		this(new DocxStamperConfiguration()
-					 .setFailOnUnresolvedExpression(false));
+		this(new DocxStamperConfiguration());
 	}
 
 	public TestDocxStamper(DocxStamperConfiguration config) {
-		stamper = new DocxStamper<>(config.setFailOnUnresolvedExpression(false));
+		stamper = new DocxStamper<>(config);
 	}
 
 	/**

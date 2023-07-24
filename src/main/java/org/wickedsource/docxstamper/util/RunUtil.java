@@ -29,8 +29,8 @@ public class RunUtil {
 		for (Object content : run.getContent()) {
 			if (content instanceof JAXBElement) {
 				result.append(getText((JAXBElement<?>) content));
-			} else if (content instanceof Text) {
-				result.append(getText((Text) content));
+			} else if (content instanceof Text text) {
+				result.append(getText(text));
 			}
 		}
 		return result.toString();
@@ -38,8 +38,8 @@ public class RunUtil {
 
 	private static CharSequence getText(JAXBElement<?> content) {
 		Object elementValue = content.getValue();
-		if (elementValue instanceof Text)
-			return getText((Text) elementValue);
+		if (elementValue instanceof Text text)
+			return getText(text);
 		if (elementValue instanceof R.Tab)
 			return "\t";
 		return "";

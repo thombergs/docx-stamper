@@ -8,31 +8,32 @@ import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.DocumentUtil;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ConditionalDisplayOfTableRowsTest {
+class ConditionalDisplayOfTableRowsTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Homer");
 		var template = getClass().getResourceAsStream("ConditionalDisplayOfTableRowsTest.docx");
 		var stamper = new TestDocxStamper<Name>();
 		var document = stamper.stampAndLoad(template, context);
 
-		var tablesFromObject = DocumentUtil.extractElements(document, Tbl.class);
+		var tablesFromObject = DocumentUtil.streamElements(document, Tbl.class).toList();
 		assertEquals(2, tablesFromObject.size());
 
-		var parentTableRows = DocumentUtil.extractElements(tablesFromObject.get(0), Tr.class);
+		var parentTableRows = DocumentUtil.streamElements(tablesFromObject.get(0), Tr.class).toList();
 		// gets all the rows within the table and the nested table
 		assertEquals(5, parentTableRows.size());
 
-		var nestedTableRows = DocumentUtil.extractElements(tablesFromObject.get(1), Tr.class);
+		var nestedTableRows = DocumentUtil.streamElements(tablesFromObject.get(1), Tr.class).toList();
 		assertEquals(2, nestedTableRows.size());
 
-		var parentTableCells = DocumentUtil.extractElements(tablesFromObject.get(0), Tc.class);
+		var parentTableCells = DocumentUtil.streamElements(tablesFromObject.get(0), Tc.class).toList();
 		// gets all the cells within the table and the nested table
 		assertEquals(5, parentTableCells.size());
 
@@ -43,7 +44,7 @@ public class ConditionalDisplayOfTableRowsTest {
 	}
 
 	private String getTextFromCell(Tc tc) {
-		List<P> paragraphsFromObject = DocumentUtil.extractElements(tc, P.class);
+		List<P> paragraphsFromObject = DocumentUtil.streamElements(tc, P.class).toList();
 		assertEquals(1, paragraphsFromObject.size());
 		return TextUtils.getText(paragraphsFromObject.get(0));
 	}

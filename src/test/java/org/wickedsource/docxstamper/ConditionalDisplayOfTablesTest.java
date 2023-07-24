@@ -9,15 +9,16 @@ import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class ConditionalDisplayOfTablesTest {
+class ConditionalDisplayOfTablesTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Homer");
 		var template = getClass().getResourceAsStream("ConditionalDisplayOfTablesTest.docx");
 		var stamper = new TestDocxStamper<Name>();

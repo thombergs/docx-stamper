@@ -7,38 +7,22 @@ import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 
-import java.util.List;
-
 public abstract class CoordinatesWalker {
+	public void walk(WordprocessingMLPackage document) {
+		DocumentUtil.streamParagraphs(document).forEach(this::walk);
+	}
 
-    private final WordprocessingMLPackage document;
+	private void walk(P paragraph) {
+		paragraph.getContent().stream()
+				 .map(XmlUtils::unwrap)
+				.filter(R.class::isInstance)
+				 .map(R.class::cast)
+				 .forEach(run -> onRun(run, paragraph));
+		// we run the paragraph afterward so that the comments inside work before the whole paragraph comments
+		onParagraph(paragraph);
+	}
 
-    public CoordinatesWalker(WordprocessingMLPackage document) {
-        this.document = document;
-    }
+	protected abstract void onRun(R run, P paragraph);
 
-    public void walk() {
-        List<P> paragraphs = DocumentUtil.getParagraphsFromObject(document);
-        for (P paragraph : paragraphs) {
-            walkParagraph(paragraph);
-        }
-    }
-
-    private void walkParagraph(P paragraph) {
-        for (Object contentElement : paragraph.getContent()) {
-            if (XmlUtils.unwrap(contentElement) instanceof R) {
-                R run = (R) contentElement;
-                onRun(run, paragraph);
-            }
-        }
-
-        // we run the paragraph afterwards so that the comments inside work before the whole paragraph comments
-        onParagraph(paragraph);
-    }
-
-    protected abstract void onParagraph(P paragraph);
-
-    protected abstract void onRun(R run, P paragraph);
-
-
+	protected abstract void onParagraph(P paragraph);
 }

@@ -7,15 +7,16 @@ import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class LineBreakReplacementTest {
+class LineBreakReplacementTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name(null);
 		var config = new DocxStamperConfiguration();
 		config.setLineBreakPlaceholder("#");

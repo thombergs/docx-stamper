@@ -7,8 +7,8 @@ import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
  * {@link EvaluationContextConfigurer} that does no customization.
  */
 public class NoOpEvaluationContextConfigurer implements EvaluationContextConfigurer {
-	@Override
-	public void configureEvaluationContext(StandardEvaluationContext context) {
-		// don't customize it
-	}
+    @Override
+    public void configureEvaluationContext(StandardEvaluationContext context) {
+        // DO NOTHING
+    }
 }

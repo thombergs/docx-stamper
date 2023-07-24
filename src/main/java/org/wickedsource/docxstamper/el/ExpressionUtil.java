@@ -1,6 +1,7 @@
 package org.wickedsource.docxstamper.el;
 
 import lombok.experimental.UtilityClass;
+import org.springframework.lang.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,8 @@ import static java.util.Collections.emptyList;
 
 @UtilityClass
 public class ExpressionUtil {
+	private static final Pattern VARIABLE_EXPRESSION_PATTERN = Pattern.compile("\\$\\{(.*?)}");
+	private static final Pattern PROCESSOR_EXPRESSION_PATTERN = Pattern.compile("#\\{(.*?)}");
 
 	/**
 	 * Finds all variable expressions in a text and returns them as list. Example expression: "${myObject.property}".
@@ -18,16 +21,13 @@ public class ExpressionUtil {
 	 * @param text the text to find expressions in.
 	 * @return a list of expressions (including the starting "${" and trailing "}").
 	 */
-	public static List<String> findVariableExpressions(String text) {
-		return findExpressions(text, "\\$\\{.*?\\}");
+	public static List<String> findVariableExpressions(@NonNull String text) {
+		return findExpressions(text, VARIABLE_EXPRESSION_PATTERN);
 	}
 
-	private static List<String> findExpressions(String text, String expressionPattern) {
-		if (text == null)
-			return emptyList();
+	private static List<String> findExpressions(@NonNull String text, Pattern pattern) {
 		if (text.equals(""))
 			return emptyList();
-		Pattern pattern = Pattern.compile(expressionPattern);
 		Matcher matcher = pattern.matcher(text);
 		int index = 0;
 		List<String> matches = new ArrayList<>();
@@ -45,8 +45,8 @@ public class ExpressionUtil {
 	 * @param text the text to find expressions in.
 	 * @return a list of expressions (including the starting "#{" and trailing "}").
 	 */
-	public static List<String> findProcessorExpressions(String text) {
-		return findExpressions(text, "\\#\\{.*?\\}");
+	public static List<String> findProcessorExpressions(@NonNull String text) {
+		return findExpressions(text, PROCESSOR_EXPRESSION_PATTERN);
 	}
 
 	/**
@@ -63,5 +63,4 @@ public class ExpressionUtil {
 		expression = expression.replaceAll("^#\\{", "").replaceAll("}$", "");
 		return expression;
 	}
-
 }

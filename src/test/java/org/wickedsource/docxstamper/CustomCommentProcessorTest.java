@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper;
 
+import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -9,6 +10,7 @@ import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentWrapper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -16,10 +18,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomCommentProcessorTest {
+class CustomCommentProcessorTest {
 
 	@Test
-	public void test() throws Docx4JException, IOException {
+	void test() throws Docx4JException, IOException {
 		var template = getClass().getResourceAsStream("CustomCommentProcessorTest.docx");
 
 		var config = new DocxStamperConfiguration()
@@ -40,16 +42,13 @@ public class CustomCommentProcessorTest {
 
 	public static class CustomCommentProcessor extends BaseCommentProcessor implements ICustomCommentProcessor {
 
+		@Getter
 		private static final List<P> visitedParagraphs = new ArrayList<>();
 
 		private P currentParagraph;
 
 		public CustomCommentProcessor(PlaceholderReplacer placeholderReplacer) {
 			super(placeholderReplacer);
-		}
-
-		public static List<P> getVisitedParagraphs() {
-			return visitedParagraphs;
 		}
 
 		@Override
@@ -74,6 +73,12 @@ public class CustomCommentProcessorTest {
 		public void setCurrentCommentWrapper(CommentWrapper commentWrapper) {
 		}
 
+		/**
+		 * @param document DocX template being processed.
+		 * @deprecated the document is passed to the processor through the commitChange method now,
+		 * and will probably pe passed through the constructor in the future
+		 */
+		@Deprecated(since = "1.6.5", forRemoval = true)
 		@Override
 		public void setDocument(WordprocessingMLPackage document) {
 		}

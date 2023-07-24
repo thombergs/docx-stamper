@@ -7,9 +7,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
 
-public class ExpressionUtilTest {
+class ExpressionUtilTest {
 	@Test
-	public void findsPlaceholders() {
+    void findsPlaceholders() {
 		String text = "lorem ipsum ${placeholder1} lorem ipsum ${placeholder2}";
 
 		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
@@ -20,7 +20,7 @@ public class ExpressionUtilTest {
 	}
 
 	@Test
-	public void findsProcessorExpressions() {
+    void findsProcessorExpressions() {
 		String text = "lorem ipsum #{expression1} lorem ipsum #{expression2}";
 
 		List<String> placeholders = ExpressionUtil.findProcessorExpressions(text);
@@ -31,7 +31,7 @@ public class ExpressionUtilTest {
 	}
 
 	@Test
-	public void findsPlaceholdersWithError() {
+    void findsPlaceholdersWithError() {
 		String text = "lorem ipsum ${placeholder1} ${ lorem ipsum } ${placeholder2";
 
 		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
@@ -42,7 +42,7 @@ public class ExpressionUtilTest {
 	}
 
 	@Test
-	public void returnsEmptyListOnEmptyText() {
+    void returnsEmptyListOnEmptyText() {
 		String text = "";
 
 		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
@@ -51,16 +51,7 @@ public class ExpressionUtilTest {
 	}
 
 	@Test
-	public void returnsEmptyListOnNullText() {
-		String text = null;
-
-		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
-
-		assertTrue(placeholders.isEmpty());
-	}
-
-	@Test
-	public void stripsExpressions() {
+    void stripsExpressions() {
 		String expressionValue = "myExpression";
 		String expression = "${%s}".formatted(expressionValue);
 		String expected = expressionValue;
@@ -71,7 +62,7 @@ public class ExpressionUtilTest {
 	}
 
 	@Test
-	public void stripsNullExpressionThrowsException() {
+    void stripsNullExpressionThrowsException() {
 		assertThrows(IllegalArgumentException.class, () -> stripExpression(null));
 	}
 

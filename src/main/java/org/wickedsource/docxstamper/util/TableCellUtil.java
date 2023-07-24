@@ -14,7 +14,7 @@ public class TableCellUtil {
 	private static final ObjectFactory objectFactory = new ObjectFactory();
 
 	public static boolean hasNoParagraphOrTable(Tc cell) {
-		Predicate<Object> isP = e -> e instanceof P;
+		Predicate<Object> isP = P.class::isInstance;
 		Predicate<Object> isTbl = e -> e instanceof JAXBElement<?> jaxbElement && jaxbElement.getValue() instanceof Tbl;
 		return cell.getContent()
 				   .stream()

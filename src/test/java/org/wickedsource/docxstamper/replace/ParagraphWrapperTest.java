@@ -7,10 +7,10 @@ import org.wickedsource.docxstamper.util.RunUtil;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.wickedsource.docxstamper.util.ParagraphUtil.create;
 
-public class ParagraphWrapperTest {
+class ParagraphWrapperTest {
 
 	@Test
-	public void getTextReturnsAggregatedText() {
+	void getTextReturnsAggregatedText() {
 		ParagraphWrapper aggregator = loremIpsum();
 		assertEquals("lorem ipsum", aggregator.getText());
 	}
@@ -20,7 +20,7 @@ public class ParagraphWrapperTest {
 	}
 
 	@Test
-	public void getRunsReturnsAddedRuns() {
+	void getRunsReturnsAddedRuns() {
 		ParagraphWrapper aggregator = loremIpsum();
 		assertEquals(3, aggregator.getRuns().size());
 		assertEquals("lorem", RunUtil.getText(aggregator.getRuns().get(0)));
@@ -29,56 +29,56 @@ public class ParagraphWrapperTest {
 	}
 
 	@Test
-	public void placeholderSpansFullSingleRun() {
+	void placeholderSpansFullSingleRun() {
 		ParagraphWrapper wrapper = loremIpsum();
 		wrapper.replace("lorem", RunUtil.create(""));
 		assertEquals(" ipsum", wrapper.getText());
 	}
 
 	@Test
-	public void placeholderWithinSingleRun() {
+	void placeholderWithinSingleRun() {
 		ParagraphWrapper wrapper = new ParagraphWrapper(create("My name is ${name}."));
 		wrapper.replace("${name}", RunUtil.create("Bob"));
 		assertEquals("My name is Bob.", wrapper.getText());
 	}
 
 	@Test
-	public void placeholderAtStartOfSingleRun() {
+	void placeholderAtStartOfSingleRun() {
 		ParagraphWrapper wrapper = new ParagraphWrapper(create("${name} my name is."));
 		wrapper.replace("${name}", RunUtil.create("Yoda"));
 		assertEquals("Yoda my name is.", wrapper.getText());
 	}
 
 	@Test
-	public void placeholderAtEndOfSingleRun() {
+	void placeholderAtEndOfSingleRun() {
 		ParagraphWrapper wrapper = new ParagraphWrapper(create("My name is ${name}"));
 		wrapper.replace("${name}", RunUtil.create("Yoda"));
 		assertEquals("My name is Yoda", wrapper.getText());
 	}
 
 	@Test
-	public void placeholderWithinMultipleRuns() {
+	void placeholderWithinMultipleRuns() {
 		ParagraphWrapper wrapper = new ParagraphWrapper(create("My name is ${", "name", "}."));
 		wrapper.replace("${name}", RunUtil.create("Yoda"));
 		assertEquals("My name is Yoda.", wrapper.getText());
 	}
 
 	@Test
-	public void placeholderStartsWithinMultipleRuns() {
+	void placeholderStartsWithinMultipleRuns() {
 		ParagraphWrapper wrapper = new ParagraphWrapper(create("${", "name", "} my name is."));
 		wrapper.replace("${name}", RunUtil.create("Yoda"));
 		assertEquals("Yoda my name is.", wrapper.getText());
 	}
 
 	@Test
-	public void placeholderEndsWithinMultipleRuns() {
+	void placeholderEndsWithinMultipleRuns() {
 		ParagraphWrapper wrapper = new ParagraphWrapper(create("My name is ${", "name", "}"));
 		wrapper.replace("${name}", RunUtil.create("Yoda"));
 		assertEquals("My name is Yoda", wrapper.getText());
 	}
 
 	@Test
-	public void placeholderExactlySpansMultipleRuns() {
+	void placeholderExactlySpansMultipleRuns() {
 		ParagraphWrapper wrapper = new ParagraphWrapper(create("${", "name", "}"));
 		wrapper.replace("${name}", RunUtil.create("Yoda"));
 		assertEquals("Yoda", wrapper.getText());

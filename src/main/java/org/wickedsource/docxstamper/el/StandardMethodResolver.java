@@ -6,7 +6,6 @@ import org.springframework.expression.MethodExecutor;
 import org.springframework.expression.MethodResolver;
 import org.springframework.expression.TypedValue;
 import org.springframework.lang.NonNull;
-import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -15,23 +14,18 @@ import java.util.Optional;
 import java.util.function.Function;
 
 public class StandardMethodResolver implements MethodResolver {
-	private final boolean failOnUnresolvedExpression;
 	private final Map<Class<?>, Object> commentProcessors;
 	private final Map<Class<?>, Object> expressionFunctions;
+	private final Function<ReflectiveOperationException, TypedValue> onFail;
 
 	public StandardMethodResolver(
-			boolean failOnUnresolvedExpression,
 			Map<Class<?>, Object> commentProcessors,
-			Map<Class<?>, Object> expressionFunctions
+			Map<Class<?>, Object> expressionFunctions,
+			Function<ReflectiveOperationException, TypedValue> onResolutionFail
 	) {
-		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
 		this.commentProcessors = commentProcessors;
 		this.expressionFunctions = expressionFunctions;
-	}
-
-	private static TypedValue throwException(String name, ReflectiveOperationException exception) {
-		String message = String.format("Error calling method %s", name);
-		throw new DocxStamperException(message, exception);
+		this.onFail = onResolutionFail;
 	}
 
 	@Override
@@ -41,10 +35,6 @@ public class StandardMethodResolver implements MethodResolver {
 			@NonNull String name,
 			@NonNull List<TypeDescriptor> argumentTypes
 	) {
-		Function<ReflectiveOperationException, TypedValue> onFail = failOnUnresolvedExpression
-				? exception -> throwException(name, exception)
-				: exception -> new TypedValue(null);
-
 		return findCommentProcessorMethod(name, argumentTypes)
 				.or(() -> findExpressionContextMethod(name, argumentTypes))
 				.map(invoker -> new StandardMethodExecutor(invoker, onFail))
@@ -62,11 +52,9 @@ public class StandardMethodResolver implements MethodResolver {
 	private Optional<StandardMethodExecutor.Invoker> findMethodInMap(Map<Class<?>, Object> methodMap, String expectedName, List<TypeDescriptor> expectedArguments) {
 		for (Map.Entry<Class<?>, Object> entry : methodMap.entrySet()) {
 			Class<?> iface = entry.getKey();
-			for (Method actualMethod : iface.getDeclaredMethods()) {
-				if (methodEquals(actualMethod, expectedName, expectedArguments)) {
-					return Optional.of((args) -> actualMethod.invoke(entry.getValue(), args));
-				}
-			}
+			for (Method actualMethod : iface.getDeclaredMethods())
+				if (methodEquals(actualMethod, expectedName, expectedArguments))
+					return Optional.of(args -> actualMethod.invoke(entry.getValue(), args));
 		}
 		return Optional.empty();
 	}

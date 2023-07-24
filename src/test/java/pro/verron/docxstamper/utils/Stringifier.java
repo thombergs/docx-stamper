@@ -1,4 +1,4 @@
-package pro.verron.docxstamper;
+package pro.verron.docxstamper.utils;
 
 import jakarta.xml.bind.JAXBElement;
 import lombok.SneakyThrows;
@@ -13,7 +13,6 @@ import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
 import org.docx4j.wml.*;
-import org.wickedsource.docxstamper.util.RunCollector;
 
 import java.security.MessageDigest;
 import java.text.CharacterIterator;
@@ -98,6 +97,8 @@ public class Stringifier {
 			return ""; // do not serialize
 		if (o instanceof Br)
 			return "|BR|";
+		if (o instanceof R.Tab)
+			return "|TAB|";
 		if (o == null)
 			throw new RuntimeException("Unsupported run content: NULL");
 		throw new RuntimeException("Unsupported run content: " + o.getClass());

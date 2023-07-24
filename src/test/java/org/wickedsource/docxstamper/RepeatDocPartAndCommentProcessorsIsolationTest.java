@@ -2,6 +2,7 @@ package org.wickedsource.docxstamper;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,10 +11,10 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
-public class RepeatDocPartAndCommentProcessorsIsolationTest {
+class RepeatDocPartAndCommentProcessorsIsolationTest {
 
 	@Test
-	public void repeatDocPartShouldNotUseSameCommentProcessorInstancesForSubtemplate() {
+	void repeatDocPartShouldNotUseSameCommentProcessorInstancesForSubtemplate() {
 		var context = new HashMap<String, Object>();
 
 		var firstTable = new ArrayList<TableValue>();

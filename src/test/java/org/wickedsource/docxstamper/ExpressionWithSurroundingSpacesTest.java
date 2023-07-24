@@ -4,15 +4,16 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionWithSurroundingSpacesTest {
+class ExpressionWithSurroundingSpacesTest {
 
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Context();
 		var template = getClass().getResourceAsStream("ExpressionWithSurroundingSpacesTest.docx");
 		var stamper = new TestDocxStamper<Context>();

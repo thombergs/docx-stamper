@@ -9,18 +9,19 @@ import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ExpressionReplacementInTablesTest {
+class ExpressionReplacementInTablesTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Bart Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInTablesTest.docx");
 
-		var stamper = new TestDocxStamper<Name>();
+		var stamper = new TestDocxStamper<Name>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));
 		var document = stamper.stampAndLoad(template, context);
 		resolvedExpressionsAreReplacedInFirstLevelTable(document);
 		unresolvedExpressionsAreNotReplacedInFirstLevelTable(document);

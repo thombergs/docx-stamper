@@ -6,49 +6,49 @@ import org.wickedsource.docxstamper.util.RunUtil;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class IndexedRunTest {
+class IndexedRunTest {
 
 	@Test
-	public void isNotTouchedByRangeBeforeStart() {
+	void isNotTouchedByRangeBeforeStart() {
 		IndexedRun run = new IndexedRun(5, 10, 0, null);
 		assertFalse(run.isTouchedByRange(0, 4));
 	}
 
 	@Test
-	public void isNotTouchedByRangeAfterEnd() {
+	void isNotTouchedByRangeAfterEnd() {
 		IndexedRun run = new IndexedRun(5, 10, 0, null);
 		assertFalse(run.isTouchedByRange(11, 15));
 	}
 
 	@Test
-	public void isTouchedByRangeEndingAtStart() {
+	void isTouchedByRangeEndingAtStart() {
 		IndexedRun run = new IndexedRun(5, 10, 0, null);
 		assertTrue(run.isTouchedByRange(0, 5));
 		assertTrue(run.isTouchedByRange(4, 5));
 	}
 
 	@Test
-	public void isTouchedByRangeEndingAtEnd() {
+	void isTouchedByRangeEndingAtEnd() {
 		IndexedRun run = new IndexedRun(5, 10, 0, null);
 		assertTrue(run.isTouchedByRange(6, 10));
 		assertTrue(run.isTouchedByRange(9, 10));
 	}
 
 	@Test
-	public void isTouchedByRangeWithin() {
+	void isTouchedByRangeWithin() {
 		IndexedRun run = new IndexedRun(5, 10, 0, null);
 		assertTrue(run.isTouchedByRange(5, 7));
 	}
 
 	@Test
-	public void isTouchedByRangeBeforeStartAndAfterEnd() {
+	void isTouchedByRangeBeforeStartAndAfterEnd() {
 		IndexedRun run = new IndexedRun(5, 10, 0, null);
 		assertTrue(run.isTouchedByRange(4, 11));
 		assertTrue(run.isTouchedByRange(0, 15));
 	}
 
 	@Test
-	public void replaceWorksWithinRange() {
+	void replaceWorksWithinRange() {
 		IndexedRun run = new IndexedRun(5, 9, 0, RunUtil.createRun("ipsum"));
 		run.replace(5, 9, "lorem");
 		assertEquals("lorem", RunUtil.getText(run.getRun()));

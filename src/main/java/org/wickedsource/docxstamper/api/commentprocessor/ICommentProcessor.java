@@ -75,7 +75,11 @@ public interface ICommentProcessor {
 	 * to processors that need it (example : repeatDocPart)
 	 *
 	 * @param document DocX template being processed.
+	 * @deprecated the document is passed to the processor through the commitChange method now,
+	 * and will probably pe passed through the constructor in the future
 	 */
+
+	@Deprecated(since = "1.6.5", forRemoval = true)
 	void setDocument(WordprocessingMLPackage document);
 
 	/**

@@ -1,8 +1,7 @@
-package org.wickedsource.docxstamper;
+package pro.verron.docxstamper.utils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wickedsource.docxstamper.util.ThrowingSupplier;
 
 import java.io.*;
 import java.nio.file.Files;

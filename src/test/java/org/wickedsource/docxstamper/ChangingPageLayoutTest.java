@@ -6,6 +6,7 @@ import org.docx4j.wml.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.expression.MapAccessor;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,9 +17,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class ChangingPageLayoutTest {
+class ChangingPageLayoutTest {
 	@Test
-	public void shouldKeepSectionBreakOrientationInRepeatParagraphWithoutSectionBreakInsideComment() {
+	void shouldKeepSectionBreakOrientationInRepeatParagraphWithoutSectionBreakInsideComment() {
 		var context = Map.of("repeatValues", List.of(new Name("Homer"), new Name("Marge")));
 
 		var template = getClass().getResourceAsStream("ChangingPageLayoutOutsideRepeatParagraphTest.docx");
@@ -42,7 +43,7 @@ public class ChangingPageLayoutTest {
 	}
 
 	@Test
-	public void shouldKeepSectionBreakOrientationInRepeatParagraphWithSectionBreakInsideComment() throws IOException, Docx4JException {
+	void shouldKeepSectionBreakOrientationInRepeatParagraphWithSectionBreakInsideComment() throws IOException, Docx4JException {
 		Map<String, Object> context = new HashMap<>();
 
 		Name name1 = new Name("Homer");
@@ -101,7 +102,7 @@ public class ChangingPageLayoutTest {
 	}
 
 	@Test
-	public void shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideComment() throws IOException, Docx4JException {
+	void shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideComment() throws IOException, Docx4JException {
 		var context = Map.of(
 				"repeatValues", List.of(
 						new Name("Homer"),
@@ -135,7 +136,7 @@ public class ChangingPageLayoutTest {
 	}
 
 	@Test
-	public void shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideCommentAndTableAsLastElement() throws IOException, Docx4JException {
+	void shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideCommentAndTableAsLastElement() throws IOException, Docx4JException {
 		var context = Map.of(
 				"repeatValues", List.of(
 						new Name("Homer"),
@@ -170,7 +171,7 @@ public class ChangingPageLayoutTest {
 	}
 
 	@Test
-	public void shouldKeepPageBreakOrientationInRepeatDocPartWithoutSectionBreaksInsideComment() throws IOException, Docx4JException {
+	void shouldKeepPageBreakOrientationInRepeatDocPartWithoutSectionBreaksInsideComment() throws IOException, Docx4JException {
 		var context = Map.of(
 				"repeatValues", List.of(
 						new Name("Homer"),

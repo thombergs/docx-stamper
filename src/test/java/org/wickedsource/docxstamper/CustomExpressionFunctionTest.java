@@ -4,14 +4,15 @@ import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
+import pro.verron.docxstamper.utils.TestDocxStamper;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class CustomExpressionFunctionTest {
+class CustomExpressionFunctionTest {
 	@Test
-	public void test() throws Docx4JException, IOException {
+    void test() throws Docx4JException, IOException {
 		var context = new Name("Homer Simpson");
 		var template = getClass().getResourceAsStream("CustomExpressionFunction.docx");
 		var config = new DocxStamperConfiguration()

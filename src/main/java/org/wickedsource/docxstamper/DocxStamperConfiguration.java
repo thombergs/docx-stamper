@@ -1,16 +1,17 @@
 package org.wickedsource.docxstamper;
 
+import lombok.Getter;
+import org.springframework.expression.spel.SpelParserConfiguration;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
-import org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer;
+import org.wickedsource.docxstamper.el.DefaultEvaluationContextConfigurer;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IParagraphRepeatProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatDocPartProcessor;
 import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.table.ITableResolver;
-import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.replace.typeresolver.FallbackResolver;
 
 import java.util.*;
@@ -18,21 +19,23 @@ import java.util.*;
 /**
  * Provides configuration parameters for DocxStamper.
  */
+@Getter
 public class DocxStamperConfiguration {
 
-	private final Map<Class<?>, CommentProcessorFactory> commentProcessors = new HashMap<>();
-	private final Map<Class<?>, ITypeResolver> typeResolvers = new HashMap<>();
+	private final Map<Class<?>, CommentProcessorBuilder> commentProcessors = new HashMap<>();
+	private final Map<Class<?>, ITypeResolver<?>> typeResolvers = new HashMap<>();
 	private final Map<Class<?>, Object> expressionFunctions = new HashMap<>();
 	private final List<PreProcessor> preprocessors = new ArrayList<>();
 	private String lineBreakPlaceholder;
-	private EvaluationContextConfigurer evaluationContextConfigurer = new NoOpEvaluationContextConfigurer();
+	private EvaluationContextConfigurer evaluationContextConfigurer = new DefaultEvaluationContextConfigurer();
 	private boolean failOnUnresolvedExpression = true;
 	private boolean leaveEmptyOnExpressionError = false;
 	private boolean replaceUnresolvedExpressions = false;
 	private String unresolvedExpressionsDefaultValue = null;
 	private boolean replaceNullValues = false;
 	private String nullValuesDefault = null;
-	private ITypeResolver defaultTypeResolver = new FallbackResolver();
+	private ITypeResolver<Object> defaultTypeResolver = new FallbackResolver();
+	private SpelParserConfiguration spelParserConfiguration = new SpelParserConfiguration();
 
 	public DocxStamperConfiguration() {
 		org.wickedsource.docxstamper.processor.CommentProcessorFactory pf = new org.wickedsource.docxstamper.processor.CommentProcessorFactory(
@@ -45,22 +48,10 @@ public class DocxStamperConfiguration {
 		commentProcessors.put(IReplaceWithProcessor.class, pf::replaceWith);
 	}
 
-	public boolean isReplaceNullValues() {
-		return replaceNullValues;
-	}
-
-	public String getNullValuesDefault() {
-		return nullValuesDefault;
-	}
-
 	public Optional<String> nullReplacementValue() {
 		return replaceNullValues
 				? Optional.ofNullable(nullValuesDefault)
 				: Optional.empty();
-	}
-
-	public boolean isFailOnUnresolvedExpression() {
-		return failOnUnresolvedExpression;
 	}
 
 	/**
@@ -72,24 +63,8 @@ public class DocxStamperConfiguration {
 		return this;
 	}
 
-	public boolean isReplaceUnresolvedExpressions() {
-		return replaceUnresolvedExpressions;
-	}
-
-	public String getUnresolvedExpressionsDefaultValue() {
-		return unresolvedExpressionsDefaultValue;
-	}
-
-	public boolean isLeaveEmptyOnExpressionError() {
-		return leaveEmptyOnExpressionError;
-	}
-
-	public String getLineBreakPlaceholder() {
-		return lineBreakPlaceholder;
-	}
-
 	/**
-	 * The String provided as lineBreakPlaceholder will be replaces with a line break
+	 * The String provided as lineBreakPlaceholder will be replaced with a line break
 	 * when stamping a document. If no lineBreakPlaceholder is provided, no replacement
 	 * will take place.
 	 *
@@ -101,20 +76,14 @@ public class DocxStamperConfiguration {
 		return this;
 	}
 
-	public Map<Class<?>, Object> getExpressionFunctions() {
-		return expressionFunctions;
-	}
-
-	public EvaluationContextConfigurer getEvaluationContextConfigurer() {
-		return evaluationContextConfigurer;
-	}
-
 	/**
 	 * Provides an {@link EvaluationContextConfigurer} which may change the configuration of a Spring
 	 * {@link org.springframework.expression.EvaluationContext} which is used for evaluating expressions
 	 * in comments and text.
 	 *
 	 * @param evaluationContextConfigurer the configurer to use.
+	 * @apiNote you can use {@link org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer} to get the
+	 * previous configuration working
 	 */
 	public DocxStamperConfiguration setEvaluationContextConfigurer(EvaluationContextConfigurer evaluationContextConfigurer) {
 		this.evaluationContextConfigurer = evaluationContextConfigurer;
@@ -188,7 +157,7 @@ public class DocxStamperConfiguration {
 	 * @param resolver     the resolver to resolve objects of the given type.
 	 * @param <T>          the type resolved by the ITypeResolver.
 	 */
-	public <T> DocxStamperConfiguration addTypeResolver(Class<T> resolvedType, ITypeResolver resolver) {
+	public <T> DocxStamperConfiguration addTypeResolver(Class<T> resolvedType, ITypeResolver<T> resolver) {
 		this.typeResolvers.put(resolvedType, resolver);
 		return this;
 	}
@@ -214,7 +183,7 @@ public class DocxStamperConfiguration {
 	 */
 	public DocxStamperConfiguration addCommentProcessor(
 			Class<?> interfaceClass,
-			CommentProcessorFactory commentProcessorFactory
+			CommentProcessorBuilder commentProcessorFactory
 	) {
 		this.commentProcessors.put(interfaceClass, commentProcessorFactory);
 		return this;
@@ -230,32 +199,19 @@ public class DocxStamperConfiguration {
 		return new DocxStamper<>(this);
 	}
 
-	public Map<Class<?>, CommentProcessorFactory> getCommentProcessors() {
-		return commentProcessors;
-	}
-
-	Map<Class<?>, ITypeResolver> getTypeResolvers() {
-		return typeResolvers;
-	}
-
-	ITypeResolver getDefaultTypeResolver() {
-		return defaultTypeResolver;
-	}
-
-	public DocxStamperConfiguration setDefaultTypeResolver(ITypeResolver defaultTypeResolver) {
+	public DocxStamperConfiguration setDefaultTypeResolver(ITypeResolver<? super Object> defaultTypeResolver) {
 		this.defaultTypeResolver = defaultTypeResolver;
 		return this;
-	}
-
-	public List<PreProcessor> getPreprocessors() {
-		return preprocessors;
 	}
 
 	public void addPreprocessor(PreProcessor preprocessor) {
 		preprocessors.add(preprocessor);
 	}
 
-	interface CommentProcessorFactory {
-		Object create(PlaceholderReplacer placeholderReplacer);
+	public DocxStamperConfiguration setSpelParserConfiguration(SpelParserConfiguration spelParserConfiguration) {
+		this.spelParserConfiguration = spelParserConfiguration;
+		return this;
 	}
+
+
 }

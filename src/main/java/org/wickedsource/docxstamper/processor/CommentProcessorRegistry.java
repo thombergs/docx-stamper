@@ -17,7 +17,6 @@ import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
-import org.wickedsource.docxstamper.util.walk.CoordinatesWalker;
 
 import java.math.BigInteger;
 import java.util.*;
@@ -38,11 +37,16 @@ public class CommentProcessorRegistry {
 	private final boolean failOnUnresolvedExpression;
 	private final ExpressionResolver expressionResolver;
 
-	public CommentProcessorRegistry(PlaceholderReplacer placeholderReplacer, ExpressionResolver expressionResolver1, Map<Class<?>, Object> commentProcessors1, boolean failOnUnresolvedExpression1) {
+	public CommentProcessorRegistry(
+			PlaceholderReplacer placeholderReplacer,
+			ExpressionResolver expressionResolver,
+			Map<Class<?>, Object> commentProcessors,
+			boolean failOnUnresolvedExpression
+	) {
 		this.placeholderReplacer = placeholderReplacer;
-		this.expressionResolver = expressionResolver1;
-		commentProcessors = commentProcessors1;
-		failOnUnresolvedExpression = failOnUnresolvedExpression1;
+		this.expressionResolver = expressionResolver;
+		this.commentProcessors = commentProcessors;
+		this.failOnUnresolvedExpression = failOnUnresolvedExpression;
 	}
 
 	/**
@@ -58,7 +62,13 @@ public class CommentProcessorRegistry {
 		final Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
 		final List<CommentWrapper> proceedComments = new ArrayList<>();
 
-		CoordinatesWalker walker = new BaseCoordinatesWalker(document) {
+		new BaseCoordinatesWalker() {
+			@Override
+			protected void onRun(R run, P paragraph) {
+				runProcessorsOnRunComment(document, comments, expressionContext, paragraph, run)
+						.ifPresent(proceedComments::add);
+			}
+
 			@Override
 			protected void onParagraph(P paragraph) {
 				runProcessorsOnParagraphComment(document, comments, expressionContext, paragraph)
@@ -66,14 +76,7 @@ public class CommentProcessorRegistry {
 				runProcessorsOnInlineContent(expressionContext, paragraph);
 			}
 
-			@Override
-			protected void onRun(R run, P paragraph) {
-				runProcessorsOnRunComment(document, comments, expressionContext, paragraph, run)
-						.ifPresent(proceedComments::add);
-			}
-
-		};
-		walker.walk();
+		}.walk(document);
 
 		for (Object processor : commentProcessors.values()) {
 			((ICommentProcessor) processor).commitChanges(document);
@@ -81,6 +84,17 @@ public class CommentProcessorRegistry {
 		for (CommentWrapper commentWrapper : proceedComments) {
 			CommentUtil.deleteComment(commentWrapper);
 		}
+	}
+
+	private <T> Optional<CommentWrapper> runProcessorsOnRunComment(
+			WordprocessingMLPackage document,
+			Map<BigInteger, CommentWrapper> comments,
+			T expressionContext,
+			P paragraph,
+			R run
+	) {
+		var comment = CommentUtil.getCommentAround(run, document);
+		return comment.flatMap(c -> runCommentProcessors(comments, expressionContext, c, paragraph, run, document));
 	}
 
 	/**
@@ -146,17 +160,6 @@ public class CommentProcessorRegistry {
 		}
 	}
 
-	private <T> Optional<CommentWrapper> runProcessorsOnRunComment(
-			WordprocessingMLPackage document,
-			Map<BigInteger, CommentWrapper> comments,
-			T expressionContext,
-			P paragraph,
-			R run
-	) {
-		var comment = CommentUtil.getCommentAround(run, document);
-		return comment.flatMap(c -> runCommentProcessors(comments, expressionContext, c, paragraph, run, document));
-	}
-
 	private <T> Optional<CommentWrapper> runCommentProcessors(
 			Map<BigInteger, CommentWrapper> comments,
 			T expressionContext,
@@ -184,9 +187,7 @@ public class CommentProcessorRegistry {
 		try {
 			expressionResolver.resolveExpression(commentString, expressionContext);
 			comments.remove(comment.getId());
-			logger.debug(
-					String.format("Comment '%s' has been successfully processed by a comment processor.",
-								  commentString));
+			logger.debug("Comment {} has been successfully processed by a comment processor.", commentString);
 			return Optional.of(commentWrapper);
 		} catch (SpelEvaluationException | SpelParseException e) {
 			if (failOnUnresolvedExpression) {

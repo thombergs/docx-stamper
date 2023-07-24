@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pro.verron</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.6.4</version>
+    <version>1.6.5</version>
     <packaging>jar</packaging>
     <name>docx-stamper</name>
 
@@ -205,6 +205,8 @@
                     </dependency>
                 </dependencies>
             </plugin>
+                 
+         
 
             <plugin>
                 <groupId>org.jacoco</groupId>
@@ -223,6 +225,11 @@
                         <goals>
                             <goal>report</goal>
                         </goals>
+                                       <configuration>
+            <formats>
+              <format>XML</format>
+            </formats>
+          </configuration>
                     </execution>
                 </executions>
             </plugin>
