@@ -48,4 +48,4 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}          
           SONAR_HOST_URL: https://sonarcloud.io
-        run: mvn --batch-mode --no-transfer-progress package sonar:sonar -Dsonar.organization=verronpro
+        run: mvn --batch-mode --no-transfer-progress package org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.organization=verronpro
