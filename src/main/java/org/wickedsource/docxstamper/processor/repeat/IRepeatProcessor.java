@@ -2,6 +2,12 @@ package org.wickedsource.docxstamper.processor.repeat;
 
 import java.util.List;
 
+/**
+ * Interface for processors that can repeat a table row.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public interface IRepeatProcessor {
 
     /**

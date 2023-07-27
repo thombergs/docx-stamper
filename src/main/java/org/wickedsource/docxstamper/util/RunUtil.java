@@ -8,10 +8,15 @@ import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.util.Objects;
 
-
+/**
+ * Utility class to handle runs.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class RunUtil {
 
-	public static final String PRESERVE = "preserve";
+    private static final String PRESERVE = "preserve";
 	private static final ObjectFactory factory = Context.getWmlObjectFactory();
 
 	private RunUtil() {
@@ -116,13 +121,25 @@ public class RunUtil {
 		run.getContent().add(textObj);
 	}
 
+    /**
+     * Creates a text object with the given text.
+     *
+     * @param text the text to set.
+     * @return the newly created text object.
+     */
 	public static Text createText(String text) {
 		Text textObj = factory.createText();
 		textObj.setValue(text);
 		textObj.setSpace(PRESERVE); // make the text preserve spaces
 		return textObj;
-	}
+    }
 
+    /**
+     * Creates a new run with the given object as content.
+     *
+     * @param text the content of the run.
+     * @return the newly created run.
+	 */
 	public static R createRun(String text) {
 		R run = factory.createR();
 		setText(run, text);

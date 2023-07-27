@@ -16,6 +16,9 @@ import org.docx4j.wml.R;
  * To use your own type resolver, implement this interface and register your implementation by calling
  * DocxStamper.getTypeResolverRegistry().addTypeResolver().
  * </p>
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public interface ITypeResolver<T> {
     /**

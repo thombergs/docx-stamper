@@ -10,11 +10,18 @@ import org.wickedsource.docxstamper.processor.CommentProcessingException;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.ParagraphUtil;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+/**
+ * <p>TableResolver class.</p>
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class TableResolver extends BaseCommentProcessor implements ITableResolver {
 	private final Map<Tbl, StampTable> cols = new HashMap<>();
 	private final Function<Tbl, List<Object>> nullSupplier;
@@ -25,14 +32,28 @@ public class TableResolver extends BaseCommentProcessor implements ITableResolve
 		this.nullSupplier = nullSupplier;
 	}
 
+    /**
+     * Generate a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
+     *
+     * @param pr                   a {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} instance
+     * @param nullReplacementValue in case the value to interpret is <code>null</code>
+     * @return a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
+     */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr, String nullReplacementValue) {
 		return new TableResolver(pr, table -> List.of(ParagraphUtil.create(nullReplacementValue)));
-	}
+    }
 
+    /**
+     * Generate a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance where value is replaced by an empty list when <code>null</code>
+     *
+     * @param pr a {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} instance
+     * @return a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr) {
-		return new TableResolver(pr, List::of);
-	}
+        return new TableResolver(pr, table -> Collections.emptyList());
+    }
 
+    /** {@inheritDoc} */
 	@Override
 	public void resolveTable(StampTable givenTable) {
 		P p = getParagraph();
@@ -41,8 +62,9 @@ public class TableResolver extends BaseCommentProcessor implements ITableResolve
 			cols.put(table, givenTable);
 		}
 		throw new CommentProcessingException("Paragraph is not within a table!", p);
-	}
+    }
 
+    /** {@inheritDoc} */
 	@Override
 	public void commitChanges(WordprocessingMLPackage document) {
 		for (Map.Entry<Tbl, StampTable> entry : cols.entrySet()) {
@@ -114,8 +136,9 @@ public class TableResolver extends BaseCommentProcessor implements ITableResolve
 	private void setCellText(Tc tableCell, String content) {
 		tableCell.getContent().clear();
 		tableCell.getContent().add(ParagraphUtil.create(content));
-	}
+    }
 
+    /** {@inheritDoc} */
 	@Override
 	public void reset() {
 		cols.clear();

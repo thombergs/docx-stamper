@@ -21,6 +21,12 @@ import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Replaces expressions in a document with the values provided by the {@link org.wickedsource.docxstamper.el.ExpressionResolver}.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class PlaceholderReplacer {
     private final Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
     private final ExpressionResolver expressionResolver;
@@ -33,6 +39,24 @@ public class PlaceholderReplacer {
     private final String unresolvedExpressionsDefaultValue;
     private final String lineBreakPlaceholder;
 
+    /**
+     * <p>Constructor for PlaceholderReplacer.</p>
+     *
+     * @param typeResolverRegistry              the registry containing all available type resolvers.
+     * @param expressionResolver                the expression resolver used to resolve expressions in the document.
+     * @param replaceNullValues                 if set to true, null values are replaced with the value provided in the
+     *                                          nullValuesDefault parameter.
+     * @param nullValuesDefault                 the value to use when replacing null values.
+     * @param failOnUnresolvedExpression        if set to true, an exception is thrown when an expression cannot be
+     *                                          resolved.
+     * @param replaceUnresolvedExpressions      if set to true, expressions that cannot be resolved are replaced by the
+     *                                          value provided in the unresolvedExpressionsDefaultValue parameter.
+     * @param unresolvedExpressionsDefaultValue the value to use when replacing unresolved expressions.
+     * @param leaveEmptyOnExpressionError       if set to true, expressions that cannot be resolved are replaced by an
+     *                                          empty string.
+     * @param lineBreakPlaceholder              if set to a non-null value, all occurrences of this placeholder will be
+     *                                          replaced with a line break.
+     */
     public PlaceholderReplacer(
             TypeResolverRegistry typeResolverRegistry,
             ExpressionResolver expressionResolver,
@@ -71,6 +95,13 @@ public class PlaceholderReplacer {
         }.walk(document);
     }
 
+    /**
+     * Finds expressions in the given paragraph and replaces them with the values provided by the expression resolver.
+     *
+     * @param p                 the paragraph in which to replace expressions.
+     * @param expressionContext the context root
+     * @param document          the document in which to replace all expressions.
+     */
     @SuppressWarnings("unchecked")
     public void resolveExpressionsForParagraph(P p, Object expressionContext, WordprocessingMLPackage document) {
         ParagraphWrapper paragraphWrapper = new ParagraphWrapper(p);
@@ -137,6 +168,13 @@ public class PlaceholderReplacer {
         return leaveEmptyOnExpressionError;
     }
 
+    /**
+     * Replaces expressions in the given paragraph and replaces them with the values provided by the expression resolver.
+     *
+     * @param p                 the paragraph in which to replace expressions.
+     * @param placeholder       the placeholder to replace.
+     * @param replacementObject the object to replace the placeholder with.
+     */
     public void replace(ParagraphWrapper p, String placeholder, String replacementObject) {
         Optional.ofNullable(replacementObject)
                 .map(replacementStr -> RunUtil.create(replacementStr, p.getParagraph()))

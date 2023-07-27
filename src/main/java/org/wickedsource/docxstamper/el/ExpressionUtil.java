@@ -10,6 +10,12 @@ import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
 
+/**
+ * Utility class for working with expressions.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 @UtilityClass
 public class ExpressionUtil {
 	private static final Pattern VARIABLE_EXPRESSION_PATTERN = Pattern.compile("\\$\\{(.*?)}");
@@ -26,7 +32,7 @@ public class ExpressionUtil {
 	}
 
 	private static List<String> findExpressions(@NonNull String text, Pattern pattern) {
-		if (text.equals(""))
+        if (text.isEmpty())
 			return emptyList();
 		Matcher matcher = pattern.matcher(text);
 		int index = 0;

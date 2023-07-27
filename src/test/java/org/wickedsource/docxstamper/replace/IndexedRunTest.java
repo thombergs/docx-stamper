@@ -51,10 +51,10 @@ class IndexedRunTest {
 	void replaceWorksWithinRange() {
 		IndexedRun run = new IndexedRun(5, 9, 0, RunUtil.createRun("ipsum"));
 		run.replace(5, 9, "lorem");
-		assertEquals("lorem", RunUtil.getText(run.getRun()));
+        assertEquals("lorem", RunUtil.getText(run.run()));
 		run.replace(8, 9, "el");
-		assertEquals("lorel", RunUtil.getText(run.getRun()));
+        assertEquals("lorel", RunUtil.getText(run.run()));
 		run.replace(8, 9, "em ipsum");
-		assertEquals("lorem ipsum", RunUtil.getText(run.getRun()));
+        assertEquals("lorem ipsum", RunUtil.getText(run.run()));
 	}
 }

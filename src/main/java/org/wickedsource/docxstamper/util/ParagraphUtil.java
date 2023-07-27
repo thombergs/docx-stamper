@@ -1,16 +1,24 @@
 package org.wickedsource.docxstamper.util;
 
-import lombok.experimental.UtilityClass;
 import org.docx4j.jaxb.Context;
 import org.docx4j.wml.ObjectFactory;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 
-@UtilityClass
+/**
+ * Utility class for creating paragraphs.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class ParagraphUtil {
 
-	private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
+    private ParagraphUtil() {
+        throw new DocxStamperException("Utility class shouldn't be instantiated");
+    }
 
+	private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
 
 	/**
 	 * Creates a new paragraph.

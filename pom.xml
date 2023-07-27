@@ -150,7 +150,6 @@
                 <version>3.5.0</version>
                 <configuration>
                     <encoding>UTF-8</encoding>
-                    <failOnError>false</failOnError>
                 </configuration>
                 <executions>
                     <execution>
@@ -205,8 +204,6 @@
                     </dependency>
                 </dependencies>
             </plugin>
-                 
-         
 
             <plugin>
                 <groupId>org.jacoco</groupId>

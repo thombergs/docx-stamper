@@ -13,6 +13,12 @@ import org.wickedsource.docxstamper.api.DocxStamperException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Wraps a comment and the comment range anchors that delimit the comment in the document.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 @Getter
 public class CommentWrapper {
 
@@ -42,6 +48,11 @@ public class CommentWrapper {
 		this.children.addAll(children);
 	}
 
+	/**
+	 * <p>getParent.</p>
+	 *
+	 * @return the comment's author.
+	 */
 	public ContentAccessor getParent() {
 		return findGreatestCommonParent(
 				getCommentRangeEnd().getParent(),
@@ -79,6 +90,11 @@ public class CommentWrapper {
 		return searchFrom;
 	}
 
+	/**
+	 * <p>getRepeatElements.</p>
+	 *
+	 * @return the elements in the document that are between the comment range anchors.
+	 */
 	public List<Object> getRepeatElements() {
 		List<Object> repeatElements = new ArrayList<>();
 		boolean startFound = false;
@@ -99,7 +115,7 @@ public class CommentWrapper {
 
 	private void removeCommentAnchorsFromFinalElements(List<Object> finalRepeatElements) {
 		ContentAccessor fakeBody = () -> finalRepeatElements;
-		CommentUtil.deleteCommentFromElement(fakeBody, getComment().getId());
+		CommentUtil.deleteCommentFromElement(fakeBody.getContent(), getComment().getId());
 	}
 
 	private void extractedSubComments(List<Comments.Comment> commentList, Set<CommentWrapper> commentWrapperChildren) {
@@ -112,6 +128,13 @@ public class CommentWrapper {
 		}
 	}
 
+	/**
+	 * Creates a new document containing only the elements between the comment range anchors.
+	 *
+	 * @param document the document from which to copy the elements.
+	 * @return a new document containing only the elements between the comment range anchors.
+	 * @throws java.lang.Exception if the subtemplate could not be created.
+	 */
 	public WordprocessingMLPackage getSubTemplate(WordprocessingMLPackage document) throws Exception {
 		List<Object> repeatElements = getRepeatElements();
 
@@ -139,6 +162,13 @@ public class CommentWrapper {
 		return subDocument;
 	}
 
+	/**
+	 * Creates a new document containing only the elements between the comment range anchors.
+	 * If the subtemplate could not be created, a {@link org.wickedsource.docxstamper.api.DocxStamperException} is thrown.
+	 *
+	 * @param document the document from which to copy the elements.
+	 * @return a new document containing only the elements between the comment range anchors.
+	 */
 	public WordprocessingMLPackage tryBuildingSubtemplate(WordprocessingMLPackage document) {
 		try {
 			return getSubTemplate(document);

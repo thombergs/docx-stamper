@@ -21,7 +21,6 @@ import org.wickedsource.docxstamper.replace.typeresolver.LocalTimeResolver;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 import org.wickedsource.docxstamper.replace.typeresolver.image.ImageResolver;
 import pro.verron.docxstamper.OpcStamper;
-import pro.verron.docxstamper.StamperFactory;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -39,6 +38,9 @@ import java.util.function.Function;
  * Main class of the docx-stamper library. This class can be used to "stamp" .docx templates
  * to create a .docx document filled with custom data at runtime.
  * </p>
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	private final List<PreProcessor> preprocessors;
@@ -48,7 +50,7 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	/**
 	 * Creates a new DocxStamper with the default configuration.
 	 *
-	 * @deprecated since 1.6.4, use {@link StamperFactory#newDocxStamper()} or {@link StamperFactory#nopreprocessingDocxStamper()} instead.
+     * @deprecated since 1.6.4, use {@link pro.verron.docxstamper.StamperFactory#newDocxStamper()} or {@link pro.verron.docxstamper.StamperFactory#nopreprocessingDocxStamper()} instead.
 	 */
 	@Deprecated(since = "1.6.4", forRemoval = true)
 	public DocxStamper() {
@@ -165,6 +167,8 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	}
 
 	/**
+     * {@inheritDoc}
+     *
 	 * <p>
 	 * Reads in a .docx template and "stamps" it into the given OutputStream, using the specified context object to
 	 * fill out any expressions it finds.
@@ -191,11 +195,6 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	 * If you need a wider vocabulary of methods available in the comments, you can create your own ICommentProcessor
 	 * and register it via getCommentProcessorRegistry().addCommentProcessor().
 	 * </p>
-	 *
-	 * @param template    the .docx template.
-	 * @param contextRoot the context root object against which all expressions found in the template are evaluated.
-	 * @param out         the output stream in which to write the resulting .docx document.
-	 * @throws DocxStamperException in case of an error.
 	 */
 	public void stamp(InputStream template, Object contextRoot, OutputStream out) throws DocxStamperException {
 		try {
@@ -208,13 +207,10 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 
 
 	/**
+     * {@inheritDoc}
+     *
 	 * Same as stamp(InputStream, T, OutputStream) except that you may pass in a DOCX4J document as a template instead
 	 * of an InputStream.
-	 *
-	 * @param document    the .docx template.
-	 * @param contextRoot the context root object against which all expressions found in the template are evaluated.
-	 * @param out         the output stream in which to write the resulting .docx document.
-	 * @throws DocxStamperException in case of an error.
 	 */
 	@Override
 	public void stamp(WordprocessingMLPackage document, Object contextRoot, OutputStream out) throws DocxStamperException {

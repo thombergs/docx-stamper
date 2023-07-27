@@ -3,6 +3,9 @@ package org.wickedsource.docxstamper.processor.table;
 /**
  * This interface is used to resolve a table in the template document.
  * The table is passed to the resolveTable method and will be used to fill an existing Tbl object in the document.
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public interface ITableResolver {
 	/**

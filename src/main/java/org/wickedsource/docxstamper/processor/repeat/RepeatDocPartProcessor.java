@@ -31,8 +31,17 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 import static org.wickedsource.docxstamper.util.DocumentUtil.walkObjectsAndImportImages;
 
+/**
+ * This class is responsible for processing the &lt;ds:repeat&gt; tag.
+ * It uses the {@link pro.verron.docxstamper.OpcStamper} to stamp the sub document and then
+ * copies the resulting sub document to the correct position in the
+ * main document.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
-	public static final ThreadFactory THREAD_FACTORY = Executors.defaultThreadFactory();
+    private static final ThreadFactory THREAD_FACTORY = Executors.defaultThreadFactory();
 	private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
 	private final OpcStamper<WordprocessingMLPackage> stamper;
 	private final Map<CommentWrapper, List<Object>> contexts = new HashMap<>();
@@ -48,14 +57,30 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 		this.nullSupplier = nullSupplier;
 	}
 
+    /**
+     * <p>newInstance.</p>
+     *
+     * @param pr                   the placeholder replacer
+     * @param stamper              the stamper
+     * @param nullReplacementValue the value to use when the placeholder is null
+     * @return a new instance of this processor
+     */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr, OpcStamper<WordprocessingMLPackage> stamper, String nullReplacementValue) {
 		return new RepeatDocPartProcessor(pr, stamper, () -> singletonList(ParagraphUtil.create(nullReplacementValue)));
-	}
+    }
 
+    /**
+     * <p>newInstance.</p>
+     *
+     * @param pr      the placeholder replacer
+     * @param stamper the stamper
+     * @return a new instance of this processor
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr, OpcStamper<WordprocessingMLPackage> stamper) {
 		return new RepeatDocPartProcessor(pr, stamper, Collections::emptyList);
-	}
+    }
 
+    /** {@inheritDoc} */
 	@Override
 	public void repeatDocPart(List<Object> contexts) {
 		if (contexts == null)
@@ -66,9 +91,10 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
 		if (!repeatElements.isEmpty()) {
 			this.contexts.put(currentCommentWrapper, contexts);
-		}
-	}
+        }
+    }
 
+    /** {@inheritDoc} */
 	@SneakyThrows
 	@Override
 	public void commitChanges(WordprocessingMLPackage document) {
@@ -194,8 +220,9 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
 	private void stamp(Object context, WordprocessingMLPackage template, OutputStream outputStream) {
 		stamper.stamp(template, context, outputStream);
-	}
+    }
 
+    /** {@inheritDoc} */
 	@Override
 	public void reset() {
 		contexts.clear();

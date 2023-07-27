@@ -2,41 +2,26 @@ package org.wickedsource.docxstamper.util;
 
 import org.docx4j.wml.R;
 
-public class IndexedRun {
-
-    private final int startIndex;
-
-    private final int endIndex;
-
-    private final int indexInParent;
-
-    private final R run;
-
-    public IndexedRun(int startIndex, int endIndex, int indexInParent, R run) {
-        this.startIndex = startIndex;
-        this.endIndex = endIndex;
-        this.indexInParent = indexInParent;
-        this.run = run;
-    }
-
-    public int getStartIndex() {
-        return startIndex;
-    }
-
-    public int getEndIndex() {
-        return endIndex;
-    }
-
-    public int getIndexInParent() {
-        return indexInParent;
-    }
-
-    public R getRun() {
-        return run;
-    }
+/**
+ * Represents a run (i.e. a text fragment) in a paragraph. The run is indexed relative to the containing paragraph
+ * and also relative to the containing document.
+ */
+public record IndexedRun(int startIndex, int endIndex, int indexInParent, R run) {
 
     /**
      * Determines whether the specified range of start and end index touches this run.
+     * <p>
+     * Example:
+     * <p>
+     * Given this run: [a,b,c,d,e,f,g,h,i,j]
+     * <p>
+     * And the range [2,5]
+     * <p>
+     * This method will return true, because the range touches the run at the indices 2, 3, 4 and 5.
+     *
+     * @param globalStartIndex the global index (meaning the index relative to multiple aggregated runs) at which to start the range.
+     * @param globalEndIndex   the global index (meaning the index relative to multiple aggregated runs) at which to end the range.
+     * @return true, if the range touches this run, false otherwise.
      */
     public boolean isTouchedByRange(int globalStartIndex, int globalEndIndex) {
         return ((startIndex >= globalStartIndex) && (startIndex <= globalEndIndex))
@@ -59,7 +44,7 @@ public class IndexedRun {
         text = text.substring(0, localStartIndex);
         text += replacement;
         String runText = RunUtil.getText(run);
-        if (runText.length() > 0) {
+        if (!runText.isEmpty()) {
             text += RunUtil.getText(run).substring(localEndIndex + 1);
         }
         RunUtil.setText(run, text);
@@ -78,10 +63,7 @@ public class IndexedRun {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof IndexedRun)) return false;
-
-        IndexedRun that = (IndexedRun) o;
-
+        if (!(o instanceof IndexedRun that)) return false;
         if (endIndex != that.endIndex) return false;
         if (indexInParent != that.indexInParent) return false;
         return startIndex == that.startIndex;

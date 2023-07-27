@@ -29,6 +29,9 @@ import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
  * ICommentProcessor must implement an interface which has to be specified at
  * registration time. Provides several getter methods to access the registered
  * ICommentProcessors.
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public class CommentProcessorRegistry {
 	private final Logger logger = LoggerFactory.getLogger(CommentProcessorRegistry.class);
@@ -37,6 +40,14 @@ public class CommentProcessorRegistry {
 	private final boolean failOnUnresolvedExpression;
 	private final ExpressionResolver expressionResolver;
 
+	/**
+	 * Creates a new CommentProcessorRegistry.
+	 *
+	 * @param placeholderReplacer        the placeholder replacer
+	 * @param expressionResolver         the expression resolver
+	 * @param commentProcessors          the comment processors
+	 * @param failOnUnresolvedExpression whether to fail on unresolved expressions
+	 */
 	public CommentProcessorRegistry(
 			PlaceholderReplacer placeholderReplacer,
 			ExpressionResolver expressionResolver,
@@ -57,6 +68,7 @@ public class CommentProcessorRegistry {
 	 *
 	 * @param document          the docx document over which to run the registered ICommentProcessors.
 	 * @param expressionContext the context root object
+	 * @param <T> a T class
 	 */
 	public <T> void runProcessors(final WordprocessingMLPackage document, final T expressionContext) {
 		final Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
@@ -203,6 +215,9 @@ public class CommentProcessorRegistry {
 		return Optional.empty();
 	}
 
+	/**
+	 * Resets all registered ICommentProcessors.
+	 */
 	public void reset() {
 		for (Object processor : commentProcessors.values()) {
 			((ICommentProcessor) processor).reset();

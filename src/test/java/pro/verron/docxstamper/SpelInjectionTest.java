@@ -12,8 +12,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class SpelInjectionTest {
 
+    /***
+     *
+     * @throws IOException
+     */
+
     @Test
     void test() throws IOException {
+
         var context = Contexts.empty();
         try (var template = getClass().getResourceAsStream("SpelInjectionTest.docx")) {
             var stamper = new TestDocxStamper<>();

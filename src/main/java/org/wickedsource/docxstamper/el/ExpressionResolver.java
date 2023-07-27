@@ -7,10 +7,23 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
 
+/**
+ * Resolves expressions against a given context object. Expressions can be either SpEL expressions or simple property
+ * expressions.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class ExpressionResolver {
 	private final ExpressionParser parser;
 	private final StandardEvaluationContext evaluationContext;
 
+    /**
+     * Creates a new ExpressionResolver with the given SpEL parser configuration.
+     *
+     * @param spelParserConfiguration   the configuration for the SpEL parser.
+     * @param standardEvaluationContext a {@link org.springframework.expression.spel.support.StandardEvaluationContext} object
+     */
 	public ExpressionResolver(
 			StandardEvaluationContext standardEvaluationContext,
 			SpelParserConfiguration spelParserConfiguration
