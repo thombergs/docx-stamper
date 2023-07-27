@@ -184,8 +184,8 @@ public class CommentUtil {
     /**
      * Returns the string value of the specified comment object.
      *
-     * @param items
-     * @param commentId a {@link BigInteger} object
+     * @param items a {@link java.util.List} object
+     * @param commentId a {@link java.math.BigInteger} object
      */
     public static void deleteCommentFromElement(List<Object> items, BigInteger commentId) {
         List<Object> elementsToRemove = new ArrayList<>();

@@ -134,7 +134,7 @@ public class DocxImageExtractor {
      *
      * @param run run containing the embedded drawing.
      * @return a {@link java.lang.String} object
-     */
+	 */
 	public String getRunDrawingFilename(R run) {
 		return getPic(run).getNvPicPr().getCNvPr().getName();
     }
@@ -144,7 +144,7 @@ public class DocxImageExtractor {
      *
      * @param run run containing the embedded drawing.
      * @return a {@link java.lang.String} object
-     */
+	 */
 	public String getRunDrawingAltText(R run) {
 		return getPic(run).getNvPicPr().getCNvPr().getDescr();
     }
@@ -154,7 +154,7 @@ public class DocxImageExtractor {
      *
      * @param run run containing the embedded drawing.
      * @return a {@link java.lang.Integer} object
-     */
+	 */
 	public Integer getRunDrawingMaxWidth(R run) {
 		return (int) getPic(run).getSpPr().getXfrm().getExt().getCx();
 	}

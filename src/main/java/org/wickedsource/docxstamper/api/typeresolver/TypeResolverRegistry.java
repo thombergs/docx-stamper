@@ -17,8 +17,6 @@ public class TypeResolverRegistry {
     /**
      * -- GETTER --
      * Gets the default ITypeResolver.
-     *
-     * @return the default ITypeResolver.
      */
     @Getter
 	private final ITypeResolver<Object> defaultResolver;
@@ -38,7 +36,7 @@ public class TypeResolverRegistry {
      * @param resolvedType the type for which the resolver is registered.
      * @param resolver     the ITypeResolver implementation to register.
      * @param <T>          the type resolved by the ITypeResolver.
-     */
+	 */
 	public <T> void registerTypeResolver(Class<T> resolvedType, ITypeResolver<T> resolver) {
 		typeResolversByType.put(resolvedType, resolver);
 	}
