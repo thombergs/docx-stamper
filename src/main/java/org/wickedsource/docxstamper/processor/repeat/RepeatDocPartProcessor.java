@@ -80,19 +80,19 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 		return new RepeatDocPartProcessor(pr, stamper, Collections::emptyList);
 	}
 
-	private static void recursivelyReplaceImages(R r, Map<R, R> replacements) {
-		Queue<R> q = new ArrayDeque<>();
+	private static void recursivelyReplaceImages(ContentAccessor r, Map<R, R> replacements) {
+		Queue<ContentAccessor> q = new ArrayDeque<>();
 		q.add(r);
 		while (!q.isEmpty()) {
-			R run = q.remove();
+			ContentAccessor run = q.remove();
 			if (replacements.containsKey(run)
-					&& ((Object) run) instanceof Child child
+					&& run instanceof Child child
 					&& child.getParent() instanceof ContentAccessor parent) {
 				List<Object> parentContent = parent.getContent();
 				parentContent.add(parentContent.indexOf(run), replacements.get(run));
 				parentContent.remove(run);
-			} else if (((Object) run) instanceof ContentAccessor ca) {
-				q.addAll(ca.getContent().st);
+			} else {
+				q.addAll(run.getContent().stream().filter(ContentAccessor.class::isInstance).map(ContentAccessor.class::cast).toList());
 			}
 		}
 	}
@@ -123,7 +123,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 		var changes = new ArrayList<>();
 		for (WordprocessingMLPackage subDocument : subDocuments) {
 			var os = documentAsInsertableElements(subDocument, oddNumberOfBreaks, previousSectionBreak);
-			os.forEach(o -> recursivelyReplaceImages(o, replacements));
+			os.stream().filter(ContentAccessor.class::isInstance).map(ContentAccessor.class::cast).forEach(o -> recursivelyReplaceImages(o, replacements));
 			os.forEach(c -> setParentIfPossible(c, gcp));
 			changes.addAll(os);
 		}
