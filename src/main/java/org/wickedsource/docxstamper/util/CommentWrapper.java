@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper.util;
 
-import lombok.Getter;
 import org.docx4j.XmlUtils;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -13,7 +12,12 @@ import org.wickedsource.docxstamper.api.DocxStamperException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Getter
+/**
+ * <p>CommentWrapper class.</p>
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class CommentWrapper {
 
 	private final Set<CommentWrapper> children = new HashSet<>();
@@ -42,6 +46,11 @@ public class CommentWrapper {
 		this.children.addAll(children);
 	}
 
+	/**
+	 * <p>getParent.</p>
+	 *
+	 * @return the comment's author.
+	 */
 	public ContentAccessor getParent() {
 		return findGreatestCommonParent(
 				getCommentRangeEnd().getParent(),
@@ -79,6 +88,11 @@ public class CommentWrapper {
 		return searchFrom;
 	}
 
+	/**
+	 * <p>getRepeatElements.</p>
+	 *
+	 * @return the elements in the document that are between the comment range anchors.
+	 */
 	public List<Object> getRepeatElements() {
 		List<Object> repeatElements = new ArrayList<>();
 		boolean startFound = false;
@@ -99,7 +113,7 @@ public class CommentWrapper {
 
 	private void removeCommentAnchorsFromFinalElements(List<Object> finalRepeatElements) {
 		ContentAccessor fakeBody = () -> finalRepeatElements;
-		CommentUtil.deleteCommentFromElement(fakeBody, getComment().getId());
+		CommentUtil.deleteCommentFromElement(fakeBody.getContent(), getComment().getId());
 	}
 
 	private void extractedSubComments(List<Comments.Comment> commentList, Set<CommentWrapper> commentWrapperChildren) {
@@ -112,6 +126,13 @@ public class CommentWrapper {
 		}
 	}
 
+	/**
+	 * Creates a new document containing only the elements between the comment range anchors.
+	 *
+	 * @param document the document from which to copy the elements.
+	 * @return a new document containing only the elements between the comment range anchors.
+	 * @throws java.lang.Exception if the subtemplate could not be created.
+	 */
 	public WordprocessingMLPackage getSubTemplate(WordprocessingMLPackage document) throws Exception {
 		List<Object> repeatElements = getRepeatElements();
 
@@ -139,11 +160,63 @@ public class CommentWrapper {
 		return subDocument;
 	}
 
+	/**
+	 * Creates a new document containing only the elements between the comment range anchors.
+	 * If the subtemplate could not be created, a {@link org.wickedsource.docxstamper.api.DocxStamperException} is thrown.
+	 *
+	 * @param document the document from which to copy the elements.
+	 * @return a new document containing only the elements between the comment range anchors.
+	 */
 	public WordprocessingMLPackage tryBuildingSubtemplate(WordprocessingMLPackage document) {
 		try {
 			return getSubTemplate(document);
 		} catch (Exception e) {
 			throw new DocxStamperException(e);
 		}
+	}
+
+	/**
+	 * <p>Getter for the field <code>commentRangeEnd</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.CommentRangeEnd} object
+	 */
+	public CommentRangeEnd getCommentRangeEnd() {
+		return commentRangeEnd;
+	}
+
+	/**
+	 * <p>Getter for the field <code>commentRangeStart</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.CommentRangeStart} object
+	 */
+	public CommentRangeStart getCommentRangeStart() {
+		return commentRangeStart;
+	}
+
+	/**
+	 * <p>Getter for the field <code>commentReference</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.R.CommentReference} object
+	 */
+	public R.CommentReference getCommentReference() {
+		return commentReference;
+	}
+
+	/**
+	 * <p>Getter for the field <code>children</code>.</p>
+	 *
+	 * @return a {@link java.util.Set} object
+	 */
+	public Set<CommentWrapper> getChildren() {
+		return children;
+	}
+
+	/**
+	 * <p>Getter for the field <code>comment</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.Comments.Comment} object
+	 */
+	public Comments.Comment getComment() {
+		return comment;
 	}
 }

@@ -19,120 +19,117 @@ import static org.wickedsource.docxstamper.util.DocumentUtil.getTableFromObject;
 
 class ObjectDeleterTest {
 
-	@Test
+    @Test
     void deletesCorrectGlobalParagraphs() throws Docx4JException, IOException {
-		var template = getClass().getResourceAsStream("ObjectDeleterTest-globalParagraphs.docx");
-		var in = WordprocessingMLPackage.load(template);
-		var coordinates = getParagraphsFromObject(in);
+        var template = getClass().getResourceAsStream("ObjectDeleterTest-globalParagraphs.docx");
+        var in = WordprocessingMLPackage.load(template);
+        var coordinates = getParagraphsFromObject(in);
 
-		var deleter = new ObjectDeleter();
-		deleter.deleteParagraph(coordinates.get(0));
-		deleter.deleteParagraph(coordinates.get(2));
-		deleter.deleteParagraph(coordinates.get(3));
+        ObjectDeleter.deleteParagraph(coordinates.get(0));
+        ObjectDeleter.deleteParagraph(coordinates.get(2));
+        ObjectDeleter.deleteParagraph(coordinates.get(3));
 
-		var document = saveAndLoadDocument(in);
-		assertEquals(2, document.getMainDocumentPart().getContent().size());
-		assertEquals("This is the second paragraph.",
-					 new ParagraphWrapper((P) document.getMainDocumentPart()
-													  .getContent()
-													  .get(0)).getText());
-		assertEquals("This is the fifth paragraph.",
-					 new ParagraphWrapper((P) document.getMainDocumentPart()
-													  .getContent()
-													  .get(1)).getText());
-	}
+        var document = saveAndLoadDocument(in);
+        assertEquals(2, document.getMainDocumentPart().getContent().size());
+        assertEquals("This is the second paragraph.",
+                new ParagraphWrapper((P) document.getMainDocumentPart()
+                        .getContent()
+                        .get(0)).getText());
+        assertEquals("This is the fifth paragraph.",
+                new ParagraphWrapper((P) document.getMainDocumentPart()
+                        .getContent()
+                        .get(1)).getText());
+    }
 
-	/**
-	 * Saves the given document into a temporal ByteArrayOutputStream and loads it from there again. This is useful to
-	 * check if changes in the Docx4j object structure are really transported into the XML of the .docx file.
-	 *
-	 * @param document the document to save and load again.
-	 * @return the document after it has been saved and loaded again.
-	 */
-	public WordprocessingMLPackage saveAndLoadDocument(WordprocessingMLPackage document) throws Docx4JException, IOException {
-		var out = IOStreams.getOutputStream();
-		document.save(out);
-		var in = IOStreams.getInputStream(out);
-		return WordprocessingMLPackage.load(in);
-	}
+    /**
+     * Saves the given document into a temporal ByteArrayOutputStream and loads it from there again. This is useful to
+     * check if changes in the Docx4j object structure are really transported into the XML of the .docx file.
+     *
+     * @param document the document to save and load again.
+     * @return the document after it has been saved and loaded again.
+     * @throws org.docx4j.openpackaging.exceptions.Docx4JException if any.
+     * @throws java.io.IOException if any.
+     */
+    public WordprocessingMLPackage saveAndLoadDocument(WordprocessingMLPackage document) throws Docx4JException, IOException {
+        var out = IOStreams.getOutputStream();
+        document.save(out);
+        var in = IOStreams.getInputStream(out);
+        return WordprocessingMLPackage.load(in);
+    }
 
-	@Test
+    @Test
     void deletesCorrectParagraphsInTableCells() throws Docx4JException, IOException {
-		InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-paragraphsInTableCells.docx");
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
-		final List<P> coordinates = getParagraphsFromObject(getTableFromObject(document));
+        InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-paragraphsInTableCells.docx");
+        WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
+        final List<P> coordinates = getParagraphsFromObject(getTableFromObject(document));
 
-		ObjectDeleter deleter = new ObjectDeleter();
-		deleter.deleteParagraph(coordinates.get(1));
-		deleter.deleteParagraph(coordinates.get(2));
-		deleter.deleteParagraph(coordinates.get(4));
-		deleter.deleteParagraph(coordinates.get(5));
-		deleter.deleteParagraph(coordinates.get(8));
-		deleter.deleteParagraph(coordinates.get(11));
+        ObjectDeleter.deleteParagraph(coordinates.get(1));
+        ObjectDeleter.deleteParagraph(coordinates.get(2));
+        ObjectDeleter.deleteParagraph(coordinates.get(4));
+        ObjectDeleter.deleteParagraph(coordinates.get(5));
+        ObjectDeleter.deleteParagraph(coordinates.get(8));
+        ObjectDeleter.deleteParagraph(coordinates.get(11));
 
-		WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
-		List<Tc> cellCoordinates = DocumentUtil.getTableCellsFromObject(savedDocument);
+        WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
+        List<Tc> cellCoordinates = DocumentUtil.getTableCellsFromObject(savedDocument);
 
-		assertEquals("0 This paragraph stays.",
-					 new ParagraphWrapper((P) cellCoordinates.get(0).getContent().get(0)).getText());
-		assertEquals("", new ParagraphWrapper((P) cellCoordinates.get(1).getContent().get(0)).getText());
-		assertEquals("3 This is the second paragraph.",
-					 new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(0)).getText());
-		assertEquals("6 This is the fifth paragraph.",
-					 new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(1)).getText());
-		assertEquals("7 This is the first paragraph.",
-					 new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(0)).getText());
-		assertEquals("9 This is the third paragraph.",
-					 new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(1)).getText());
-		assertEquals("10 This is the fourth paragraph.",
-					 new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(2)).getText());
-	}
+        assertEquals("0 This paragraph stays.",
+                new ParagraphWrapper((P) cellCoordinates.get(0).getContent().get(0)).getText());
+        assertEquals("", new ParagraphWrapper((P) cellCoordinates.get(1).getContent().get(0)).getText());
+        assertEquals("3 This is the second paragraph.",
+                new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(0)).getText());
+        assertEquals("6 This is the fifth paragraph.",
+                new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(1)).getText());
+        assertEquals("7 This is the first paragraph.",
+                new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(0)).getText());
+        assertEquals("9 This is the third paragraph.",
+                new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(1)).getText());
+        assertEquals("10 This is the fourth paragraph.",
+                new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(2)).getText());
+    }
 
-	@Test
+    @Test
     void deletesCorrectGlobalTables() throws Docx4JException, IOException {
-		InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tables.docx");
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
-		final List<Tbl> coordinates = DocumentUtil.getTableFromObject(document);
+        InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tables.docx");
+        WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
+        final List<Tbl> coordinates = DocumentUtil.getTableFromObject(document);
 
-		ObjectDeleter deleter = new ObjectDeleter();
-		deleter.deleteTable(coordinates.get(1));
-		deleter.deleteTable(coordinates.get(3));
+        ObjectDeleter.deleteTable(coordinates.get(1));
+        ObjectDeleter.deleteTable(coordinates.get(3));
 
-		WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
+        WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
 
-		List<Tbl> newTableCoordinates = DocumentUtil.getTableFromObject(savedDocument);
-		assertEquals(2, newTableCoordinates.size());
+        List<Tbl> newTableCoordinates = DocumentUtil.getTableFromObject(savedDocument);
+        assertEquals(2, newTableCoordinates.size());
 
-		List<Tc> cellCoordinates = DocumentUtil.getTableCellsFromObject(savedDocument);
-		assertEquals("This", new ParagraphWrapper((P) cellCoordinates.get(0).getContent().get(0)).getText());
-		assertEquals("Table", new ParagraphWrapper((P) cellCoordinates.get(1).getContent().get(0)).getText());
-		assertEquals("Stays", new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(0)).getText());
-		assertEquals("!", new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(0)).getText());
-		assertEquals("This table stays",
-					 new ParagraphWrapper((P) cellCoordinates.get(4).getContent().get(0)).getText());
-	}
+        List<Tc> cellCoordinates = DocumentUtil.getTableCellsFromObject(savedDocument);
+        assertEquals("This", new ParagraphWrapper((P) cellCoordinates.get(0).getContent().get(0)).getText());
+        assertEquals("Table", new ParagraphWrapper((P) cellCoordinates.get(1).getContent().get(0)).getText());
+        assertEquals("Stays", new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(0)).getText());
+        assertEquals("!", new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(0)).getText());
+        assertEquals("This table stays", new ParagraphWrapper((P) cellCoordinates.get(4).getContent().get(0)).getText());
+    }
 
-	@Test
+    @Test
     void deletesCorrectTableRows() throws Docx4JException, IOException {
-		InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tableRows.docx");
-		WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
-		final List<Tr> rowCoordinates = DocumentUtil.getTableRowsFromObject(document);
+        InputStream template = getClass().getResourceAsStream("ObjectDeleterTest-tableRows.docx");
+        WordprocessingMLPackage document = WordprocessingMLPackage.load(template);
+        final List<Tr> rowCoordinates = DocumentUtil.getTableRowsFromObject(document);
 
-		ObjectDeleter deleter = new ObjectDeleter();
-		deleter.deleteTableRow(rowCoordinates.get(2));
-		deleter.deleteTableRow(rowCoordinates.get(4));
+        ObjectDeleter.deleteTableRow(rowCoordinates.get(2));
+        ObjectDeleter.deleteTableRow(rowCoordinates.get(4));
 
-		WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
+        WordprocessingMLPackage savedDocument = saveAndLoadDocument(document);
 
-		List<Tr> newRowCoordinates = DocumentUtil.getTableRowsFromObject(savedDocument);
-		assertEquals(3, newRowCoordinates.size());
+        List<Tr> newRowCoordinates = DocumentUtil.getTableRowsFromObject(savedDocument);
+        assertEquals(3, newRowCoordinates.size());
 
-		List<Tc> cellCoordinates = DocumentUtil.getTableCellsFromObject(savedDocument);
-		assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(0).getContent().get(0)).getText());
-		assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(1).getContent().get(0)).getText());
-		assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(0)).getText());
-		assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(0)).getText());
-		assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(4).getContent().get(0)).getText());
-		assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(5).getContent().get(0)).getText());
-	}
+        List<Tc> cellCoordinates = DocumentUtil.getTableCellsFromObject(savedDocument);
+        assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(0).getContent().get(0)).getText());
+        assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(1).getContent().get(0)).getText());
+        assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(2).getContent().get(0)).getText());
+        assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(3).getContent().get(0)).getText());
+        assertEquals("This row", new ParagraphWrapper((P) cellCoordinates.get(4).getContent().get(0)).getText());
+        assertEquals("Stays!", new ParagraphWrapper((P) cellCoordinates.get(5).getContent().get(0)).getText());
+    }
 }

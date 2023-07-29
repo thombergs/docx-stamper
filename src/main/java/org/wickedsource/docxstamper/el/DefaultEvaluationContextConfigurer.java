@@ -11,10 +11,16 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * {@link EvaluationContextConfigurer} that has a better default security,
+ * {@link org.wickedsource.docxstamper.api.EvaluationContextConfigurer} that has a better default security,
  * especially doesn't allow Especially known injections.
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public class DefaultEvaluationContextConfigurer implements EvaluationContextConfigurer {
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void configureEvaluationContext(StandardEvaluationContext context) {
         TypeLocator typeLocator = typeName -> {

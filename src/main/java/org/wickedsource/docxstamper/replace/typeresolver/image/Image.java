@@ -8,19 +8,20 @@ import java.io.InputStream;
 
 /**
  * This class describes an image which will be inserted into document.
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public class Image {
 
     private final byte[] imageBytes;
-
-    private String filename;
-
-    private String altText;
-
     private Integer maxWidth;
 
     /**
+     * <p>Constructor for Image.</p>
+     *
      * @param in - content of the image as InputStream
+     * @throws java.io.IOException if any.
      */
     public Image(InputStream in) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -29,8 +30,11 @@ public class Image {
     }
 
     /**
+     * <p>Constructor for Image.</p>
+     *
      * @param in - content of the image as InputStream
      * @param maxWidth - max width of the image in twip
+     * @throws java.io.IOException if any.
      */
     public Image(InputStream in, Integer maxWidth) throws IOException {
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -40,6 +44,8 @@ public class Image {
     }
 
     /**
+     * <p>Constructor for Image.</p>
+     *
      * @param imageBytes - content of the image as array of the bytes
      */
     public Image(byte[] imageBytes) {
@@ -47,6 +53,8 @@ public class Image {
     }
 
     /**
+     * <p>Constructor for Image.</p>
+     *
      * @param imageBytes - content of the image as array of the bytes
      * @param maxWidth - max width of the image in twip
      */
@@ -55,28 +63,21 @@ public class Image {
         this.maxWidth = maxWidth;
     }
 
-    public String getFilename() {
-        return filename;
-    }
-
     /**
-     *Returns the expected alternative text to display for user that can't see the image itself.
- 
-     */
-    public String getAltText() {
-        return altText;
-    }
-
-    public byte[] getImageBytes() {
-        return imageBytes;
-    }
-
-    /**
-     * The expected max width for this image
+     * <p>Getter for the field <code>maxWidth</code>.</p>
      *
-     * @return max width in twip, or null.
+     * @return a {@link java.lang.Integer} object
      */
     public Integer getMaxWidth() {
         return maxWidth;
+    }
+
+    /**
+     * <p>Getter for the field <code>imageBytes</code>.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
+    public byte[] getImageBytes() {
+        return imageBytes;
     }
 }

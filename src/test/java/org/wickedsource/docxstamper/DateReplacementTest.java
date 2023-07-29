@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
@@ -17,8 +16,7 @@ class DateReplacementTest {
 	@Test
 	void test() throws Docx4JException, IOException {
 		var now = new Date();
-		var context = new DateContext();
-		context.setDate(now);
+		var context = new DateContext(now);
 
 		var template = getClass().getResourceAsStream("DateReplacementTest.docx");
 		var stamper = new TestDocxStamper<>();
@@ -29,13 +27,6 @@ class DateReplacementTest {
 		assertEquals("Today is: " + new SimpleDateFormat("dd.MM.yyyy").format(now), p.getText());
 	}
 
-	@Getter
-	public static class DateContext {
-
-		private Date date;
-
-		public void setDate(Date date) {
-			this.date = date;
-		}
+	public record DateContext(Date date) {
 	}
 }

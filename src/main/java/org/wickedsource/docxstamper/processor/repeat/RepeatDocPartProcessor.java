@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper.processor.repeat;
 
-import lombok.SneakyThrows;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -31,9 +30,19 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toMap;
 import static org.wickedsource.docxstamper.util.DocumentUtil.walkObjectsAndImportImages;
 
+/**
+ * This class is responsible for processing the &lt;ds:repeat&gt; tag.
+ * It uses the {@link pro.verron.docxstamper.OpcStamper} to stamp the sub document and then
+ * copies the resulting sub document to the correct position in the
+ * main document.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
-	public static final ThreadFactory THREAD_FACTORY = Executors.defaultThreadFactory();
+	private static final ThreadFactory threadFactory = Executors.defaultThreadFactory();
 	private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
+
 	private final OpcStamper<WordprocessingMLPackage> stamper;
 	private final Map<CommentWrapper, List<Object>> contexts = new HashMap<>();
 	private final Supplier<? extends List<?>> nullSupplier;
@@ -48,14 +57,52 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 		this.nullSupplier = nullSupplier;
 	}
 
-	public static ICommentProcessor newInstance(PlaceholderReplacer pr, OpcStamper<WordprocessingMLPackage> stamper, String nullReplacementValue) {
-		return new RepeatDocPartProcessor(pr, stamper, () -> singletonList(ParagraphUtil.create(nullReplacementValue)));
+	/**
+	 * <p>newInstance.</p>
+	 *
+	 * @param pr                   the placeholder replacer
+	 * @param stamper              the stamper
+	 * @param nullReplacementValue the value to use when the placeholder is null
+	 * @return a new instance of this processor
+	 */
+	public static ICommentProcessor newInstance(
+			PlaceholderReplacer pr,
+			OpcStamper<WordprocessingMLPackage> stamper,
+			String nullReplacementValue
+	) {
+		Supplier<List<?>> nullSupplier = () -> singletonList(ParagraphUtil.create(nullReplacementValue));
+		return new RepeatDocPartProcessor(pr, stamper, nullSupplier);
 	}
 
+	/**
+	 * <p>newInstance.</p>
+	 *
+	 * @param pr      the placeholder replacer
+	 * @param stamper the stamper
+	 * @return a new instance of this processor
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr, OpcStamper<WordprocessingMLPackage> stamper) {
 		return new RepeatDocPartProcessor(pr, stamper, Collections::emptyList);
 	}
 
+	private static void recursivelyReplaceImages(ContentAccessor r, Map<R, R> replacements) {
+		Queue<ContentAccessor> q = new ArrayDeque<>();
+		q.add(r);
+		while (!q.isEmpty()) {
+			ContentAccessor run = q.remove();
+			if (replacements.containsKey(run)
+					&& run instanceof Child child
+					&& child.getParent() instanceof ContentAccessor parent) {
+				List<Object> parentContent = parent.getContent();
+				parentContent.add(parentContent.indexOf(run), replacements.get(run));
+				parentContent.remove(run);
+			} else {
+				q.addAll(run.getContent().stream().filter(ContentAccessor.class::isInstance).map(ContentAccessor.class::cast).toList());
+			}
+		}
+	}
+
+	/** {@inheritDoc} */
 	@Override
 	public void repeatDocPart(List<Object> contexts) {
 		if (contexts == null)
@@ -66,34 +113,6 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 
 		if (!repeatElements.isEmpty()) {
 			this.contexts.put(currentCommentWrapper, contexts);
-		}
-	}
-
-	@SneakyThrows
-	@Override
-	public void commitChanges(WordprocessingMLPackage document) {
-		for (Entry<CommentWrapper, List<Object>> entry : this.contexts.entrySet()) {
-			CommentWrapper commentWrapper = entry.getKey();
-			List<Object> expressionContexts = entry.getValue();
-			ContentAccessor gcp = Objects.requireNonNull(commentWrapper.getParent());
-			List<Object> repeatElements = commentWrapper.getRepeatElements();
-			WordprocessingMLPackage subTemplate = commentWrapper.tryBuildingSubtemplate(document);
-			SectPr previousSectionBreak = SectionUtil.getPreviousSectionBreakIfPresent(repeatElements.get(0), gcp);
-			boolean oddNumberOfBreaks = SectionUtil.isOddNumberOfSectionBreaks(repeatElements);
-
-			List<?> changes = expressionContexts == null
-					? nullSupplier.get()
-					: stampSubDocuments(document,
-										expressionContexts,
-										gcp,
-										subTemplate,
-										previousSectionBreak,
-										oddNumberOfBreaks);
-
-			List<Object> gcpContent = gcp.getContent();
-			int index = gcpContent.indexOf(repeatElements.get(0));
-			gcpContent.addAll(index, changes);
-			gcpContent.removeAll(repeatElements);
 		}
 	}
 
@@ -109,7 +128,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 		var changes = new ArrayList<>();
 		for (WordprocessingMLPackage subDocument : subDocuments) {
 			var os = documentAsInsertableElements(subDocument, oddNumberOfBreaks, previousSectionBreak);
-			os.forEach(o -> recursivelyReplaceImages(o, replacements));
+			os.stream().filter(ContentAccessor.class::isInstance).map(ContentAccessor.class::cast).forEach(o -> recursivelyReplaceImages(o, replacements));
 			os.forEach(c -> setParentIfPossible(c, gcp));
 			changes.addAll(os);
 		}
@@ -146,20 +165,33 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 		return inserts;
 	}
 
-	private static void recursivelyReplaceImages(Object o, Map<R, R> replacements) {
-		Queue<Object> q = new ArrayDeque<>();
-		q.add(o);
-		while (!q.isEmpty()) {
-			Object current = q.remove();
-			if (replacements.containsKey(current)
-					&& current instanceof Child child
-					&& child.getParent() instanceof ContentAccessor parent) {
-				List<Object> parentContent = parent.getContent();
-				parentContent.add(parentContent.indexOf(current), replacements.get(current));
-				parentContent.remove(current);
-			} else if (current instanceof ContentAccessor ca) {
-				q.addAll(ca.getContent());
-			}
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void commitChanges(WordprocessingMLPackage document) {
+		for (Entry<CommentWrapper, List<Object>> entry : this.contexts.entrySet()) {
+			CommentWrapper commentWrapper = entry.getKey();
+			List<Object> expressionContexts = entry.getValue();
+			ContentAccessor gcp = Objects.requireNonNull(commentWrapper.getParent());
+			List<Object> repeatElements = commentWrapper.getRepeatElements();
+			WordprocessingMLPackage subTemplate = commentWrapper.tryBuildingSubtemplate(document);
+			SectPr previousSectionBreak = SectionUtil.getPreviousSectionBreakIfPresent(repeatElements.get(0), gcp);
+			boolean oddNumberOfBreaks = SectionUtil.isOddNumberOfSectionBreaks(repeatElements);
+
+			List<?> changes = expressionContexts == null
+					? nullSupplier.get()
+					: stampSubDocuments(document,
+					expressionContexts,
+					gcp,
+					subTemplate,
+					previousSectionBreak,
+					oddNumberOfBreaks);
+
+			List<Object> gcpContent = gcp.getContent();
+			int index = gcpContent.indexOf(repeatElements.get(0));
+			gcpContent.addAll(index, changes);
+			gcpContent.removeAll(repeatElements);
 		}
 	}
 
@@ -173,7 +205,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 				PipedOutputStream os = new PipedOutputStream();
 				PipedInputStream is = new PipedInputStream(os)
 		) {
-			Thread thread = THREAD_FACTORY.newThread(() -> outputter.accept(os));
+			Thread thread = threadFactory.newThread(() -> outputter.accept(os));
 			thread.start();
 			WordprocessingMLPackage wordprocessingMLPackage = WordprocessingMLPackage.load(is);
 			thread.join();
@@ -196,6 +228,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 		stamper.stamp(template, context, outputStream);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void reset() {
 		contexts.clear();

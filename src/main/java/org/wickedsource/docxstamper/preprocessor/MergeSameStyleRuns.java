@@ -15,9 +15,15 @@ import java.util.Objects;
 
 /**
  * Merges runs with the same style that are next to each other.
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public class MergeSameStyleRuns implements PreProcessor {
 
+    /**
+     * {@inheritDoc}
+     */
 	@Override
 	public void process(WordprocessingMLPackage document) {
 		var mainDocumentPart = document.getMainDocumentPart();

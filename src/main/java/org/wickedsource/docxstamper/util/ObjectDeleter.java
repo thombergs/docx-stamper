@@ -1,40 +1,49 @@
 package org.wickedsource.docxstamper.util;
 
 import jakarta.xml.bind.JAXBElement;
-import org.docx4j.XmlUtils;
 import org.docx4j.wml.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.util.Iterator;
 
+/**
+ * Utility class for deleting objects from a {@link org.docx4j.wml.Document}.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class ObjectDeleter {
-	private final Logger logger = LoggerFactory.getLogger(ObjectDeleter.class);
+	private static final Logger log = LoggerFactory.getLogger(ObjectDeleter.class);
 
-	public void deleteObject(Object object) {
-		if (object instanceof P p) {
-			deleteParagraph(p);
-		} else {
-			Object unwrappedObject = XmlUtils.unwrap(object);
-			if (unwrappedObject instanceof Tbl tbl) {
-				deleteTable(tbl);
-			}
-		}
+    private ObjectDeleter() {
+        throw new DocxStamperException("Utility class shouldn't be instantiated");
 	}
 
-	public void deleteParagraph(P paragraph) {
+    /**
+     * Deletes the given paragraph from the document.
+     *
+     * @param paragraph the paragraph to delete.
+     */
+    public static void deleteParagraph(P paragraph) {
 		if (paragraph.getParent() instanceof Tc parentCell) {
 			// paragraph within a table cell
-            deleteFromCell(parentCell, paragraph);
+            ObjectDeleter.deleteFromCell(parentCell, paragraph);
 		} else {
 			((ContentAccessor) paragraph.getParent()).getContent().remove(paragraph);
-		}
-	}
+        }
+    }
 
-	public void deleteTable(Tbl table) {
+    /**
+     * Deletes the given table from the document.
+     *
+     * @param table the table to delete.
+     */
+    public static void deleteTable(Tbl table) {
 		if (table.getParent() instanceof Tc parentCell) {
 			// nested table within a table cell
-            deleteFromCell(parentCell, table);
+            ObjectDeleter.deleteFromCell(parentCell, table);
 		} else {
 			// global table
 			((ContentAccessor) table.getParent()).getContent().remove(table.getParent());
@@ -45,20 +54,20 @@ public class ObjectDeleter {
 				if (next instanceof JAXBElement element && element.getValue().equals(table)) {
 					iterator.remove();
 					break;
-				}
-			}
-		}
-	}
+                }
+            }
+        }
+    }
 
-	private void deleteFromCell(Tc cell, P paragraph) {
+    private static void deleteFromCell(Tc cell, P paragraph) {
 		cell.getContent().remove(paragraph);
 		if (TableCellUtil.hasNoParagraphOrTable(cell)) {
 			TableCellUtil.addEmptyParagraph(cell);
 		}
 		// TODO: find out why border lines are removed in some cells after having deleted a paragraph
-	}
+    }
 
-	private void deleteFromCell(Tc cell, Object obj) {
+    private static void deleteFromCell(Tc cell, Object obj) {
 		if (!(obj instanceof Tbl || obj instanceof P)) {
 			throw new AssertionError("Only delete Tables or Paragraphs with this method.");
 		}
@@ -67,13 +76,18 @@ public class ObjectDeleter {
 			TableCellUtil.addEmptyParagraph(cell);
 		}
 		// TODO: find out why border lines are removed in some cells after having deleted a paragraph
-	}
+    }
 
-	public void deleteTableRow(Tr tableRow) {
+    /**
+     * Deletes the given table row from the document.
+     *
+     * @param tableRow the table row to delete.
+     */
+    public static void deleteTableRow(Tr tableRow) {
 		if (tableRow.getParent() instanceof Tbl table) {
             table.getContent().remove(tableRow);
-		} else {
-			logger.error("Table row is not contained within a table. Unable to remove");
+        } else {
+            log.error("Table row is not contained within a table. Unable to remove");
 		}
 	}
 

@@ -18,10 +18,23 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.singletonList;
 
+/**
+ * This class is used to repeat paragraphs and tables.
+ * <p>
+ * It is used internally by the DocxStamper and should not be instantiated by
+ * clients.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IParagraphRepeatProcessor {
 	private final Supplier<? extends List<? extends P>> nullSupplier;
 	private Map<P, Paragraphs> pToRepeat = new HashMap<>();
 
+	/**
+	 * @param placeholderReplacer replaces placeholders with values
+	 * @param nullSupplier        supplies a list of paragraphs if the list of objects to repeat is null
+	 */
 	private ParagraphRepeatProcessor(
 			PlaceholderReplacer placeholderReplacer,
 			Supplier<? extends List<? extends P>> nullSupplier
@@ -30,37 +43,35 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 		this.nullSupplier = nullSupplier;
 	}
 
+	/**
+	 * <p>newInstance.</p>
+	 *
+	 * @param pr              replaces placeholders with values
+	 * @param nullReplacement replaces null values
+	 * @return a new instance of ParagraphRepeatProcessor
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr, String nullReplacement) {
 		return new ParagraphRepeatProcessor(pr, () -> singletonList(ParagraphUtil.create(nullReplacement)));
 	}
 
+	/**
+	 * <p>newInstance.</p>
+	 *
+	 * @param placeholderReplacer replaces placeholders with values
+	 * @return a new instance of ParagraphRepeatProcessor
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer placeholderReplacer) {
 		return new ParagraphRepeatProcessor(placeholderReplacer, Collections::emptyList);
 	}
 
-	@Override
-	public void repeatParagraph(List<Object> objects) {
-		P paragraph = getParagraph();
-
-		Deque<P> paragraphs = getParagraphsInsideComment(paragraph);
-
-		Paragraphs toRepeat = new Paragraphs();
-		toRepeat.commentWrapper = getCurrentCommentWrapper();
-		toRepeat.data = new ArrayDeque<>(objects);
-		toRepeat.paragraphs = paragraphs;
-		toRepeat.sectionBreakBefore = SectionUtil.getPreviousSectionBreakIfPresent(paragraph,
-																				   (ContentAccessor) paragraph.getParent());
-		toRepeat.firstParagraphSectionBreak = SectionUtil.getParagraphSectionBreak(paragraph);
-		toRepeat.hasOddSectionBreaks = SectionUtil.isOddNumberOfSectionBreaks(new ArrayList<>(toRepeat.paragraphs));
-
-		if (paragraph.getPPr() != null && paragraph.getPPr().getSectPr() != null) {
-			// we need to clear the first paragraph's section break to be able to control how to repeat it
-			paragraph.getPPr().setSectPr(null);
-		}
-
-		pToRepeat.put(paragraph, toRepeat);
-	}
-
+	/**
+	 * Returns all paragraphs inside the comment of the given paragraph.
+	 * <p>
+	 * If the paragraph is not inside a comment, the given paragraph is returned.
+	 *
+	 * @param paragraph the paragraph to analyze
+	 * @return all paragraphs inside the comment of the given paragraph
+	 */
 	public static Deque<P> getParagraphsInsideComment(P paragraph) {
 		BigInteger commentId = null;
 		boolean foundEnd = false;
@@ -100,24 +111,35 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 		return paragraphs;
 	}
 
-	@Override
-	public void commitChanges(WordprocessingMLPackage document) {
-		for (Map.Entry<P, Paragraphs> entry : pToRepeat.entrySet()) {
-			P currentP = entry.getKey();
-			ContentAccessor parent = (ContentAccessor) currentP.getParent();
-			List<Object> parentContent = parent.getContent();
-			int index = parentContent.indexOf(currentP);
-			if (index < 0) throw new DocxStamperException("Impossible");
-
-			Paragraphs paragraphsToRepeat = entry.getValue();
-			Deque<Object> expressionContexts = Objects.requireNonNull(paragraphsToRepeat).data;
-			Deque<P> collection = expressionContexts == null
-					? new ArrayDeque<>(nullSupplier.get())
-					: generateParagraphsToAdd(document, paragraphsToRepeat, expressionContexts);
-			restoreFirstSectionBreakIfNeeded(paragraphsToRepeat, collection);
-			parentContent.addAll(index, collection);
-			parentContent.removeAll(paragraphsToRepeat.paragraphs);
+	private static void restoreFirstSectionBreakIfNeeded(Paragraphs paragraphs, Deque<P> paragraphsToAdd) {
+		if (paragraphs.firstParagraphSectionBreak != null) {
+			P breakP = paragraphsToAdd.getLast();
+			SectionUtil.applySectionBreakToParagraph(paragraphs.firstParagraphSectionBreak, breakP);
 		}
+	}
+
+	/** {@inheritDoc} */
+	@Override
+	public void repeatParagraph(List<Object> objects) {
+		P paragraph = getParagraph();
+
+		Deque<P> paragraphs = getParagraphsInsideComment(paragraph);
+
+		Paragraphs toRepeat = new Paragraphs();
+		toRepeat.commentWrapper = getCurrentCommentWrapper();
+		toRepeat.data = new ArrayDeque<>(objects);
+		toRepeat.paragraphs = paragraphs;
+		toRepeat.sectionBreakBefore = SectionUtil.getPreviousSectionBreakIfPresent(paragraph,
+				(ContentAccessor) paragraph.getParent());
+		toRepeat.firstParagraphSectionBreak = SectionUtil.getParagraphSectionBreak(paragraph);
+		toRepeat.hasOddSectionBreaks = SectionUtil.isOddNumberOfSectionBreaks(new ArrayList<>(toRepeat.paragraphs));
+
+		if (paragraph.getPPr() != null && paragraph.getPPr().getSectPr() != null) {
+			// we need to clear the first paragraph's section break to be able to control how to repeat it
+			paragraph.getPPr().setSectPr(null);
+		}
+
+		pToRepeat.put(paragraph, toRepeat);
 	}
 
 	private Deque<P> generateParagraphsToAdd(WordprocessingMLPackage document, Paragraphs paragraphs, Deque<Object> expressionContexts) {
@@ -138,7 +160,7 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 					SectionUtil.applySectionBreakToParagraph(paragraphs.sectionBreakBefore, pClone);
 				}
 
-				CommentUtil.deleteCommentFromElement(pClone, paragraphs.commentWrapper.getComment().getId());
+				CommentUtil.deleteCommentFromElement(pClone.getContent(), paragraphs.commentWrapper.getComment().getId());
 				placeholderReplacer.resolveExpressionsForParagraph(pClone, expressionContext, document);
 				paragraphsToAdd.add(pClone);
 			}
@@ -146,13 +168,30 @@ public class ParagraphRepeatProcessor extends BaseCommentProcessor implements IP
 		return paragraphsToAdd;
 	}
 
-	private static void restoreFirstSectionBreakIfNeeded(Paragraphs paragraphs, Deque<P> paragraphsToAdd) {
-		if (paragraphs.firstParagraphSectionBreak != null) {
-			P breakP = paragraphsToAdd.getLast();
-			SectionUtil.applySectionBreakToParagraph(paragraphs.firstParagraphSectionBreak, breakP);
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void commitChanges(WordprocessingMLPackage document) {
+		for (Map.Entry<P, Paragraphs> entry : pToRepeat.entrySet()) {
+			P currentP = entry.getKey();
+			ContentAccessor parent = (ContentAccessor) currentP.getParent();
+			List<Object> parentContent = parent.getContent();
+			int index = parentContent.indexOf(currentP);
+			if (index < 0) throw new DocxStamperException("Impossible");
+
+			Paragraphs paragraphsToRepeat = entry.getValue();
+			Deque<Object> expressionContexts = Objects.requireNonNull(paragraphsToRepeat).data;
+			Deque<P> collection = expressionContexts == null
+					? new ArrayDeque<>(nullSupplier.get())
+					: generateParagraphsToAdd(document, paragraphsToRepeat, expressionContexts);
+			restoreFirstSectionBreakIfNeeded(paragraphsToRepeat, collection);
+			parentContent.addAll(index, collection);
+			parentContent.removeAll(paragraphsToRepeat.paragraphs);
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void reset() {
 		pToRepeat = new HashMap<>();

@@ -82,6 +82,11 @@ class ChangingPageLayoutTest {
 		assertThatNoCommentOrReferenceRemains(result);
 	}
 
+	/**
+	 * <p>assertThatNoCommentOrReferenceRemains.</p>
+	 *
+	 * @param document a {@link org.docx4j.openpackaging.packages.WordprocessingMLPackage} object
+	 */
 	public void assertThatNoCommentOrReferenceRemains(WordprocessingMLPackage document) {
 		new BaseDocumentWalker(document.getMainDocumentPart()) {
 			@Override

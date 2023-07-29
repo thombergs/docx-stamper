@@ -29,6 +29,9 @@ import org.wickedsource.docxstamper.util.CommentWrapper;
  * that were commented bold.</p>
  * <p><strong>3. Registering you comment processor with DocxStamper</strong><br/>
  * Register your comment processor in DocxStamper by calling DocxStamperConfiguration#addCommentProcessor().</p>
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public interface ICommentProcessor {
 
@@ -86,4 +89,11 @@ public interface ICommentProcessor {
 	 * Resets all state in the comment processor so that it can be re-used in another stamping process.
 	 */
 	void reset();
+
+	/**
+	 * <p>getCurrentRun.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.R} object
+	 */
+	R getCurrentRun();
 }

@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.*;
@@ -20,13 +19,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RepeatDocPartTest {
 	@Test
     void test() throws Docx4JException, IOException {
-		var context = new Characters();
-		context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
-		context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
-		context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
-		context.getCharacters().add(new Character("Kent Brockman", "Harry Shearer"));
-		context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
-		context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
+		var context = new Characters(List.of(
+				new Character("Homer Simpson", "Dan Castellaneta"),
+				new Character("Marge Simpson", "Julie Kavner"),
+				new Character("Bart Simpson", "Nancy Cartwright"),
+				new Character("Kent Brockman", "Harry Shearer"),
+				new Character("Disco Stu", "Hank Azaria"),
+				new Character("Krusty the Clown", "Dan Castellaneta")
+		));
 
 		var template = getClass().getResourceAsStream("RepeatDocPartTest.docx");
 		var stamper = new TestDocxStamper<Characters>();
@@ -35,7 +35,7 @@ class RepeatDocPartTest {
 		var documentContent = document.getMainDocumentPart().getContent();
 
 		int index = 2; // skip init paragraphs
-		for (Character character : context.getCharacters()) {
+		for (Character character : context.characters()) {
 			for (int j = 0; j < 3; j++) { // 3 elements should be repeated
 				Object object = XmlUtils.unwrap(documentContent.get(index++));
 				switch (j) {
@@ -75,15 +75,9 @@ class RepeatDocPartTest {
 		}
 	}
 
-    public record Character(String name, String actor) {
-
-
+	record Character(String name, String actor) {
 	}
 
-    @Getter
-	public static class Characters {
-
-		private final List<Character> characters = new ArrayList<>();
-
+	record Characters(List<Character> characters) {
 	}
 }

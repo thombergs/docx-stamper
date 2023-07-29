@@ -1,5 +1,12 @@
 package org.wickedsource.docxstamper.processor.replaceExpression;
 
+/**
+ * Interface for processors that replace a single word with an expression defined
+ * in a comment.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public interface IReplaceWithProcessor {
 
 	/**
@@ -10,5 +17,4 @@ public interface IReplaceWithProcessor {
 	 * @param expression the expression to replace the text with
 	 */
 	void replaceWordWith(String expression);
-
 }

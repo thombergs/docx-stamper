@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.lang.NonNull;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -29,6 +30,9 @@ import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
  * ICommentProcessor must implement an interface which has to be specified at
  * registration time. Provides several getter methods to access the registered
  * ICommentProcessors.
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public class CommentProcessorRegistry {
 	private final Logger logger = LoggerFactory.getLogger(CommentProcessorRegistry.class);
@@ -37,6 +41,14 @@ public class CommentProcessorRegistry {
 	private final boolean failOnUnresolvedExpression;
 	private final ExpressionResolver expressionResolver;
 
+	/**
+	 * Creates a new CommentProcessorRegistry.
+	 *
+	 * @param placeholderReplacer        the placeholder replacer
+	 * @param expressionResolver         the expression resolver
+	 * @param commentProcessors          the comment processors
+	 * @param failOnUnresolvedExpression whether to fail on unresolved expressions
+	 */
 	public CommentProcessorRegistry(
 			PlaceholderReplacer placeholderReplacer,
 			ExpressionResolver expressionResolver,
@@ -57,6 +69,7 @@ public class CommentProcessorRegistry {
 	 *
 	 * @param document          the docx document over which to run the registered ICommentProcessors.
 	 * @param expressionContext the context root object
+	 * @param <T> a T class
 	 */
 	public <T> void runProcessors(final WordprocessingMLPackage document, final T expressionContext) {
 		final Map<BigInteger, CommentWrapper> comments = CommentUtil.getComments(document);
@@ -147,14 +160,11 @@ public class CommentProcessorRegistry {
 				logger.debug("Processor expression '{}' has been successfully processed by a comment processor.",
 							 processorExpression);
 			} catch (SpelEvaluationException | SpelParseException e) {
+				String msg = "Expression '%s' failed since no processor solves it".formatted(strippedExpression);
 				if (failOnUnresolvedExpression) {
-					throw new UnresolvedExpressionException(strippedExpression, e);
+					throw new DocxStamperException(msg, e);
 				} else {
-					logger.warn(String.format(
-							"Skipping processor expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
-							processorExpression,
-							e.getMessage()));
-					logger.trace("Reason for skipping processor expression: ", e);
+					logger.warn(msg, e);
 				}
 			}
 		}
@@ -203,6 +213,9 @@ public class CommentProcessorRegistry {
 		return Optional.empty();
 	}
 
+	/**
+	 * Resets all registered ICommentProcessors.
+	 */
 	public void reset() {
 		for (Object processor : commentProcessors.values()) {
 			((ICommentProcessor) processor).reset();

@@ -4,19 +4,32 @@
 name: Java CI with Maven
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
+  schedule:
+    - cron: '* 11 * * 1'
 
 permissions:
   pull-requests: read
 
 jobs:
-  build:
-
+  ci:
+    name: Continuous Integration
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
 
+    strategy:
+      fail-fast: false
+      matrix:        
+        version: [ '17', '18', '19', '20' ]
+        language: [ 'java' ]
+        
     steps:
       - uses: actions/checkout@v3
         with:
@@ -25,7 +38,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: '17'
+          java-version: ${{ matrix.version }}
           distribution: 'temurin'
           cache: 'maven'
           
@@ -42,10 +55,18 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-          
+       
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v2
+        with:
+          languages: ${{ matrix.language }}
+ 
       - name: Build with Maven
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}          
           SONAR_HOST_URL: https://sonarcloud.io
         run: mvn --batch-mode --no-transfer-progress package org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.organization=verronpro
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2   

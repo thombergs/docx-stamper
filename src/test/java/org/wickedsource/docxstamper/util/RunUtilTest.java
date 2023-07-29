@@ -21,6 +21,13 @@ class RunUtilTest {
 		assertEquals("This is the only run of text in this document.", RunUtil.getText(run));
 	}
 
+	/**
+	 * <p>loadDocument.</p>
+	 *
+	 * @param resourceName a {@link java.lang.String} object
+	 * @return a {@link org.docx4j.openpackaging.packages.WordprocessingMLPackage} object
+	 * @throws org.docx4j.openpackaging.exceptions.Docx4JException if any.
+	 */
 	public WordprocessingMLPackage loadDocument(String resourceName) throws Docx4JException {
 		var in = getClass().getResourceAsStream(resourceName);
 		return WordprocessingMLPackage.load(in);

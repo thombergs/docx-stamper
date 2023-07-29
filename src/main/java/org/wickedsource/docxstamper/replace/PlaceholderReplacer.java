@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
-import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -21,8 +21,14 @@ import org.wickedsource.docxstamper.util.walk.BaseCoordinatesWalker;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Replaces expressions in a document with the values provided by the {@link org.wickedsource.docxstamper.el.ExpressionResolver}.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class PlaceholderReplacer {
-    private final Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
+    private static final Logger log = LoggerFactory.getLogger(PlaceholderReplacer.class);
     private final ExpressionResolver expressionResolver;
     private final TypeResolverRegistry typeResolverRegistry;
     private final boolean replaceNullValues;
@@ -33,6 +39,24 @@ public class PlaceholderReplacer {
     private final String unresolvedExpressionsDefaultValue;
     private final String lineBreakPlaceholder;
 
+    /**
+     * <p>Constructor for PlaceholderReplacer.</p>
+     *
+     * @param typeResolverRegistry              the registry containing all available type resolvers.
+     * @param expressionResolver                the expression resolver used to resolve expressions in the document.
+     * @param replaceNullValues                 if set to true, null values are replaced with the value provided in the
+     *                                          nullValuesDefault parameter.
+     * @param nullValuesDefault                 the value to use when replacing null values.
+     * @param failOnUnresolvedExpression        if set to true, an exception is thrown when an expression cannot be
+     *                                          resolved.
+     * @param replaceUnresolvedExpressions      if set to true, expressions that cannot be resolved are replaced by the
+     *                                          value provided in the unresolvedExpressionsDefaultValue parameter.
+     * @param unresolvedExpressionsDefaultValue the value to use when replacing unresolved expressions.
+     * @param leaveEmptyOnExpressionError       if set to true, expressions that cannot be resolved are replaced by an
+     *                                          empty string.
+     * @param lineBreakPlaceholder              if set to a non-null value, all occurrences of this placeholder will be
+     *                                          replaced with a line break.
+     */
     public PlaceholderReplacer(
             TypeResolverRegistry typeResolverRegistry,
             ExpressionResolver expressionResolver,
@@ -71,6 +95,13 @@ public class PlaceholderReplacer {
         }.walk(document);
     }
 
+    /**
+     * Finds expressions in the given paragraph and replaces them with the values provided by the expression resolver.
+     *
+     * @param p                 the paragraph in which to replace expressions.
+     * @param expressionContext the context root
+     * @param document          the document in which to replace all expressions.
+     */
     @SuppressWarnings("unchecked")
     public void resolveExpressionsForParagraph(P p, Object expressionContext, WordprocessingMLPackage document) {
         ParagraphWrapper paragraphWrapper = new ParagraphWrapper(p);
@@ -83,35 +114,25 @@ public class PlaceholderReplacer {
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     R replacementObject = resolver.resolve(document, replacement);
                     replace(paragraphWrapper, placeholder, replacementObject);
-                    logger.debug("Replaced expression '{}' with value provided by TypeResolver {}",
-                            placeholder,
-                            resolver.getClass());
+                    log.debug("Expression '{}' replaced by typeResolver {}", placeholder, resolver.getClass());
                 } else if (replaceNullValues) {
                     //noinspection rawtypes
                     ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
                     R replacementObject = resolver.resolve(document, nullValuesDefault);
                     replace(paragraphWrapper, placeholder, replacementObject);
-                    logger.debug("Replaced expression '%s' with value provided by TypeResolver %s",
-                            placeholder,
-                            resolver.getClass());
+                    log.debug("Expression '{}' replaced by typeResolver {}", placeholder, resolver.getClass());
                 }
             } catch (SpelEvaluationException | SpelParseException e) {
                 if (isFailOnUnresolvedExpression()) {
-                    throw new UnresolvedExpressionException(
-                            String.format(
-                                    "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
-                                    placeholder,
-                                    expressionContext.getClass(),
-                                    e.getMessage()),
-                            e);
+                    String message = "Expression %s could not be resolved against context of type %s"
+                            .formatted(placeholder, expressionContext.getClass());
+                    throw new DocxStamperException(message, e);
                 } else {
-                    logger.warn(String.format(
-                            "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
+                    log.warn("Expression {} could not be resolved against context root of type {}. Reason: {}. Set log level to TRACE to view Stacktrace.",
                             placeholder,
                             expressionContext.getClass(),
-                            e.getMessage()));
-                    logger.trace("Reason for skipping expression:", e);
-
+                            e.getMessage());
+                    log.trace("Reason for skipping expression:", e);
                     if (leaveEmptyOnExpressionError()) {
                         replace(paragraphWrapper, placeholder, "");
                     } else if (replaceUnresolvedExpressions()) {
@@ -137,6 +158,13 @@ public class PlaceholderReplacer {
         return leaveEmptyOnExpressionError;
     }
 
+    /**
+     * Replaces expressions in the given paragraph and replaces them with the values provided by the expression resolver.
+     *
+     * @param p                 the paragraph in which to replace expressions.
+     * @param placeholder       the placeholder to replace.
+     * @param replacementObject the object to replace the placeholder with.
+     */
     public void replace(ParagraphWrapper p, String placeholder, String replacementObject) {
         Optional.ofNullable(replacementObject)
                 .map(replacementStr -> RunUtil.create(replacementStr, p.getParagraph()))

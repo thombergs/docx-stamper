@@ -21,13 +21,19 @@ import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * <p>CommentUtil class.</p>
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class CommentUtil {
+    private CommentUtil() {
+        throw new DocxStamperException("Utility class shouldn't be instantiated");
+    }
 
     private static final Logger logger = LoggerFactory.getLogger(CommentUtil.class);
     private static final String WORD_COMMENTS_PART_NAME = "/word/comments.xml";
-
-    private CommentUtil() {
-    }
 
     /**
      * Returns the comment the given DOCX4J run is commented with.
@@ -84,6 +90,13 @@ public class CommentUtil {
         }
     }
 
+    /**
+     * Returns the comment the given DOCX4J object is commented with.
+     *
+     * @param object   the DOCX4J object whose comment to retrieve.
+     * @param document the document that contains the object.
+     * @return the comment, if found, null otherwise.
+     */
     public static String getCommentStringFor(ContentAccessor object, WordprocessingMLPackage document) {
         Comments.Comment comment = getCommentFor(object, document).orElseThrow();
         return getCommentString(comment);
@@ -131,6 +144,9 @@ public class CommentUtil {
 
     /**
      * Returns the string value of the specified comment object.
+     *
+     * @param comment a {@link org.docx4j.wml.Comments.Comment} object
+     * @return a {@link java.lang.String} object
      */
     public static String getCommentString(Comments.Comment comment) {
         StringBuilder builder = new StringBuilder();
@@ -142,6 +158,11 @@ public class CommentUtil {
         return builder.toString();
     }
 
+    /**
+     * Returns the string value of the specified comment object.
+     *
+     * @param comment a {@link org.wickedsource.docxstamper.util.CommentWrapper} object
+     */
     public static void deleteComment(CommentWrapper comment) {
         CommentRangeEnd end = comment.getCommentRangeEnd();
         if (end != null) {
@@ -160,30 +181,41 @@ public class CommentUtil {
         }
     }
 
-    public static void deleteCommentFromElement(ContentAccessor element, BigInteger commentId) {
+    /**
+     * Returns the string value of the specified comment object.
+     *
+     * @param items a {@link java.util.List} object
+     * @param commentId a {@link java.math.BigInteger} object
+     */
+    public static void deleteCommentFromElement(List<Object> items, BigInteger commentId) {
         List<Object> elementsToRemove = new ArrayList<>();
-        for (Object obj : element.getContent()) {
-            Object unwrapped = XmlUtils.unwrap(obj);
+        for (Object item : items) {
+            Object unwrapped = XmlUtils.unwrap(item);
             if (unwrapped instanceof CommentRangeStart crs) {
                 if (crs.getId().equals(commentId)) {
-                    elementsToRemove.add(obj);
+                    elementsToRemove.add(item);
                 }
             } else if (unwrapped instanceof CommentRangeEnd cre) {
                 if (cre.getId().equals(commentId)) {
-                    elementsToRemove.add(obj);
+                    elementsToRemove.add(item);
                 }
             } else if (unwrapped instanceof R.CommentReference rcr) {
                 if (rcr.getId().equals(commentId)) {
-                    elementsToRemove.add(obj);
+                    elementsToRemove.add(item);
                 }
             } else if (unwrapped instanceof ContentAccessor ca) {
-                deleteCommentFromElement(ca, commentId);
+                deleteCommentFromElement(ca.getContent(), commentId);
             }
         }
-
-        element.getContent().removeAll(elementsToRemove);
+        items.removeAll(elementsToRemove);
     }
 
+    /**
+     * Returns the string value of the specified comment object.
+     *
+     * @param document a {@link org.docx4j.openpackaging.packages.WordprocessingMLPackage} object
+     * @return a {@link java.util.Map} object
+     */
     public static Map<BigInteger, CommentWrapper> getComments(WordprocessingMLPackage document) {
         Map<BigInteger, CommentWrapper> rootComments = new HashMap<>();
         Map<BigInteger, CommentWrapper> allComments = new HashMap<>();

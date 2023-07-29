@@ -14,6 +14,12 @@ import org.wickedsource.docxstamper.util.ObjectDeleter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Processor for the {@link org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor} comment.
+ *
+ * @author joseph
+ * @version $Id: $Id
+ */
 public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplayIfProcessor {
 
 	private List<P> paragraphsToBeRemoved = new ArrayList<>();
@@ -24,54 +30,64 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 		super(placeholderReplacer);
 	}
 
+	/**
+	 * Creates a new DisplayIfProcessor instance.
+	 *
+	 * @param pr the {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} to use for replacing placeholders.
+	 * @return a new DisplayIfProcessor instance.
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr) {
 		return new DisplayIfProcessor(pr);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void commitChanges(WordprocessingMLPackage document) {
-		ObjectDeleter deleter = new ObjectDeleter();
-		removeParagraphs(deleter);
-		removeTables(deleter);
-		removeTableRows(deleter);
+        removeParagraphs();
+        removeTables();
+        removeTableRows();
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void reset() {
 		paragraphsToBeRemoved = new ArrayList<>();
 		tablesToBeRemoved = new ArrayList<>();
 		tableRowsToBeRemoved = new ArrayList<>();
-	}
+    }
 
-	private void removeParagraphs(ObjectDeleter deleter) {
+    private void removeParagraphs() {
 		for (P p : paragraphsToBeRemoved) {
-			deleter.deleteParagraph(p);
-		}
-	}
+            ObjectDeleter.deleteParagraph(p);
+        }
+    }
 
-	private void removeTables(ObjectDeleter deleter) {
+    private void removeTables() {
 		for (Tbl table : tablesToBeRemoved) {
-			deleter.deleteTable(table);
-		}
-	}
+            ObjectDeleter.deleteTable(table);
+        }
+    }
 
-	private void removeTableRows(ObjectDeleter deleter) {
+    private void removeTableRows() {
 		for (Tr row : tableRowsToBeRemoved) {
-			deleter.deleteTableRow(row);
+            ObjectDeleter.deleteTableRow(row);
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void displayParagraphIf(Boolean condition) {
 		if (Boolean.TRUE.equals(condition)) return;
 		paragraphsToBeRemoved.add(getParagraph());
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void displayParagraphIfPresent(Object condition) {
 		displayParagraphIf(condition != null);
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void displayTableIf(Boolean condition) {
 		if (Boolean.TRUE.equals(condition)) return;
@@ -87,6 +103,7 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 		}
 	}
 
+	/** {@inheritDoc} */
 	@Override
 	public void displayTableRowIf(Boolean condition) {
 		if (Boolean.TRUE.equals(condition)) return;

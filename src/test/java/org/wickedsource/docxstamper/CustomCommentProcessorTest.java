@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
@@ -42,13 +41,16 @@ class CustomCommentProcessorTest {
 
 	public static class CustomCommentProcessor extends BaseCommentProcessor implements ICustomCommentProcessor {
 
-		@Getter
 		private static final List<P> visitedParagraphs = new ArrayList<>();
 
 		private P currentParagraph;
 
 		public CustomCommentProcessor(PlaceholderReplacer placeholderReplacer) {
 			super(placeholderReplacer);
+		}
+
+		public static List<P> getVisitedParagraphs() {
+			return visitedParagraphs;
 		}
 
 		@Override

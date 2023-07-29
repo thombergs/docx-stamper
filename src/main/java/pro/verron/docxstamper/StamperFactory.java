@@ -11,12 +11,15 @@ import org.wickedsource.docxstamper.preprocessor.RemoveProofErrors;
  * <p>
  * This class can be used to create "stampers" that will open .docx templates
  * to create a .docx document filled with custom data at runtime.
+ *
+ * @author joseph
+ * @version $Id: $Id
  */
 public class StamperFactory {
 
 	/**
 	 * Creates a new DocxStamper with the default configuration.
-	 * Also adds the {@link RemoveProofErrors} and {@link MergeSameStyleRuns} preprocessors.
+     * Also adds the {@link org.wickedsource.docxstamper.preprocessor.RemoveProofErrors} and {@link org.wickedsource.docxstamper.preprocessor.MergeSameStyleRuns} preprocessors.
 	 *
 	 * @return a new DocxStamper
 	 */

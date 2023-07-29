@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
@@ -21,18 +20,12 @@ class CustomTypeResolverTest {
 				.addTypeResolver(CustomType.class, resolver);
 		var template = getClass().getResourceAsStream("CustomTypeResolverTest.docx");
 		var stamper = new TestDocxStamper<Context>(config);
-		var document = stamper.stampAndLoad(template, new Context());
+		var document = stamper.stampAndLoad(template, new Context(new CustomType()));
 		var nameParagraph = (P) document.getMainDocumentPart().getContent().get(2);
 		assertEquals("The name should be resolved to foo.", new ParagraphWrapper(nameParagraph).getText());
 	}
 
-	@Getter
-	public static class Context {
-		private CustomType name = new CustomType();
-
-		public void setName(CustomType name) {
-			this.name = name;
-		}
+	record Context(CustomType name) {
 	}
 
 	public static class CustomType {
