@@ -16,8 +16,8 @@ permissions:
   pull-requests: read
 
 jobs:
-  build:
-    name: Analyze
+  ci:
+    name: Continuous Integration
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:        
-        version: [ '17', '18', '19', '20', '21' ]
+        version: [ '17', '18', '19', '20' ]
         language: [ 'java' ]
         
     steps:
