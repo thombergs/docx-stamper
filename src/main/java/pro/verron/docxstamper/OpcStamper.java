@@ -8,7 +8,6 @@ import java.io.OutputStream;
 /**
  * <p>OpcStamper interface.</p>
  *
- * @param <T> type of the template
  * @author joseph
  * @version $Id: $Id
  */

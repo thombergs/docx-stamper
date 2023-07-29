@@ -1,9 +1,10 @@
 package org.wickedsource.docxstamper.util;
 
-import lombok.extern.slf4j.Slf4j;
 import org.docx4j.XmlUtils;
 import org.docx4j.jaxb.Context;
 import org.docx4j.wml.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.util.List;
@@ -16,8 +17,8 @@ import static java.util.Optional.ofNullable;
  * @author joseph
  * @version $Id: $Id
  */
-@Slf4j
 public class SectionUtil {
+	private static final Logger log = LoggerFactory.getLogger(SectionUtil.class);
 
     private SectionUtil() {
         throw new DocxStamperException("Utility class shouldn't be instantiated");
@@ -25,13 +26,13 @@ public class SectionUtil {
 
 	private static final ObjectFactory factory = Context.getWmlObjectFactory();
 
-    /**
-     * Creates a new section break object.
-     *
-     * @param firstObject a {@link java.lang.Object} object
-     * @param parent      a {@link org.docx4j.wml.ContentAccessor} object
-     * @return a new section break object.
-     */
+	/**
+	 * Creates a new section break object.
+	 *
+	 * @param firstObject a {@link java.lang.Object} object
+	 * @param parent      a {@link org.docx4j.wml.ContentAccessor} object
+	 * @return a new section break object.
+	 */
 	public static SectPr getPreviousSectionBreakIfPresent(Object firstObject, ContentAccessor parent) {
 		List<Object> parentContent = parent.getContent();
 		int pIndex = parentContent.indexOf(firstObject);
@@ -48,26 +49,26 @@ public class SectionUtil {
 			i--;
 		}
 		log.info("No previous section break found from : {}, first object index={}", parent, pIndex);
-        return null;
-    }
+		return null;
+	}
 
-    /**
-     * Creates a new section break object.
-     *
-     * @return a new section break object.
-     * @param p a {@link org.docx4j.wml.P} object
+	/**
+	 * Creates a new section break object.
+	 *
+	 * @return a new section break object.
+	 * @param p a {@link org.docx4j.wml.P} object
 	 */
 	public static SectPr getParagraphSectionBreak(P p) {
 		return p.getPPr() != null && p.getPPr().getSectPr() != null
 				? p.getPPr().getSectPr()
-                : null;
-    }
+				: null;
+	}
 
-    /**
-     * Creates a new section break object.
-     *
-     * @return a new section break object.
-     * @param objects a {@link java.util.List} object
+	/**
+	 * Creates a new section break object.
+	 *
+	 * @return a new section break object.
+	 * @param objects a {@link java.util.List} object
 	 */
 	public static boolean isOddNumberOfSectionBreaks(List<Object> objects) {
 		long count = objects.stream()
@@ -76,13 +77,13 @@ public class SectionUtil {
 							.filter(p -> p.getPPr() != null && p.getPPr().getSectPr() != null)
 							.count();
 		return count % 2 != 0;
-    }
+	}
 
-    /**
-     * Creates a new section break object.
-     *
-     * @param sectPr a {@link org.docx4j.wml.SectPr} object
-     * @param paragraph a {@link org.docx4j.wml.P} object
+	/**
+	 * Creates a new section break object.
+	 *
+	 * @param sectPr a {@link org.docx4j.wml.SectPr} object
+	 * @param paragraph a {@link org.docx4j.wml.P} object
 	 */
 	public static void applySectionBreakToParagraph(SectPr sectPr, P paragraph) {
 		PPr nextPPr = ofNullable(paragraph.getPPr())

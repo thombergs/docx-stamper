@@ -32,28 +32,28 @@ public class TableResolver extends BaseCommentProcessor implements ITableResolve
 		this.nullSupplier = nullSupplier;
 	}
 
-    /**
-     * Generate a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
-     *
-     * @param pr                   a {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} instance
-     * @param nullReplacementValue in case the value to interpret is <code>null</code>
-     * @return a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
-     */
+	/**
+	 * Generate a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
+	 *
+	 * @param pr                   a {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} instance
+	 * @param nullReplacementValue in case the value to interpret is <code>null</code>
+	 * @return a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr, String nullReplacementValue) {
 		return new TableResolver(pr, table -> List.of(ParagraphUtil.create(nullReplacementValue)));
-    }
+	}
 
-    /**
-     * Generate a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance where value is replaced by an empty list when <code>null</code>
-     *
-     * @param pr a {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} instance
-     * @return a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
+	/**
+	 * Generate a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance where value is replaced by an empty list when <code>null</code>
+	 *
+	 * @param pr a {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} instance
+	 * @return a new {@link org.wickedsource.docxstamper.processor.table.TableResolver} instance
 	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr) {
         return new TableResolver(pr, table -> Collections.emptyList());
-    }
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void resolveTable(StampTable givenTable) {
 		P p = getParagraph();
@@ -62,9 +62,9 @@ public class TableResolver extends BaseCommentProcessor implements ITableResolve
 			cols.put(table, givenTable);
 		}
 		throw new CommentProcessingException("Paragraph is not within a table!", p);
-    }
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void commitChanges(WordprocessingMLPackage document) {
 		for (Map.Entry<Tbl, StampTable> entry : cols.entrySet()) {
@@ -136,9 +136,9 @@ public class TableResolver extends BaseCommentProcessor implements ITableResolve
 	private void setCellText(Tc tableCell, String content) {
 		tableCell.getContent().clear();
 		tableCell.getContent().add(ParagraphUtil.create(content));
-    }
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void reset() {
 		cols.clear();

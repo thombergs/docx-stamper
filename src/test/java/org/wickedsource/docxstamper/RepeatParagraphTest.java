@@ -1,8 +1,6 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
-import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
@@ -18,16 +16,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class RepeatParagraphTest {
     @Test
     void test() throws Docx4JException, IOException {
-        var context = new Characters();
-        context.getCharacters().add(new Character("Homer Simpson", "Dan Castellaneta"));
-        context.getCharacters().add(new Character("Marge Simpson", "Julie Kavner"));
-        context.getCharacters().add(new Character("Bart Simpson", "Nancy Cartwright"));
-        context.getCharacters().add(new Character("Kent Brockman", "Harry Shearer"));
-        context.getCharacters().add(new Character("Disco Stu", "Hank Azaria"));
-        context.getCharacters().add(new Character("Krusty the Clown", "Dan Castellaneta"));
+        var context = new Characters(List.of(
+                new Character("Homer Simpson", "Dan Castellaneta"),
+                new Character("Marge Simpson", "Julie Kavner"),
+                new Character("Bart Simpson", "Nancy Cartwright"),
+                new Character("Kent Brockman", "Harry Shearer"),
+                new Character("Disco Stu", "Hank Azaria"),
+                new Character("Krusty the Clown", "Dan Castellaneta")
+        ));
         var template = getClass().getResourceAsStream("RepeatParagraphTest.docx");
         var stamper = new TestDocxStamper<Characters>();
-        WordprocessingMLPackage document = stamper.stampAndLoad(template, context);
+        var document = stamper.stampAndLoad(template, context);
 
         var titleCoords = new ArrayList<P>();
         var quotationCoords = new ArrayList<P>();
@@ -64,9 +63,6 @@ class RepeatParagraphTest {
     public record Character(String name, String actor) {
     }
 
-    @Getter
-    public static class Characters {
-        private final List<Character> characters = new ArrayList<>();
-
+    public record Characters(List<Character> characters) {
     }
 }

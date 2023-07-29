@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper.replace.typeresolver.image;
 
-import lombok.Getter;
 import org.apache.commons.io.IOUtils;
 
 import java.io.ByteArrayOutputStream;
@@ -13,39 +12,9 @@ import java.io.InputStream;
  * @author joseph
  * @version $Id: $Id
  */
-@Getter
 public class Image {
 
-    /**
-     * -- GETTER --
-     * <p>Getter for the field <code>imageBytes</code>.</p>
-     *
-     * @return an array of {@link byte} objects
-     */
     private final byte[] imageBytes;
-
-    /**
-     * -- GETTER --
-     * <p>Getter for the field <code>filename</code>.</p>
-     *
-     * @return a {@link String} object
-     */
-    private String filename;
-
-    /**
-     * -- GETTER --
-     * Returns the expected alternative text to display for user that can't see the image itself.
-     *
-     * @return a {@link String} object
-     */
-    private String altText;
-
-    /**
-     * -- GETTER --
-     * The expected max width for this image
-     *
-     * @return max width in twip, or null.
-     */
     private Integer maxWidth;
 
     /**
@@ -94,4 +63,21 @@ public class Image {
         this.maxWidth = maxWidth;
     }
 
+    /**
+     * <p>Getter for the field <code>maxWidth</code>.</p>
+     *
+     * @return a {@link java.lang.Integer} object
+     */
+    public Integer getMaxWidth() {
+        return maxWidth;
+    }
+
+    /**
+     * <p>Getter for the field <code>imageBytes</code>.</p>
+     *
+     * @return an array of {@link byte} objects
+     */
+    public byte[] getImageBytes() {
+        return imageBytes;
+    }
 }

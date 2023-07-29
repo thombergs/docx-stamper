@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
-import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.typeresolver.ITypeResolver;
 import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -28,7 +28,7 @@ import java.util.Optional;
  * @version $Id: $Id
  */
 public class PlaceholderReplacer {
-    private final Logger logger = LoggerFactory.getLogger(PlaceholderReplacer.class);
+    private static final Logger log = LoggerFactory.getLogger(PlaceholderReplacer.class);
     private final ExpressionResolver expressionResolver;
     private final TypeResolverRegistry typeResolverRegistry;
     private final boolean replaceNullValues;
@@ -114,35 +114,25 @@ public class PlaceholderReplacer {
                     ITypeResolver resolver = typeResolverRegistry.getResolverForType(replacement.getClass());
                     R replacementObject = resolver.resolve(document, replacement);
                     replace(paragraphWrapper, placeholder, replacementObject);
-                    logger.debug("Replaced expression '{}' with value provided by TypeResolver {}",
-                            placeholder,
-                            resolver.getClass());
+                    log.debug("Expression '{}' replaced by typeResolver {}", placeholder, resolver.getClass());
                 } else if (replaceNullValues) {
                     //noinspection rawtypes
                     ITypeResolver resolver = typeResolverRegistry.getDefaultResolver();
                     R replacementObject = resolver.resolve(document, nullValuesDefault);
                     replace(paragraphWrapper, placeholder, replacementObject);
-                    logger.debug("Replaced expression '%s' with value provided by TypeResolver %s",
-                            placeholder,
-                            resolver.getClass());
+                    log.debug("Expression '{}' replaced by typeResolver {}", placeholder, resolver.getClass());
                 }
             } catch (SpelEvaluationException | SpelParseException e) {
                 if (isFailOnUnresolvedExpression()) {
-                    throw new UnresolvedExpressionException(
-                            String.format(
-                                    "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
-                                    placeholder,
-                                    expressionContext.getClass(),
-                                    e.getMessage()),
-                            e);
+                    String message = "Expression %s could not be resolved against context of type %s"
+                            .formatted(placeholder, expressionContext.getClass());
+                    throw new DocxStamperException(message, e);
                 } else {
-                    logger.warn(String.format(
-                            "Expression %s could not be resolved against context root of type %s. Reason: %s. Set log level to TRACE to view Stacktrace.",
+                    log.warn("Expression {} could not be resolved against context root of type {}. Reason: {}. Set log level to TRACE to view Stacktrace.",
                             placeholder,
                             expressionContext.getClass(),
-                            e.getMessage()));
-                    logger.trace("Reason for skipping expression:", e);
-
+                            e.getMessage());
+                    log.trace("Reason for skipping expression:", e);
                     if (leaveEmptyOnExpressionError()) {
                         replace(paragraphWrapper, placeholder, "");
                     } else if (replaceUnresolvedExpressions()) {

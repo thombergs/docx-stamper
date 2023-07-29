@@ -50,7 +50,7 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	/**
 	 * Creates a new DocxStamper with the default configuration.
 	 *
-     * @deprecated since 1.6.4, use {@link pro.verron.docxstamper.StamperFactory#newDocxStamper()} or {@link pro.verron.docxstamper.StamperFactory#nopreprocessingDocxStamper()} instead.
+	 * @deprecated since 1.6.4, use {@link pro.verron.docxstamper.StamperFactory#newDocxStamper()} or {@link pro.verron.docxstamper.StamperFactory#nopreprocessingDocxStamper()} instead.
 	 */
 	@Deprecated(since = "1.6.4", forRemoval = true)
 	public DocxStamper() {
@@ -167,8 +167,8 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 	}
 
 	/**
-     * {@inheritDoc}
-     *
+	 * {@inheritDoc}
+	 *
 	 * <p>
 	 * Reads in a .docx template and "stamps" it into the given OutputStream, using the specified context object to
 	 * fill out any expressions it finds.
@@ -207,8 +207,8 @@ public class DocxStamper<T> implements OpcStamper<WordprocessingMLPackage> {
 
 
 	/**
-     * {@inheritDoc}
-     *
+	 * {@inheritDoc}
+	 *
 	 * Same as stamp(InputStream, T, OutputStream) except that you may pass in a DOCX4J document as a template instead
 	 * of an InputStream.
 	 */

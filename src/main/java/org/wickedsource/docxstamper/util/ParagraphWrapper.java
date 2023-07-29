@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper.util;
 
-import lombok.Getter;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
 
@@ -23,7 +22,6 @@ import static java.util.stream.Collectors.joining;
  */
 public class ParagraphWrapper {
 	private final List<IndexedRun> runs = new ArrayList<>();
-	@Getter
 	private final P paragraph;
 	private int currentPosition = 0;
 
@@ -46,7 +44,7 @@ public class ParagraphWrapper {
 		this.runs.clear();
 		int index = 0;
 		for (Object contentElement : paragraph.getContent()) {
-			if (contentElement instanceof R r && !RunUtil.getText(r).equals("")) {
+			if (contentElement instanceof R r && !RunUtil.getText(r).isEmpty()) {
 				this.addRun(r, index);
 			}
 			index++;
@@ -175,4 +173,12 @@ public class ParagraphWrapper {
 		return getText();
 	}
 
+	/**
+	 * <p>Getter for the field <code>paragraph</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.P} object
+	 */
+	public P getParagraph() {
+		return paragraph;
+	}
 }

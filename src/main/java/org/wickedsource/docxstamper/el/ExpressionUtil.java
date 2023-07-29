@@ -1,7 +1,7 @@
 package org.wickedsource.docxstamper.el;
 
-import lombok.experimental.UtilityClass;
 import org.springframework.lang.NonNull;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,15 +11,18 @@ import java.util.regex.Pattern;
 import static java.util.Collections.emptyList;
 
 /**
- * Utility class for working with expressions.
+ * Utility class for working with expressions in a text.
  *
  * @author joseph
  * @version $Id: $Id
  */
-@UtilityClass
 public class ExpressionUtil {
 	private static final Pattern VARIABLE_EXPRESSION_PATTERN = Pattern.compile("\\$\\{(.*?)}");
 	private static final Pattern PROCESSOR_EXPRESSION_PATTERN = Pattern.compile("#\\{(.*?)}");
+
+	private ExpressionUtil() {
+		throw new DocxStamperException("Utility classes should not be instantiated!");
+	}
 
 	/**
 	 * Finds all variable expressions in a text and returns them as list. Example expression: "${myObject.property}".
@@ -32,7 +35,7 @@ public class ExpressionUtil {
 	}
 
 	private static List<String> findExpressions(@NonNull String text, Pattern pattern) {
-        if (text.isEmpty())
+		if (text.isEmpty())
 			return emptyList();
 		Matcher matcher = pattern.matcher(text);
 		int index = 0;

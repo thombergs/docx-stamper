@@ -25,18 +25,14 @@ public class ImageResolver implements ITypeResolver<Image> {
 
 	private static final Random random = new Random();
 
-    /**
-     * Creates a run containing the given image.
-     *
-     * @param filenameHint  filename hint for the image
-     * @param altText       alt text for the image
-     * @param maxWidth      max width of the image
-     * @param abstractImage the image
-     * @return the run containing the image
-     */
+	/**
+	 * Creates a run containing the given image.
+	 *
+	 * @param maxWidth      max width of the image
+	 * @param abstractImage the image
+	 * @return the run containing the image
+	 */
 	public static R createRunWithImage(
-			String filenameHint,
-			String altText,
 			Integer maxWidth,
 			BinaryPartAbstractImage abstractImage
 	) {
@@ -44,8 +40,8 @@ public class ImageResolver implements ITypeResolver<Image> {
 		// id must not be too large, otherwise Word cannot open the document
 		int id1 = random.nextInt(100000);
 		int id2 = random.nextInt(100000);
-		if (filenameHint == null) filenameHint = "dummyFileName";
-		if (altText == null) altText = "dummyAltText";
+		var filenameHint = "dummyFileName";
+		var altText = "dummyAltText";
 
 		Inline inline = tryCreateImageInline(filenameHint, altText, maxWidth, abstractImage, id1, id2);
 
@@ -58,19 +54,15 @@ public class ImageResolver implements ITypeResolver<Image> {
 
 		return run;
 
-    }
+	}
 
-    /**
-     * {@inheritDoc}
-     */
+	/** {@inheritDoc} */
     @Override
     public R resolve(WordprocessingMLPackage document, Image image) {
         try {
             // TODO: adding the same image twice will put the image twice into the docx-zip file. make the second
             //       addition of the same image a reference instead.
             return createRunWithImage(
-                    image.getFilename(),
-                    image.getAltText(),
                     image.getMaxWidth(),
                     createImagePart(document, image.getImageBytes())
             );

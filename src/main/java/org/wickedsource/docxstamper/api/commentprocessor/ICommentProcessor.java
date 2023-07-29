@@ -89,4 +89,11 @@ public interface ICommentProcessor {
 	 * Resets all state in the comment processor so that it can be re-used in another stamping process.
 	 */
 	void reset();
+
+	/**
+	 * <p>getCurrentRun.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.R} object
+	 */
+	R getCurrentRun();
 }

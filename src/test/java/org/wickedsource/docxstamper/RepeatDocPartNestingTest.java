@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.docx4j.XmlUtils;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.wml.ContentAccessor;
@@ -15,6 +14,7 @@ import pro.verron.docxstamper.utils.TestDocxStamper;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
 
 import static java.util.stream.IntStream.range;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,10 +34,10 @@ class RepeatDocPartNestingTest {
 
     @Test
     void test() throws Docx4JException, IOException {
-        var schoolContext = new SchoolContext("South Park Primary School");
-        for (int i = 0; i < numberOfGrades; i++) {
-            schoolContext.getGrades().add(createOneGrade(i));
-        }
+        var schoolContext = new SchoolContext(
+                "South Park Primary School",
+                IntStream.range(0, numberOfGrades).mapToObj(this::createOneGrade).toList()
+        );
         var template = getClass().getResourceAsStream("RepeatDocPartNestingTest.docx");
         var stamper = new TestDocxStamper<SchoolContext>();
         var document = stamper.stampAndLoad(template, schoolContext);
@@ -49,14 +49,14 @@ class RepeatDocPartNestingTest {
 
         int index = 2; // skip init paragraphs
         // check school name
-        checkParagraphContent(schoolContext.getSchoolName(), index++);
-        for (Grade grade : schoolContext.getGrades()) {
+        checkParagraphContent(schoolContext.schoolName(), index++);
+        for (Grade grade : schoolContext.grades()) {
             // check grade name
             String expected = String.format("Grade No.%d there are %d classes",
-                    grade.getNumber(),
-                    grade.getClasses().size());
+                    grade.number(),
+                    grade.classes().size());
             checkParagraphContent(expected, index++);
-            for (AClass aClass : grade.getClasses()) {
+            for (AClass aClass : grade.classes()) {
                 // check class name
                 expected = String.format("Class No.%d there are %d students", aClass.number(), aClass.students()
                         .size());
@@ -73,12 +73,12 @@ class RepeatDocPartNestingTest {
                     };
                     cellWalker.walk();
                     assertEquals(3, cells.size());
-                    assertEquals(String.valueOf(s.getNumber()), new ParagraphWrapper((P) cells.get(0)
+                    assertEquals(String.valueOf(s.number()), new ParagraphWrapper((P) cells.get(0)
                             .getContent()
                             .get(0)).getText());
-                    assertEquals(s.getName(), new ParagraphWrapper((P) cells.get(1).getContent()
+                    assertEquals(s.name(), new ParagraphWrapper((P) cells.get(1).getContent()
                             .get(0)).getText());
-                    assertEquals(String.valueOf(s.getAge()), new ParagraphWrapper((P) cells.get(2)
+                    assertEquals(String.valueOf(s.age()), new ParagraphWrapper((P) cells.get(2)
                             .getContent()
                             .get(0)).getText());
 
@@ -90,11 +90,10 @@ class RepeatDocPartNestingTest {
     }
 
     private Grade createOneGrade(int number) {
-        Grade grade = new Grade(number);
-        for (int i = 0; i < numberOfClasses; i++) {
-            grade.getClasses().add(createOneClass(i));
-        }
-        return grade;
+        return new Grade(
+                number,
+                IntStream.range(0, numberOfClasses).mapToObj(this::createOneClass).toList()
+        );
     }
 
     private void checkParagraphContent(String expected, int index) {
@@ -115,54 +114,13 @@ class RepeatDocPartNestingTest {
     public record AClass(int number, List<Student> students) {
     }
 
-    @Getter
-    public static class Student {
-        int number;
-        String name;
-        int age;
-
-        public Student() {
-        }
-
-        public Student(int number, String name, int age) {
-            this.number = number;
-            this.name = name;
-            this.age = age;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
+    record Student(int number, String name, int age) {
     }
 
-    @Getter
-    public static class SchoolContext {
-        String schoolName;
-        List<Grade> grades = new ArrayList<>();
-
-        public SchoolContext() {
-        }
-
-        public SchoolContext(String schoolName) {
-            this.schoolName = schoolName;
-        }
-
+    record SchoolContext(String schoolName, List<Grade> grades) {
     }
 
-    @Getter
-    public static class Grade {
-        int number;
-        List<AClass> classes = new ArrayList<>();
-
-        public Grade() {
-        }
-
-        public Grade(int number) {
-            this.number = number;
-        }
-
+    record Grade(int number, List<AClass> classes) {
     }
-
 }
 

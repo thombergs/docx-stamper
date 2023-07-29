@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.expression.spel.SpelEvaluationException;
 import org.springframework.expression.spel.SpelParseException;
 import org.springframework.lang.NonNull;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.UnresolvedExpressionException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
@@ -159,14 +160,11 @@ public class CommentProcessorRegistry {
 				logger.debug("Processor expression '{}' has been successfully processed by a comment processor.",
 							 processorExpression);
 			} catch (SpelEvaluationException | SpelParseException e) {
+				String msg = "Expression '%s' failed since no processor solves it".formatted(strippedExpression);
 				if (failOnUnresolvedExpression) {
-					throw new UnresolvedExpressionException(strippedExpression, e);
+					throw new DocxStamperException(msg, e);
 				} else {
-					logger.warn(String.format(
-							"Skipping processor expression '%s' because it can not be resolved by any comment processor. Reason: %s. Set log level to TRACE to view Stacktrace.",
-							processorExpression,
-							e.getMessage()));
-					logger.trace("Reason for skipping processor expression: ", e);
+					logger.warn(msg, e);
 				}
 			}
 		}

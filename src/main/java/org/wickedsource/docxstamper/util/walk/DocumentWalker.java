@@ -24,6 +24,7 @@ import org.docx4j.wml.*;
  * <li>{@link org.docx4j.wml.CTSimpleField}</li>
  * <li>{@link org.docx4j.wml.CTSdtCell}</li>
  * <li>{@link org.docx4j.wml.CTSdtContentCell}</li>
+ * </ul>
  *
  * @author joseph
  * @version $Id: $Id

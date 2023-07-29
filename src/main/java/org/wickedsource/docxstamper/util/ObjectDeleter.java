@@ -1,8 +1,9 @@
 package org.wickedsource.docxstamper.util;
 
 import jakarta.xml.bind.JAXBElement;
-import lombok.extern.slf4j.Slf4j;
 import org.docx4j.wml.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.util.Iterator;
@@ -13,8 +14,8 @@ import java.util.Iterator;
  * @author joseph
  * @version $Id: $Id
  */
-@Slf4j
 public class ObjectDeleter {
+	private static final Logger log = LoggerFactory.getLogger(ObjectDeleter.class);
 
     private ObjectDeleter() {
         throw new DocxStamperException("Utility class shouldn't be instantiated");

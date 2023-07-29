@@ -1,7 +1,5 @@
 package org.wickedsource.docxstamper.api.typeresolver;
 
-import lombok.Getter;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,30 +10,25 @@ import java.util.Map;
  * @version $Id: $Id
  */
 public class TypeResolverRegistry {
-
 	private final Map<Class<?>, ITypeResolver<?>> typeResolversByType = new HashMap<>();
-    /**
-     * -- GETTER --
-     * Gets the default ITypeResolver.
-     */
-    @Getter
+
 	private final ITypeResolver<Object> defaultResolver;
 
-    /**
-     * Creates a new TypeResolverRegistry with the given default ITypeResolver.
-     *
-     * @param defaultResolver the ITypeResolver that is used when no specific resolver for a type is registered.
-     */
+	/**
+	 * Creates a new TypeResolverRegistry with the given default ITypeResolver.
+	 *
+	 * @param defaultResolver the ITypeResolver that is used when no specific resolver for a type is registered.
+	 */
 	public TypeResolverRegistry(ITypeResolver<Object> defaultResolver) {
 		this.defaultResolver = defaultResolver;
-    }
+	}
 
-    /**
-     * Registers a new ITypeResolver for the given type.
-     *
-     * @param resolvedType the type for which the resolver is registered.
-     * @param resolver     the ITypeResolver implementation to register.
-     * @param <T>          the type resolved by the ITypeResolver.
+	/**
+	 * Registers a new ITypeResolver for the given type.
+	 *
+	 * @param resolvedType the type for which the resolver is registered.
+	 * @param resolver     the ITypeResolver implementation to register.
+	 * @param <T>          the type resolved by the ITypeResolver.
 	 */
 	public <T> void registerTypeResolver(Class<T> resolvedType, ITypeResolver<T> resolver) {
 		typeResolversByType.put(resolvedType, resolver);
@@ -53,6 +46,14 @@ public class TypeResolverRegistry {
 		return typeResolversByType.containsKey(type)
 				? (ITypeResolver<T>) typeResolversByType.get(type)
 				: (ITypeResolver<T>) defaultResolver;
-    }
+	}
 
+	/**
+	 * <p>Getter for the field <code>defaultResolver</code>.</p>
+	 *
+	 * @return a {@link org.wickedsource.docxstamper.api.typeresolver.ITypeResolver} object
+	 */
+	public ITypeResolver<Object> getDefaultResolver() {
+		return defaultResolver;
+	}
 }

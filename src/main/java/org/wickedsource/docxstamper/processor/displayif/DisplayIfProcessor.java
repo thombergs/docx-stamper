@@ -30,27 +30,25 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 		super(placeholderReplacer);
 	}
 
-    /**
-     * Creates a new DisplayIfProcessor instance.
-     *
-     * @param pr the {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} to use for replacing placeholders.
-     * @return a new DisplayIfProcessor instance.
-     */
+	/**
+	 * Creates a new DisplayIfProcessor instance.
+	 *
+	 * @param pr the {@link org.wickedsource.docxstamper.replace.PlaceholderReplacer} to use for replacing placeholders.
+	 * @return a new DisplayIfProcessor instance.
+	 */
 	public static ICommentProcessor newInstance(PlaceholderReplacer pr) {
 		return new DisplayIfProcessor(pr);
-    }
+	}
 
-    /**
-     * {@inheritDoc}
-	 */
+	/** {@inheritDoc} */
 	@Override
 	public void commitChanges(WordprocessingMLPackage document) {
         removeParagraphs();
         removeTables();
         removeTableRows();
-    }
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void reset() {
 		paragraphsToBeRemoved = new ArrayList<>();
@@ -73,23 +71,23 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
     private void removeTableRows() {
 		for (Tr row : tableRowsToBeRemoved) {
             ObjectDeleter.deleteTableRow(row);
-        }
-    }
+		}
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void displayParagraphIf(Boolean condition) {
 		if (Boolean.TRUE.equals(condition)) return;
 		paragraphsToBeRemoved.add(getParagraph());
-    }
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void displayParagraphIfPresent(Object condition) {
 		displayParagraphIf(condition != null);
-    }
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void displayTableIf(Boolean condition) {
 		if (Boolean.TRUE.equals(condition)) return;
@@ -102,10 +100,10 @@ public class DisplayIfProcessor extends BaseCommentProcessor implements IDisplay
 			tablesToBeRemoved.add(tbl);
 		} else {
 			throw new CommentProcessingException("Paragraph is not within a table!", p);
-        }
-    }
+		}
+	}
 
-    /** {@inheritDoc} */
+	/** {@inheritDoc} */
 	@Override
 	public void displayTableRowIf(Boolean condition) {
 		if (Boolean.TRUE.equals(condition)) return;

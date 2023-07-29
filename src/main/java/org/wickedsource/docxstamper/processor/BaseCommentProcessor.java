@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper.processor;
 
-import lombok.Getter;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
 import org.docx4j.wml.R;
@@ -23,13 +22,9 @@ public abstract class BaseCommentProcessor implements ICommentProcessor {
 	 */
 	protected final PlaceholderReplacer placeholderReplacer;
 
-	@Getter
 	private P paragraph;
-	@Getter
 	private R currentRun;
-	@Getter
 	private CommentWrapper currentCommentWrapper;
-	@Getter
 	private WordprocessingMLPackage document;
 
 	/**
@@ -70,5 +65,44 @@ public abstract class BaseCommentProcessor implements ICommentProcessor {
 	@Override
 	public void setDocument(WordprocessingMLPackage document) {
 		this.document = document;
+	}
+
+	/**
+	 * <p>Getter for the field <code>currentCommentWrapper</code>.</p>
+	 *
+	 * @return a {@link org.wickedsource.docxstamper.util.CommentWrapper} object
+	 */
+	public CommentWrapper getCurrentCommentWrapper() {
+		return currentCommentWrapper;
+	}
+
+	/**
+	 * <p>Getter for the field <code>paragraph</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.P} object
+	 */
+	public P getParagraph() {
+		return paragraph;
+	}
+
+	/**
+	 * <p>Getter for the field <code>currentRun</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.wml.R} object
+	 */
+	public R getCurrentRun() {
+		return currentRun;
+	}
+
+	/**
+	 * <p>Getter for the field <code>document</code>.</p>
+	 *
+	 * @return a {@link org.docx4j.openpackaging.packages.WordprocessingMLPackage} object
+	 * @deprecated the document is passed to the processor through the commitChange method now
+	 * and will probably pe passed through the constructor in the future
+	 */
+	@Deprecated(since = "1.6.5", forRemoval = true)
+	public WordprocessingMLPackage getDocument() {
+		return document;
 	}
 }

@@ -73,7 +73,7 @@ public class DocumentUtil {
      * @param elementClass the class of the elements to get
      * @param <T>          the type of the elements to get
      * @return a stream of the elements
-     */
+	 */
 	public static <T> Stream<T> streamElements(Object object, Class<T> elementClass) {
 		return object instanceof WordprocessingMLPackage document
 				? streamDocumentElements(document, elementClass)
@@ -117,7 +117,7 @@ public class DocumentUtil {
      *
      * @param parentObject the object to get the tables from
      * @return a list of tables
-     */
+	 */
 	public static List<Tbl> getTableFromObject(Object parentObject) {
 		return streamElements(parentObject, Tbl.class).toList();
     }
@@ -127,7 +127,7 @@ public class DocumentUtil {
      *
      * @param parentObject the object to get the rows from
      * @return a list of rows
-     */
+	 */
 	public static List<Tr> getTableRowsFromObject(Object parentObject) {
 		return streamElements(parentObject, Tr.class).toList();
     }
@@ -137,7 +137,7 @@ public class DocumentUtil {
      *
      * @param parentObject the object to get the cells from
      * @return a list of cells
-     */
+	 */
 	public static List<Tc> getTableCellsFromObject(Object parentObject) {
 		return streamElements(parentObject, Tc.class).toList();
     }
@@ -147,7 +147,7 @@ public class DocumentUtil {
      *
      * @param subDocument the object to get the first element from
      * @return the first element
-     */
+	 */
 	public static Object lastElement(WordprocessingMLPackage subDocument) {
 		return new ArrayDeque<>(subDocument.getMainDocumentPart().getContent()).getLast();
     }
@@ -157,7 +157,7 @@ public class DocumentUtil {
      *
      * @param subDocument the object to get the last element from
      * @return the last element
-     */
+	 */
 	public static List<Object> allElements(WordprocessingMLPackage subDocument) {
 		return subDocument.getMainDocumentPart().getContent();
 	}
@@ -197,11 +197,9 @@ public class DocumentUtil {
 				if (currentObj instanceof R currentR && isImageRun(currentR)) {
 					DocxImageExtractor docxImageExtractor = new DocxImageExtractor(source);
 					byte[] imageData = docxImageExtractor.getRunDrawingData(currentR);
-					String filename = docxImageExtractor.getRunDrawingFilename(currentR);
-					String alt = docxImageExtractor.getRunDrawingAltText(currentR);
 					Integer maxWidth = docxImageExtractor.getRunDrawingMaxWidth(currentR);
 					BinaryPartAbstractImage imagePart = tryCreateImagePart(target, imageData);
-					replacements.put(currentR, ImageResolver.createRunWithImage(filename, alt, maxWidth, imagePart));
+					replacements.put(currentR, ImageResolver.createRunWithImage(maxWidth, imagePart));
 				} else if (currentObj instanceof ContentAccessor contentAccessor)
 					queue.addAll(contentAccessor.getContent());
 			}
@@ -237,7 +235,7 @@ public class DocumentUtil {
      *
      * @param document the document to get the runs from
      * @return the runs
-     */
+	 */
 	public static Stream<P> streamParagraphs(WordprocessingMLPackage document) {
 		return streamElements(document, P.class);
 	}

@@ -14,6 +14,11 @@ import static pro.verron.docxstamper.utils.context.Contexts.*;
 
 class DefaultTests {
 
+    /**
+     * <p>source.</p>
+     *
+     * @return a {@link java.util.stream.Stream} object
+     */
     public static Stream<Arguments> source() {
         return Stream.of(
                 Arguments.of(

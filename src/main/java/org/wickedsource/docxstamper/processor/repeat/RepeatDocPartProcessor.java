@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper.processor.repeat;
 
-import lombok.SneakyThrows;
 import org.docx4j.jaxb.Context;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
@@ -41,8 +40,9 @@ import static org.wickedsource.docxstamper.util.DocumentUtil.walkObjectsAndImpor
  * @version $Id: $Id
  */
 public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRepeatDocPartProcessor {
-    private static final ThreadFactory THREAD_FACTORY = Executors.defaultThreadFactory();
+	private static final ThreadFactory threadFactory = Executors.defaultThreadFactory();
 	private static final ObjectFactory objectFactory = Context.getWmlObjectFactory();
+
 	private final OpcStamper<WordprocessingMLPackage> stamper;
 	private final Map<CommentWrapper, List<Object>> contexts = new HashMap<>();
 	private final Supplier<? extends List<?>> nullSupplier;
@@ -65,8 +65,13 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 	 * @param nullReplacementValue the value to use when the placeholder is null
 	 * @return a new instance of this processor
 	 */
-	public static ICommentProcessor newInstance(PlaceholderReplacer pr, OpcStamper<WordprocessingMLPackage> stamper, String nullReplacementValue) {
-		return new RepeatDocPartProcessor(pr, stamper, () -> singletonList(ParagraphUtil.create(nullReplacementValue)));
+	public static ICommentProcessor newInstance(
+			PlaceholderReplacer pr,
+			OpcStamper<WordprocessingMLPackage> stamper,
+			String nullReplacementValue
+	) {
+		Supplier<List<?>> nullSupplier = () -> singletonList(ParagraphUtil.create(nullReplacementValue));
+		return new RepeatDocPartProcessor(pr, stamper, nullSupplier);
 	}
 
 	/**
@@ -163,7 +168,6 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 	/**
 	 * {@inheritDoc}
 	 */
-	@SneakyThrows
 	@Override
 	public void commitChanges(WordprocessingMLPackage document) {
 		for (Entry<CommentWrapper, List<Object>> entry : this.contexts.entrySet()) {
@@ -201,7 +205,7 @@ public class RepeatDocPartProcessor extends BaseCommentProcessor implements IRep
 				PipedOutputStream os = new PipedOutputStream();
 				PipedInputStream is = new PipedInputStream(os)
 		) {
-			Thread thread = THREAD_FACTORY.newThread(() -> outputter.accept(os));
+			Thread thread = threadFactory.newThread(() -> outputter.accept(os));
 			thread.start();
 			WordprocessingMLPackage wordprocessingMLPackage = WordprocessingMLPackage.load(is);
 			thread.join();

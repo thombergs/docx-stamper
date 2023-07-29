@@ -47,6 +47,8 @@ class ObjectDeleterTest {
      *
      * @param document the document to save and load again.
      * @return the document after it has been saved and loaded again.
+     * @throws org.docx4j.openpackaging.exceptions.Docx4JException if any.
+     * @throws java.io.IOException if any.
      */
     public WordprocessingMLPackage saveAndLoadDocument(WordprocessingMLPackage document) throws Docx4JException, IOException {
         var out = IOStreams.getOutputStream();

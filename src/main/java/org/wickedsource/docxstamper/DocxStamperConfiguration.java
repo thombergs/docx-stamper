@@ -1,6 +1,5 @@
 package org.wickedsource.docxstamper;
 
-import lombok.Getter;
 import org.springframework.expression.spel.SpelParserConfiguration;
 import org.wickedsource.docxstamper.api.EvaluationContextConfigurer;
 import org.wickedsource.docxstamper.api.preprocessor.PreProcessor;
@@ -23,7 +22,6 @@ import java.util.*;
  * @author joseph
  * @version $Id: $Id
  */
-@Getter
 public class DocxStamperConfiguration {
 
     private final Map<Class<?>, CommentProcessorBuilder> commentProcessors = new HashMap<>();
@@ -66,15 +64,12 @@ public class DocxStamperConfiguration {
     }
 
     /**
-     * If set to true, stamper will throw an {@link org.wickedsource.docxstamper.api.UnresolvedExpressionException}
-     * if a variable expression or processor expression within the document or within the comments is encountered that cannot be resolved. Is set to true by default.
+     * <p>isFailOnUnresolvedExpression.</p>
      *
-     * @param failOnUnresolvedExpression a boolean
-     * @return a {@link org.wickedsource.docxstamper.DocxStamperConfiguration} object
+     * @return a boolean
      */
-    public DocxStamperConfiguration setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
-        this.failOnUnresolvedExpression = failOnUnresolvedExpression;
-        return this;
+    public boolean isFailOnUnresolvedExpression() {
+        return failOnUnresolvedExpression;
     }
 
     /**
@@ -97,8 +92,6 @@ public class DocxStamperConfiguration {
      *
      * @param evaluationContextConfigurer the configurer to use.
      * @return a {@link org.wickedsource.docxstamper.DocxStamperConfiguration} object
-     * @apiNote you can use {@link org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer} to get the
-     * previous configuration working
      */
     public DocxStamperConfiguration setEvaluationContextConfigurer(EvaluationContextConfigurer evaluationContextConfigurer) {
         this.evaluationContextConfigurer = evaluationContextConfigurer;
@@ -256,5 +249,134 @@ public class DocxStamperConfiguration {
     public DocxStamperConfiguration setSpelParserConfiguration(SpelParserConfiguration spelParserConfiguration) {
         this.spelParserConfiguration = spelParserConfiguration;
         return this;
+    }
+
+    /**
+     * If set to true, stamper will throw an {@link org.wickedsource.docxstamper.api.DocxStamperException}
+     * if a variable expression or processor expression within the document or within the comments is encountered that cannot be resolved. Is set to true by default.
+     *
+     * @param failOnUnresolvedExpression a boolean
+     * @return a {@link org.wickedsource.docxstamper.DocxStamperConfiguration} object
+     */
+    public DocxStamperConfiguration setFailOnUnresolvedExpression(boolean failOnUnresolvedExpression) {
+        this.failOnUnresolvedExpression = failOnUnresolvedExpression;
+        return this;
+    }
+
+    /**
+     * <p>isReplaceUnresolvedExpressions.</p>
+     *
+     * @return a boolean
+     */
+    public boolean isReplaceUnresolvedExpressions() {
+        return replaceUnresolvedExpressions;
+    }
+
+    /**
+     * <p>isLeaveEmptyOnExpressionError.</p>
+     *
+     * @return a boolean
+     */
+    public boolean isLeaveEmptyOnExpressionError() {
+        return leaveEmptyOnExpressionError;
+    }
+
+    /**
+     * <p>Getter for the field <code>unresolvedExpressionsDefaultValue</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
+    public String getUnresolvedExpressionsDefaultValue() {
+        return unresolvedExpressionsDefaultValue;
+    }
+
+    /**
+     * <p>Getter for the field <code>lineBreakPlaceholder</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
+    public String getLineBreakPlaceholder() {
+        return lineBreakPlaceholder;
+    }
+
+    /**
+     * <p>Getter for the field <code>evaluationContextConfigurer</code>.</p>
+     *
+     * @return a {@link org.wickedsource.docxstamper.api.EvaluationContextConfigurer} object
+     */
+    public EvaluationContextConfigurer getEvaluationContextConfigurer() {
+        return evaluationContextConfigurer;
+    }
+
+    /**
+     * <p>Getter for the field <code>spelParserConfiguration</code>.</p>
+     *
+     * @return a {@link org.springframework.expression.spel.SpelParserConfiguration} object
+     */
+    public SpelParserConfiguration getSpelParserConfiguration() {
+        return spelParserConfiguration;
+    }
+
+    /**
+     * <p>Getter for the field <code>expressionFunctions</code>.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
+    public Map<Class<?>, Object> getExpressionFunctions() {
+        return expressionFunctions;
+    }
+
+    /**
+     * <p>Getter for the field <code>typeResolvers</code>.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
+    public Map<Class<?>, ITypeResolver<?>> getTypeResolvers() {
+        return typeResolvers;
+    }
+
+    /**
+     * <p>Getter for the field <code>defaultTypeResolver</code>.</p>
+     *
+     * @return a {@link org.wickedsource.docxstamper.api.typeresolver.ITypeResolver} object
+     */
+    public ITypeResolver<Object> getDefaultTypeResolver() {
+        return defaultTypeResolver;
+    }
+
+    /**
+     * <p>Getter for the field <code>commentProcessors</code>.</p>
+     *
+     * @return a {@link java.util.Map} object
+     */
+    public Map<Class<?>, CommentProcessorBuilder> getCommentProcessors() {
+        return commentProcessors;
+    }
+
+    /**
+     * <p>isReplaceNullValues.</p>
+     *
+     * @return a boolean
+     */
+    public boolean isReplaceNullValues() {
+        return replaceNullValues;
+    }
+
+    /**
+     * <p>Getter for the field <code>nullValuesDefault</code>.</p>
+     *
+     * @return a {@link java.lang.String} object
+     */
+    public String getNullValuesDefault() {
+        return nullValuesDefault;
+    }
+
+    /**
+     * <p>Getter for the field <code>preprocessors</code>.</p>
+     *
+     * @return a {@link java.util.List} object
+     */
+    public List<PreProcessor> getPreprocessors() {
+        return preprocessors;
     }
 }

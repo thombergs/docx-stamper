@@ -1,7 +1,6 @@
 package pro.verron.docxstamper.utils;
 
 import jakarta.xml.bind.JAXBElement;
-import lombok.SneakyThrows;
 import org.docx4j.TextUtils;
 import org.docx4j.TraversalUtil;
 import org.docx4j.dml.CTBlip;
@@ -13,8 +12,10 @@ import org.docx4j.dml.wordprocessingDrawing.Inline;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.openpackaging.parts.WordprocessingML.BinaryPartAbstractImage;
 import org.docx4j.wml.*;
+import org.wickedsource.docxstamper.api.DocxStamperException;
 
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.*;
@@ -22,14 +23,44 @@ import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.joining;
 
+/**
+ * <p>Stringifier class.</p>
+ *
+ * @author joseph
+ * @version $Id: $Id
+ * @since 1.6.5
+ */
 public class Stringifier {
 
 	private final Supplier<WordprocessingMLPackage> documentSupplier;
 
+	/**
+	 * <p>Constructor for Stringifier.</p>
+	 *
+	 * @param documentSupplier a {@link java.util.function.Supplier} object
+	 */
 	public Stringifier(Supplier<WordprocessingMLPackage> documentSupplier) {
 		this.documentSupplier = documentSupplier;
 	}
 
+	private static MessageDigest findDigest() {
+		try {
+			return MessageDigest.getInstance("SHA-1");
+		} catch (NoSuchAlgorithmException e) {
+			throw new DocxStamperException(e);
+		}
+	}
+
+	private WordprocessingMLPackage document() {
+		return documentSupplier.get();
+	}
+
+	/**
+	 * <p>stringify.</p>
+	 *
+	 * @param blip a {@link org.docx4j.dml.CTBlip} object
+	 * @return a {@link java.lang.String} object
+	 */
 	public String stringify(CTBlip blip) {
 		var image = document()
 				.getParts()
@@ -49,10 +80,12 @@ public class Stringifier {
 				sha1b64(imageBytes));
 	}
 
-	private WordprocessingMLPackage document() {
-		return documentSupplier.get();
-	}
-
+	/**
+	 * <p>humanReadableByteCountSI.</p>
+	 *
+	 * @param bytes a long
+	 * @return a {@link java.lang.String} object
+	 */
 	public String humanReadableByteCountSI(long bytes) {
 		if (-1000 < bytes && bytes < 1000) return bytes + "B";
 
@@ -64,14 +97,19 @@ public class Stringifier {
 		return String.format(Locale.US, "%.1f%cB", bytes / 1000.0, ci.current());
 	}
 
-	@SneakyThrows
 	private String sha1b64(byte[] imageBytes) {
-		MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+		MessageDigest messageDigest = findDigest();
 		Base64.Encoder encoder = Base64.getEncoder();
 		byte[] digest = messageDigest.digest(imageBytes);
 		return encoder.encodeToString(digest);
 	}
 
+	/**
+	 * <p>stringify.</p>
+	 *
+	 * @param o a {@link java.lang.Object} object
+	 * @return a {@link java.lang.String} object
+	 */
 	public String stringify(Object o) {
 		if (o instanceof JAXBElement<?> jaxbElement)
 			return stringify(jaxbElement.getValue());
@@ -104,6 +142,12 @@ public class Stringifier {
 		throw new RuntimeException("Unsupported run content: " + o.getClass());
 	}
 
+	/**
+	 * <p>stringify.</p>
+	 *
+	 * @param p a {@link org.docx4j.wml.P} object
+	 * @return a {@link java.lang.String} object
+	 */
 	public String stringify(P p) {
 		String runs = extractDocumentRuns(p);
 		return Optional
@@ -112,6 +156,12 @@ public class Stringifier {
 				.orElse(runs);
 	}
 
+	/**
+	 * <p>extractDocumentRuns.</p>
+	 *
+	 * @param p a {@link java.lang.Object} object
+	 * @return a {@link java.lang.String} object
+	 */
 	public String extractDocumentRuns(Object p) {
 		var runCollector = new RunCollector();
 		TraversalUtil.visit(p, runCollector);
@@ -151,6 +201,12 @@ public class Stringifier {
 		return String.join(",", set);
 	}
 
+	/**
+	 * <p>stringify.</p>
+	 *
+	 * @param run a {@link org.docx4j.wml.R} object
+	 * @return a {@link java.lang.String} object
+	 */
 	public String stringify(R run) {
 		var runPresentation = Optional
 				.ofNullable(run.getRPr())
@@ -164,6 +220,12 @@ public class Stringifier {
 		return "|%s/%s|".formatted(serialized, runPresentation.get());
 	}
 
+	/**
+	 * <p>stringify.</p>
+	 *
+	 * @param rPr a {@link org.docx4j.wml.RPrAbstract} object
+	 * @return a {@link java.lang.String} object
+	 */
 	public String stringify(RPrAbstract rPr) {
 		var set = new TreeSet<String>();
 		if (rPr.getB() != null) set.add("b=" + rPr.getB().isVal());
