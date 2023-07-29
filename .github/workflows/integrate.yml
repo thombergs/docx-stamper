@@ -10,7 +10,7 @@ on:
   pull_request:
     branches: [ "master" ]
   schedule:
-    - cron: '* 11 * * 1'
+    - cron: '06 11 * * 1'
 
 permissions:
   pull-requests: read
@@ -27,7 +27,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:        
-        version: [ '17', '18', '19', '20' ]
         language: [ 'java' ]
         
     steps:
@@ -38,7 +37,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v3
         with:
-          java-version: ${{ matrix.version }}
+          java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
           
