@@ -1,8 +1,8 @@
 plugins {
     id "java"
     id "java-library"
-    id "com.jfrog.artifactory" version "4.5.4"
-    id "com.jfrog.bintray" version "1.8.1"
+    id "com.jfrog.artifactory" version "4.31.7"
+    id "com.jfrog.bintray" version "1.8.5"
     id "maven-publish"
 }
 
@@ -13,26 +13,26 @@ repositories {
 }
 
 // run gradle with "-Dsnapshot=true" to automatically append "-SNAPSHOT" to the version
-version = '1.4.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
-sourceCompatibility = 1.8
+version = '1.5.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
+sourceCompatibility = 11
 
 ext{
     bintrayUser = System.getProperty("bintray.user")
     bintrayKey = System.getProperty("bintray.key")
     buildNumber = System.getProperty("build.number")
-    docx4JVersion = System.getProperty("docx4j.version") ? System.getProperty("docx4j.version") : '6.1.2'
+    docx4JVersion = System.getProperty("docx4j.version") ? System.getProperty("docx4j.version") : '11.4.9'
 }
 
 dependencies {
-    implementation("commons-io:commons-io:2.5")
-    implementation("org.javassist:javassist:3.21.0-GA")
-    implementation("org.springframework:spring-expression:4.3.6.RELEASE")
+    implementation("commons-io:commons-io:2.11.0")
+    implementation("org.javassist:javassist:3.29.2-GA")
+    implementation("org.springframework:spring-expression:5.3.26")
 
     // We want docx-stamper to be usable with any docx4j version, so the dependency to docx4J
     // has to be provided by the client.
-    compileOnly("org.docx4j:docx4j:${docx4JVersion}")
+    compileOnly("org.docx4j:docx4j-JAXB-ReferenceImpl:${docx4JVersion}")
     
-    testImplementation("org.docx4j:docx4j:${docx4JVersion}")    
+    testImplementation("org.docx4j:docx4j-JAXB-ReferenceImpl:${docx4JVersion}")
     testImplementation("junit:junit:4.4")
 }
 
@@ -98,7 +98,7 @@ publishing {
 }
 
 artifactory {
-    contextUrl = 'http://oss.jfrog.org'
+    contextUrl = 'https://oss.jfrog.org'
     publish {
         repository {
             repoKey = 'oss-snapshot-local'

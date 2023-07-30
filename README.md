@@ -128,17 +128,17 @@ To include docx-stamper in your project, you can use the following maven coordin
 <dependency>
     <groupId>org.wickedsource.docx-stamper</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
 </dependency>
 ```
 
-Note that as of version 1.4.0 you have to provide the dependency to your version of Docx4J yourself:
+Note that as of version 1.5.0 you have to provide the dependency to your version of Docx4J yourself:
 
 ```xml
 <dependency>
     <groupId>org.docx4j</groupId>
-    <artifactId>docx4j</artifactId>
-    <version>6.1.2</version>
+    <artifactId>docx4j-JAXB-ReferenceImpl</artifactId>
+    <version>11.4.9</version>
 </dependency>
 ```
 
