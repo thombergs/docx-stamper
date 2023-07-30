@@ -20,14 +20,14 @@ The main feature of docx-stamper is **replacement of expressions** within the te
 
 The value an expression resolves to may be of the following types:
 
-| Type of expression value | Effect  |
-| ---|---|
-| java.lang.Object | The expression is replaced by the String representation of the object (`String.valueOf()`).
-| java.lang.String | The expression is replaced with the String value.|
-| java.util.Date   | The expression is replaced by a formatted Date string (by default "dd.MM.yyyy"). You can change the format string by registering your own [DateResolver](src/main/java/org/wickedsource/docxstamper/replace/typeresolver/DateResolver.java).|
-| [org.wickedsource.docxstamper...Image](src/main/java/org/wickedsource/docxstamper/replace/typeresolver/image/Image.java) | The expression is replaced with an inline image.|
+| Type of expression value                                                                                               | Effect  |
+|------------------------------------------------------------------------------------------------------------------------|---|
+| java.lang.Object                                                                                                       | The expression is replaced by the String representation of the object (`String.valueOf()`).
+| java.lang.String                                                                                                       | The expression is replaced with the String value.|
+| java.util.Date                                                                                                         | The expression is replaced by a formatted Date string (by default "dd.MM.yyyy"). You can change the format string by registering your own [DateResolver](src/main/java/io/reflectoring/docxstamper/replace/typeresolver/DateResolver.java).|
+| [io.reflectoring.docxstamper...Image](src/main/java/io/reflectoring/docxstamper/replace/typeresolver/image/Image.java) | The expression is replaced with an inline image.|
 
-If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement your own [TypeResolver](src/main/java/org/wickedsource/docxstamper/api/typeresolver/ITypeResolver.java). To register your own TypeResolver with docx-stamper, use the following code:
+If an expression cannot be resolved successfully, it will be skipped (meaning the expression stays in the document as it was in the template). To support more than the above types you can implement your own [TypeResolver](src/main/java/io/reflectoring/docxstamper/api/typeresolver/ITypeResolver.java). To register your own TypeResolver with docx-stamper, use the following code:
 
 ```java
 ITypeResolver typeResolver = ...;              // instance of your own ITypeResolver implementation
@@ -39,7 +39,7 @@ DocxStamper stamper = new DocxStamperConfiguration()
 
 ## Customizing the SpEL Evaluation Context
 
-If you want to take more control over the evaluation of expressions, you can implement a [EvaluationContextConfigurer](src/main/java/org/wickedsource/docxstamper/api/EvaluationContextConfigurer.java)
+If you want to take more control over the evaluation of expressions, you can implement a [EvaluationContextConfigurer](src/main/java/io/reflectoring/docxstamper/api/EvaluationContextConfigurer.java)
 and customize Springs `StandardEvaluationContext` to your needs. You can register an `EvaluationContextConfigurer` like this:
 
 ```java 
@@ -85,7 +85,7 @@ Besides replacing expressions, docx-stamper can **process comments on paragraphs
 | `repeatDocPart(List<Object>)`      | Repeats the part of the document surrounded by the comment. The document part is copied once for each object in the passed-in list. Expressions found in the elements of the document part are evaluated against the object from the list. Can be used instead repeatTableRow and repeatParagraph if you want to repeat more than table rows and paragraphs.
 | `replaceWordWith(expression)`         | Replaces the commented word (must be a single word!) with the value of the given expression. |
 
-If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](src/main/java/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.java). To register you comment processor to docx-stamper, use the following code:
+If a comment cannot be processed, by default an exception will be thrown. Successfully processed comments are removed from the document. You can add support to more expressions in comments by implementing your own [ICommentProcessor](src/main/java/io/reflectoring/docxstamper/api/commentprocessor/ICommentProcessor.java). To register you comment processor to docx-stamper, use the following code:
 
 ```java
 ICommentProcessor commentProcessor = ...;      // instance of your own ICommentProcessor implementation
@@ -95,7 +95,7 @@ DocxStamper stamper = new DocxStamperConfiguration()
   .addCommentProcessor(interfaceClass, commentProcessor)
   .build();
 ```
-For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](src/main/java/org/wickedsource/docxstamper/api/commentprocessor/ICommentProcessor.java).
+For an in-depth description of how to create a comment processor, see the javadoc of [ICommentProcessor](src/main/java/io/reflectoring/docxstamper/api/commentprocessor/ICommentProcessor.java).
 
 ## Conditional Display and Repeating of Elements in Headers or Footers
 The docx file format does not allow comments in Headers or Footers of a document. To be able to conditionally display content in a header or footer, simply surround the expression you would put in a comment with "#{}" and put it at the beginning of the paragraph you want to manipulate. The expression will be evaluated as it would be in a comment.
@@ -110,9 +110,9 @@ DocxStamper stamper = new DocxStamperConfiguration()
 ```
 
 ## Sample Code
-The source code contains a set of tests show how to use the features. If you want to run them yourself, clone the repository and run [the tests in the main package](src/test/java/org/wickedsource/docxstamper) with the system property `-DkeepOutputFile=true` so that the resulting .docx documents will not be cleaned up so you can view them. The resulting files will be stored in your local temp folder (watch the logging output for the exact location of the files).
+The source code contains a set of tests show how to use the features. If you want to run them yourself, clone the repository and run [the tests in the main package](src/test/java/io/reflectoring/docxstamper) with the system property `-DkeepOutputFile=true` so that the resulting .docx documents will not be cleaned up so you can view them. The resulting files will be stored in your local temp folder (watch the logging output for the exact location of the files).
 
-If you want to have a look at the .docx templates used in the tests, have a look at the [resources subfolder](src/test/resources/org/wickedsource/docxstamper) in the test folder.
+If you want to have a look at the .docx templates used in the tests, have a look at the [resources subfolder](src/test/resources/io/reflectoring/docxstamper) in the test folder.
 
 ## Maven coordinates
 To include docx-stamper in your project, you can use the following maven coordinates in your dependency management system:
@@ -126,9 +126,9 @@ To include docx-stamper in your project, you can use the following maven coordin
 </repositories>
 
 <dependency>
-    <groupId>org.wickedsource.docx-stamper</groupId>
+    <groupId>io.reflectoring.docx-stamper</groupId>
     <artifactId>docx-stamper</artifactId>
-    <version>1.5.0</version>
+    <version>2.0.0</version>
 </dependency>
 ```
 

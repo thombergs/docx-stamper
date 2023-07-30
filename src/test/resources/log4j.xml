@@ -15,7 +15,7 @@
         <appender-ref ref="console"/>
     </root>
 
-    <logger name="org.wickedsource">
+    <logger name="io.reflectoring">
         <level value="TRACE"/>
     </logger>
 

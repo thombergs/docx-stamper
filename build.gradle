@@ -13,7 +13,7 @@ repositories {
 }
 
 // run gradle with "-Dsnapshot=true" to automatically append "-SNAPSHOT" to the version
-version = '1.5.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
+version = '2.0.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
 sourceCompatibility = 11
 
 ext{
@@ -83,7 +83,7 @@ publishing {
             artifact javadocJar {
                 classifier "javadoc"
             }
-            groupId 'org.wickedsource.docx-stamper'
+            groupId 'io.reflectoring.docx-stamper'
             artifactId 'docx-stamper'
             version project.version
             pom.withXml {
