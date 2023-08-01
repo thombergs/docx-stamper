@@ -25,7 +25,7 @@ dependencies {
     implementation("commons-io:commons-io:2.11.0")
     implementation("org.javassist:javassist:3.29.2-GA")
     implementation("org.springframework:spring-expression:5.3.26")
-    implementation("javax.xml.bind:jaxb-api:2.3.0")
+    implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
 
     // We want docx-stamper to be usable with any docx4j version, so the dependency to docx4J
     // has to be provided by the client.
