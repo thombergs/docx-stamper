@@ -1,8 +1,6 @@
 plugins {
     id "java"
     id "java-library"
-    id "com.jfrog.artifactory" version "4.31.7"
-    id "com.jfrog.bintray" version "1.8.5"
     id "maven-publish"
 }
 
@@ -13,7 +11,7 @@ repositories {
 }
 
 // run gradle with "-Dsnapshot=true" to automatically append "-SNAPSHOT" to the version
-version = '1.5.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
+version = '2.0.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
 sourceCompatibility = 11
 
 ext{
@@ -27,6 +25,7 @@ dependencies {
     implementation("commons-io:commons-io:2.11.0")
     implementation("org.javassist:javassist:3.29.2-GA")
     implementation("org.springframework:spring-expression:5.3.26")
+    implementation("javax.xml.bind:jaxb-api:2.3.0")
 
     // We want docx-stamper to be usable with any docx4j version, so the dependency to docx4J
     // has to be provided by the client.
@@ -37,13 +36,13 @@ dependencies {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
+    archiveClassifier = 'sources'
     from sourceSets.main.allSource
 }
 
 javadoc.failOnError = false
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier = 'javadoc'
     from javadoc.destinationDir
 }
 
@@ -72,75 +71,3 @@ def pomConfig = {
         url "https://github.com/thombergs/docx-stamper"
     }
 }
-
-publishing {
-    publications {
-        mavenPublication(MavenPublication) {
-            from components.java
-            artifact sourcesJar {
-                classifier "sources"
-            }
-            artifact javadocJar {
-                classifier "javadoc"
-            }
-            groupId 'org.wickedsource.docx-stamper'
-            artifactId 'docx-stamper'
-            version project.version
-            pom.withXml {
-                def root = asNode()
-                root.appendNode('description', 'Template engine for .docx documents.')
-                root.appendNode('name', 'docx-stamper')
-                root.appendNode('url', 'https://github.com/thombergs/docx-stamper')
-                root.children().last() + pomConfig
-            }
-        }
-    }
-}
-
-artifactory {
-    contextUrl = 'https://oss.jfrog.org'
-    publish {
-        repository {
-            repoKey = 'oss-snapshot-local'
-            username = bintrayUser
-            password = bintrayKey
-        }
-        defaults {
-            publications('mavenPublication')
-            publishArtifacts = true
-            publishPom = true
-            properties = [
-                    'build.number': buildNumber,
-                    'build.name': 'docx-stamper'
-            ]
-        }
-    }
-    resolve {
-        repoKey = 'jcenter'
-    }
-    clientConfig.info.setBuildNumber(buildNumber)
-    clientConfig.info.setBuildName('docx-stamper')
-}
-
-bintray {
-    user = bintrayUser
-    key = bintrayKey
-    publications = ['mavenPublication']
-
-    pkg {
-        repo = 'maven-releases'
-        name = 'docx-stamper'
-        userOrg = 'reflectoring'
-        licenses = ['Apache-2.0']
-        vcsUrl = 'https://github.com/thombergs/docx-stamper'
-        version {
-            name = project.version
-            desc = "build ${buildNumber}"
-            released  = new Date()
-        }
-    }
-
-    publish = true
-}
-
-
