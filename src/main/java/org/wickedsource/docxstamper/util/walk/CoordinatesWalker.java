@@ -10,7 +10,7 @@ import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.*;
 import org.wickedsource.docxstamper.api.coordinates.*;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.context.ImageContext;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 import java.io.IOException;
 import java.io.InputStream;
 

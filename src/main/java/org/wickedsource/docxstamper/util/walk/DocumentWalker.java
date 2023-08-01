@@ -3,7 +3,7 @@ package org.wickedsource.docxstamper.util.walk;
 import org.docx4j.XmlUtils;
 import org.docx4j.wml.*;
 
-import javax.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBElement;
 
 public abstract class DocumentWalker {
 
