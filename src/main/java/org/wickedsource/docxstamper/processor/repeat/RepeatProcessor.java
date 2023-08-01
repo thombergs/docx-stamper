@@ -10,6 +10,7 @@ import org.wickedsource.docxstamper.api.typeresolver.TypeResolverRegistry;
 import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.BaseCommentProcessor;
 import org.wickedsource.docxstamper.processor.CommentProcessingException;
+import org.wickedsource.docxstamper.proxy.ProxyBuilder;
 import org.wickedsource.docxstamper.replace.PlaceholderReplacer;
 import org.wickedsource.docxstamper.util.CommentUtil;
 import org.wickedsource.docxstamper.util.walk.BaseDocumentWalker;
@@ -45,11 +46,12 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
             List<Object> expressionContexts = tableRowsToRepeat.get(rCoords);
             int index = rCoords.getIndex();
             for (final Object expressionContext : expressionContexts) {
+                Object context = getContext(expressionContext);
                 Tr rowClone = XmlUtils.deepCopy(rCoords.getRow());
                 DocumentWalker walker = new BaseDocumentWalker(rowClone) {
                     @Override
                     protected void onParagraph(P paragraph) {
-                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, expressionContext, document);
+                        placeholderReplacer.resolveExpressionsForParagraph(paragraph, context, document);
                     }
                 };
                 walker.walk();
@@ -71,4 +73,12 @@ public class RepeatProcessor extends BaseCommentProcessor implements IRepeatProc
         CommentUtil.deleteComment(getCurrentCommentWrapper());
     }
 
+    private Object getContext(Object expressionContext) {
+        ProxyBuilder proxyBuilder = getProxyBuilder();
+        try {
+            return proxyBuilder.cloneWithNewRoot(expressionContext).build();
+        }  catch (Exception e) {
+            return expressionContext;
+        }
+    }
 }
