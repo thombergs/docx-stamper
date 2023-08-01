@@ -1,5 +1,10 @@
 package org.wickedsource.docxstamper;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Date;
+import java.util.Map;
+
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.wickedsource.docxstamper.api.DocxStamperException;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
@@ -9,7 +14,10 @@ import org.wickedsource.docxstamper.el.ExpressionResolver;
 import org.wickedsource.docxstamper.processor.CommentProcessorRegistry;
 import org.wickedsource.docxstamper.processor.displayif.DisplayIfProcessor;
 import org.wickedsource.docxstamper.processor.displayif.IDisplayIfProcessor;
-import org.wickedsource.docxstamper.processor.repeat.*;
+import org.wickedsource.docxstamper.processor.repeat.IParagraphRepeatProcessor;
+import org.wickedsource.docxstamper.processor.repeat.IRepeatProcessor;
+import org.wickedsource.docxstamper.processor.repeat.ParagraphRepeatProcessor;
+import org.wickedsource.docxstamper.processor.repeat.RepeatProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.IReplaceWithProcessor;
 import org.wickedsource.docxstamper.processor.replaceExpression.ReplaceWithProcessor;
 import org.wickedsource.docxstamper.proxy.ProxyBuilder;
@@ -135,8 +143,10 @@ public class DocxStamper<T> {
   public void stamp(WordprocessingMLPackage document, T contextRoot, OutputStream out) throws DocxStamperException {
     try {
       ProxyBuilder<T> proxyBuilder = addCustomInterfacesToContextRoot(contextRoot, this.config.getExpressionFunctions());
+      replaceExpressions(document, proxyBuilder);
       processComments(document, proxyBuilder);
       replaceExpressions(document, proxyBuilder);
+      postProcess();
       document.save(out);
       commentProcessorRegistry.reset();
     } catch (DocxStamperException e) {
@@ -166,6 +176,12 @@ public class DocxStamper<T> {
 
   private void processComments(final WordprocessingMLPackage document, ProxyBuilder<T> proxyBuilder) {
     commentProcessorRegistry.runProcessors(document, proxyBuilder);
+  }
+
+  private void postProcess() {
+    if(placeholderReplacer.isLeaveEmptyOnExpressionError()) {
+      placeholderReplacer.applyLeaveEmptyErrorExpressions();
+    }
   }
 
 }

@@ -68,5 +68,8 @@ public class RepeatTableRowTest extends AbstractDocx4jTest {
         Assert.assertEquals("Dan Castellaneta", new ParagraphWrapper((P) cells.get(13).getCell().getContent().get(0)).getText());
     }
 
-
+    @Override
+    protected DocxStamperConfiguration createConfiguration() {
+        return new DocxStamperConfiguration().leaveEmptyOnExpressionError(true);
+    }
 }
