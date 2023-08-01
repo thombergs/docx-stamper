@@ -27,6 +27,13 @@ public class ProxyBuilder<T> {
     return this;
   }
 
+  public ProxyBuilder<T> cloneWithNewRoot(T rootObject) {
+    ProxyBuilder<T> proxy = new ProxyBuilder<>();
+    proxy.root = rootObject;
+    proxy.interfacesToImplementations = new HashMap<>(interfacesToImplementations);
+    return proxy;
+  }
+
   /**
    * Specifies an interfaces and an implementation of an interface by which the root object
    * shall be extended.

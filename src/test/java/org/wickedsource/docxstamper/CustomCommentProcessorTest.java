@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.wickedsource.docxstamper.api.commentprocessor.ICommentProcessor;
 import org.wickedsource.docxstamper.api.coordinates.ParagraphCoordinates;
 import org.wickedsource.docxstamper.api.coordinates.RunCoordinates;
+import org.wickedsource.docxstamper.proxy.ProxyBuilder;
 import org.wickedsource.docxstamper.util.CommentWrapper;
 
 import java.io.IOException;
@@ -59,6 +60,11 @@ public class CustomCommentProcessorTest extends AbstractDocx4jTest {
 
         @Override
         public void setCurrentCommentWrapper(CommentWrapper commentWrapper) {
+
+        }
+
+        @Override
+        public void setProxyBuilder(ProxyBuilder proxyBuilder) {
 
         }
 
