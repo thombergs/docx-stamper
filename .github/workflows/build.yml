@@ -1,5 +1,5 @@
 name: build
-run-name: ${{ github.actor }} is learning GitHub Actions
+run-name: ${{ github.ref }} build
 
 on:
   push:
@@ -9,6 +9,7 @@ on:
 
 jobs:
   build-with-jdk:
+    name: Build with JDK
     runs-on: ubuntu-latest
     strategy:
       matrix:
