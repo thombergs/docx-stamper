@@ -13,7 +13,6 @@ import org.docx4j.openpackaging.parts.relationships.Namespaces;
 import org.docx4j.openpackaging.parts.relationships.RelationshipsPart;
 import org.docx4j.relationships.Relationship;
 import org.docx4j.wml.*;
-import org.wickedsource.docxstamper.api.coordinates.*;
 
 import jakarta.xml.bind.JAXBElement;
 import java.util.ArrayList;

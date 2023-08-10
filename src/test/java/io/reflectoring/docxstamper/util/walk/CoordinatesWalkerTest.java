@@ -10,7 +10,6 @@ import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.junit.Assert;
 import org.junit.Test;
 import io.reflectoring.docxstamper.AbstractDocx4jTest;
-import org.wickedsource.docxstamper.api.coordinates.*;
 import io.reflectoring.docxstamper.util.ParagraphWrapper;
 
 import java.io.IOException;

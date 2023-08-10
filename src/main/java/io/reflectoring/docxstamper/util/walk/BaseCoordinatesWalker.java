@@ -6,7 +6,6 @@ import io.reflectoring.docxstamper.api.coordinates.TableCellCoordinates;
 import io.reflectoring.docxstamper.api.coordinates.TableCoordinates;
 import io.reflectoring.docxstamper.api.coordinates.TableRowCoordinates;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
-import org.wickedsource.docxstamper.api.coordinates.*;
 
 public abstract class BaseCoordinatesWalker extends CoordinatesWalker {
 
