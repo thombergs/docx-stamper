@@ -2,6 +2,7 @@ plugins {
     id "java"
     id "java-library"
     id "maven-publish"
+    id "signing"
 }
 
 repositories {
@@ -15,8 +16,6 @@ version = '2.0.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHO
 sourceCompatibility = 11
 
 ext{
-    bintrayUser = System.getProperty("bintray.user")
-    bintrayKey = System.getProperty("bintray.key")
     buildNumber = System.getProperty("build.number")
     docx4JVersion = System.getProperty("docx4j.version") ? System.getProperty("docx4j.version") : '11.4.9'
 }
@@ -24,7 +23,7 @@ ext{
 dependencies {
     implementation("commons-io:commons-io:2.11.0")
     implementation("org.javassist:javassist:3.29.2-GA")
-    implementation("org.springframework:spring-expression:5.3.26")
+    implementation("org.springframework:spring-expression:6.0.11")
     implementation("jakarta.xml.bind:jakarta.xml.bind-api:4.0.0")
 
     // We want docx-stamper to be usable with any docx4j version, so the dependency to docx4J
@@ -70,4 +69,60 @@ def pomConfig = {
     scm {
         url "https://github.com/thombergs/docx-stamper"
     }
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            groupId = 'io.reflectoring'
+            artifactId = 'docx-stamper'
+            version = project.version
+
+            pom {
+                name = 'DocxStampler'
+                description = 'Template engine for .docx documents.'
+                url = 'https://github.com/thombergs/docx-stamper'
+                licenses {
+                    license {
+                        name = "MIT"
+                        url = "https://opensource.org/licenses/MIT"
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'thombergs'
+                        name = 'Tom Hombergs'
+                        email = 'tom@reflectoring.io'
+                    }
+                }
+                scm {
+                    connection = 'https://github.com/thombergs/docx-stamper'
+                    developerConnection = 'https://github.com/thombergs/docx-stamper'
+                    url = 'https://github.com/thombergs/docx-stamper'
+                }
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "OSSRH"
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            credentials {
+                username = System.getenv("MAVEN_USERNAME")
+                password = System.getenv("MAVEN_PASSWORD")
+            }
+        }
+    }
+}
+
+signing {
+    sign configurations.archives
+    sign publishing.publications.mavenPublication
 }
