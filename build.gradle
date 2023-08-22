@@ -126,3 +126,6 @@ signing {
     sign configurations.archives
     sign publishing.publications.mavenPublication
 }
+
+// we don't want to sign the artifacts unless we publish
+signArchives.onlyIf{gradle.startParameter.getTaskNames().contains("publish")}
