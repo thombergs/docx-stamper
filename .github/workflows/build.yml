@@ -22,8 +22,8 @@ jobs:
           java-version: ${{ matrix.jdk-version }}
       - name: Build
         env:
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           chmod 755 ./gradlew
-          ./gradlew build -Psigning.key=$SIGNING_KEY -Psigning.password=$SIGNING_PASSWORD
+          ./gradlew build
