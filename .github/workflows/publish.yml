@@ -15,8 +15,8 @@ jobs:
         env:
           MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME }}
           MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD }}
-          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_KEY_BASE_64: ${{ secrets.SIGNING_KEY_BASE_64 }}
           SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
         run: |
           chmod 755 ./gradlew
-          ./gradlew publish -Psigning.key=$SIGNING_KEY -Psigning.password=$SIGNING_PASSWORD
+          ./gradlew publish -Psigning.key=$SIGNING_KEY_BASE_64 -Psigning.password=$SIGNING_PASSWORD
