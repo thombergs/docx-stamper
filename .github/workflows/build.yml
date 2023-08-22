@@ -1,4 +1,4 @@
-name: build
+name: Build & Test
 run-name: "build (branch: ${{ github.ref_name }})"
 
 on:
