@@ -20,6 +20,10 @@ jobs:
         with:
           distribution: 'corretto'
           java-version: ${{ matrix.jdk-version }}
-      - run: |
+      - name: Build
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
           chmod 755 ./gradlew
-          ./gradlew build
+          ./gradlew build -Psigning.key=$SIGNING_KEY -Psigning.password=$SIGNING_PASSWORD

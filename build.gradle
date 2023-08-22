@@ -13,7 +13,7 @@ repositories {
 
 // run gradle with "-Dsnapshot=true" to automatically append "-SNAPSHOT" to the version
 version = '2.0.0' + (Boolean.valueOf(System.getProperty("snapshot")) ? "-SNAPSHOT" : "")
-sourceCompatibility = 11
+sourceCompatibility = 17
 
 ext{
     buildNumber = System.getProperty("build.number")
