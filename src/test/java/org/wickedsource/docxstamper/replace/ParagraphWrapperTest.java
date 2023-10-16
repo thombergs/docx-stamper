@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.replace;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.ParagraphWrapper;
 import org.wickedsource.docxstamper.util.RunUtil;
@@ -7,6 +8,7 @@ import org.wickedsource.docxstamper.util.RunUtil;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.wickedsource.docxstamper.util.ParagraphUtil.create;
 
+@DisplayName("Utilities - Paragraph Wrapper")
 class ParagraphWrapperTest {
 
 	@Test

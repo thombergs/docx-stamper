@@ -3,11 +3,13 @@ package org.wickedsource.docxstamper.util;
 import org.docx4j.openpackaging.exceptions.Docx4JException;
 import org.docx4j.openpackaging.packages.WordprocessingMLPackage;
 import org.docx4j.wml.P;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@DisplayName("Utilities - Comments")
 class CommentUtilTest {
 	@Test
 	void onlyParagraphsWithCommentRangeStartAreCommented() throws Docx4JException {

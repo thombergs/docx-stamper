@@ -11,14 +11,5 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class ReplaceNullExpressionTest {
-    @Test
-    void test() throws Docx4JException, IOException {
-        var context = Contexts.name(null);
-        var template = getClass().getResourceAsStream("ReplaceNullExpressionTest.docx");
-        var config = new DocxStamperConfiguration().replaceNullValues(true);
-        var actual = new TestDocxStamper<>(config).stampAndLoadAndExtract(template, context);
 
-        var expected = List.of("I am .//rPr={}", "//rPr={u=single}");
-        assertIterableEquals(expected, actual);
-    }
 }

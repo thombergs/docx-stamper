@@ -6,6 +6,7 @@ import org.docx4j.wml.P;
 import org.docx4j.wml.Tbl;
 import org.docx4j.wml.Tc;
 import org.docx4j.wml.Tr;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import pro.verron.docxstamper.utils.IOStreams;
 
@@ -17,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.wickedsource.docxstamper.util.DocumentUtil.getParagraphsFromObject;
 import static org.wickedsource.docxstamper.util.DocumentUtil.getTableFromObject;
 
+@DisplayName("Utilities - Deletion tools")
 class ObjectDeleterTest {
 
     @Test

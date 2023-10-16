@@ -18,7 +18,7 @@ class SpelInjectionTest {
      */
 
     @Test
-    void test() throws IOException {
+    void spelInjectionTest() throws IOException {
 
         var context = Contexts.empty();
         try (var template = getClass().getResourceAsStream("SpelInjectionTest.docx")) {

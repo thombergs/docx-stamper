@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertIterableEquals;
 
 class ExpressionReplacementInTextBoxesTest {
 	@Test
-    void test() throws Docx4JException, IOException {
+    void expressionReplacementInTextBoxesTest() {
 		var context = new Name("Bart Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInTextBoxesTest.docx");
 		var stamper = new TestDocxStamper<Name>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));

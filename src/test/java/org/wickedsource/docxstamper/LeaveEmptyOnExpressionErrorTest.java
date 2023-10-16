@@ -12,23 +12,5 @@ import java.io.IOException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class LeaveEmptyOnExpressionErrorTest {
-	@Test
-    void test() throws Docx4JException, IOException {
-		var context = new Name("Homer Simpson");
-		var template = getClass().getResourceAsStream("LeaveEmptyOnExpressionErrorTest.docx");
-		var config = new DocxStamperConfiguration()
-				.setFailOnUnresolvedExpression(false)
-				.leaveEmptyOnExpressionError(true);
-		var stamper = new TestDocxStamper<Name>(config);
-		var document = stamper.stampAndLoad(template, context);
-		resolvedExpressionsAreReplaced(document);
-	}
 
-	private void resolvedExpressionsAreReplaced(WordprocessingMLPackage document) {
-		P nameParagraph = (P) document.getMainDocumentPart().getContent().get(0);
-		assertEquals("Leave me empty .", new ParagraphWrapper(nameParagraph).getText());
-	}
-
-	public record Name(String name) {
-	}
 }

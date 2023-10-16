@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -66,11 +67,11 @@ public final class TestDocxStamper<T> {
 	 * @param context a T object
 	 * @return a {@link java.util.List} object
 	 */
-	public List<String> stampAndLoadAndExtract(InputStream template, T context) {
+	public String stampAndLoadAndExtract(InputStream template, T context) {
 		Stringifier stringifier = new Stringifier(() -> document);
 		return streamElements(template, context, P.class)
 				.map(stringifier::stringify)
-				.toList();
+				.collect(Collectors.joining("\n"));
 	}
 
 	private <C> Stream<C> streamElements(InputStream template, T context, Class<C> clazz) {

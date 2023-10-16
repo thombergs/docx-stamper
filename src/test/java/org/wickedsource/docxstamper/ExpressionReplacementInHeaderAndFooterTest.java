@@ -18,7 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExpressionReplacementInHeaderAndFooterTest {
 	@Test
-    void test() throws Docx4JException, IOException {
+    void expressionReplacementInHeaderAndFooterTest() throws Docx4JException,
+			IOException {
 		var context = new Name("Homer Simpson");
 		var template = getClass().getResourceAsStream("ExpressionReplacementInHeaderAndFooterTest.docx");
 		var stamper = new TestDocxStamper<Name>(new DocxStamperConfiguration().setFailOnUnresolvedExpression(false));

@@ -1,5 +1,6 @@
 package org.wickedsource.docxstamper.el;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
 
+@DisplayName("Utilities - Expression finder")
 class ExpressionUtilTest {
 	@Test
     void findsPlaceholders() {
