@@ -6,66 +6,67 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.wickedsource.docxstamper.el.ExpressionUtil.stripExpression;
+import static org.wickedsource.docxstamper.el.ExpressionResolver.cleanExpression;
+import static org.wickedsource.docxstamper.el.ExpressionUtil.findVariableExpressions;
 
 @DisplayName("Utilities - Expression finder")
 class ExpressionUtilTest {
-	@Test
+    @Test
     void findsPlaceholders() {
-		String text = "lorem ipsum ${placeholder1} lorem ipsum ${placeholder2}";
+        String text = "lorem ipsum ${placeholder1} lorem ipsum ${placeholder2}";
 
-		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
+        List<String> placeholders = findVariableExpressions(text);
 
-		assertEquals(2, placeholders.size());
-		assertEquals("${placeholder1}", placeholders.get(0));
-		assertEquals("${placeholder2}", placeholders.get(1));
-	}
+        assertEquals(2, placeholders.size());
+        assertEquals("${placeholder1}", placeholders.get(0));
+        assertEquals("${placeholder2}", placeholders.get(1));
+    }
 
-	@Test
+    @Test
     void findsProcessorExpressions() {
-		String text = "lorem ipsum #{expression1} lorem ipsum #{expression2}";
+        String text = "lorem ipsum #{expression1} lorem ipsum #{expression2}";
 
-		List<String> placeholders = ExpressionUtil.findProcessorExpressions(text);
+        List<String> placeholders = ExpressionUtil.findProcessorExpressions(
+                text);
 
-		assertEquals(2, placeholders.size());
-		assertEquals("#{expression1}", placeholders.get(0));
-		assertEquals("#{expression2}", placeholders.get(1));
-	}
+        assertEquals(2, placeholders.size());
+        assertEquals("#{expression1}", placeholders.get(0));
+        assertEquals("#{expression2}", placeholders.get(1));
+    }
 
-	@Test
+    @Test
     void findsPlaceholdersWithError() {
-		String text = "lorem ipsum ${placeholder1} ${ lorem ipsum } ${placeholder2";
+        String text = "lorem ipsum ${placeholder1} ${ lorem ipsum } ${placeholder2";
 
-		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
+        List<String> placeholders = findVariableExpressions(text);
 
-		assertEquals(2, placeholders.size());
-		assertEquals("${placeholder1}", placeholders.get(0));
-		assertEquals("${ lorem ipsum }", placeholders.get(1));
-	}
+        assertEquals(2, placeholders.size());
+        assertEquals("${placeholder1}", placeholders.get(0));
+        assertEquals("${ lorem ipsum }", placeholders.get(1));
+    }
 
-	@Test
+    @Test
     void returnsEmptyListOnEmptyText() {
-		String text = "";
+        String text = "";
+        List<String> placeholders = findVariableExpressions(text);
+        assertTrue(placeholders.isEmpty());
+    }
 
-		List<String> placeholders = ExpressionUtil.findVariableExpressions(text);
-
-		assertTrue(placeholders.isEmpty());
-	}
-
-	@Test
+    @Test
     void stripsExpressions() {
-		String expressionValue = "myExpression";
-		String expression = "${%s}".formatted(expressionValue);
-		String expected = expressionValue;
+        String expressionValue = "myExpression";
+        String expression = "${%s}".formatted(expressionValue);
+        String expected = expressionValue;
 
-		String actual = stripExpression(expression);
+        String actual = cleanExpression(expression);
 
-		assertEquals(expected, actual);
-	}
+        assertEquals(expected, actual);
+    }
 
-	@Test
+    @Test
     void stripsNullExpressionThrowsException() {
-		assertThrows(IllegalArgumentException.class, () -> stripExpression(null));
-	}
+        assertThrows(IllegalArgumentException.class,
+                     () -> cleanExpression(null));
+    }
 
 }

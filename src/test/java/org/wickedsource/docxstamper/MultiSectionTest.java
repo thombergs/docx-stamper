@@ -12,17 +12,18 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wickedsource.docxstamper.DefaultTests.getResource;
 
 class MultiSectionTest {
 
 	@Test
     void expressionsInMultipleSections() throws Docx4JException, IOException {
 		var context = new NamesContext("Homer", "Marge");
-		var template = getClass().getResourceAsStream("MultiSectionTest.docx");
-		var stamper = new TestDocxStamper<NamesContext>();
+		var template = getResource("MultiSectionTest.docx");
+		var stamper = new TestDocxStamper<NamesContext>(
+				new DocxStamperConfiguration());
 		var document = stamper.stampAndLoad(template, context);
 		assertTableRows(document);
-
 	}
 
 	private void assertTableRows(WordprocessingMLPackage document) {

@@ -8,12 +8,13 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wickedsource.docxstamper.DefaultTests.getResource;
 
 @DisplayName("Utilities - Comments")
 class CommentUtilTest {
 	@Test
 	void onlyParagraphsWithCommentRangeStartAreCommented() throws Docx4JException {
-		var in = getClass().getResourceAsStream("CommentUtilTest.docx");
+		var in = getResource("util//CommentUtilTest.docx");
 		var document = WordprocessingMLPackage.load(in);
 
 		P p1 = (P) document.getMainDocumentPart().getContent().get(0);

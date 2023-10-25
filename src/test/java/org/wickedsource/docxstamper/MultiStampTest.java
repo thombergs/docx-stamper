@@ -9,12 +9,15 @@ import org.docx4j.wml.Tr;
 import org.junit.jupiter.api.Test;
 import org.wickedsource.docxstamper.util.DocumentUtil;
 import pro.verron.docxstamper.utils.TestDocxStamper;
+import pro.verron.docxstamper.utils.context.Name;
+import pro.verron.docxstamper.utils.context.NamesContext;
 
 import java.io.IOException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.wickedsource.docxstamper.DefaultTests.getResource;
 
 class MultiStampTest {
 	@Test
@@ -26,12 +29,12 @@ class MultiStampTest {
 				new Name("Lisa"),
 				new Name("Maggie")));
 
-		var template = getClass().getResourceAsStream("MultiStampTest.docx");
-		var stamper = new TestDocxStamper<>();
+		var template = getResource("MultiStampTest.docx");
+		var stamper = new TestDocxStamper<>(new DocxStamperConfiguration());
 		var document = stamper.stampAndLoad(template, context);
 		assertTableRows(document);
 
-		template = getClass().getResourceAsStream("MultiStampTest.docx");
+		template = getResource("MultiStampTest.docx");
 		document = stamper.stampAndLoad(template, context);
 		assertTableRows(document);
 	}
@@ -55,11 +58,5 @@ class MultiStampTest {
 		String cellContent = TextUtils.getText(cell0.get(0));
 		String message = String.format("'%s' is not contained in '%s'", text, cellContent);
 		assertTrue(cellContent.contains(text), message);
-	}
-
-	public record Name(String name) {
-	}
-
-	public record NamesContext(List<Name> names) {
 	}
 }

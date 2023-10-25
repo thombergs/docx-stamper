@@ -9,12 +9,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.wickedsource.docxstamper.DefaultTests.getResource;
 
 class FailOnUnresolvedExpressionTest {
     @Test
     void fails() throws IOException {
         var context = new Name("Homer");
-        try (var template = getClass().getResourceAsStream("FailOnUnresolvedExpressionTest.docx")) {
+        try (var template = getResource("FailOnUnresolvedExpressionTest" +
+                                          ".docx")) {
             var stamper = new DocxStamper<Name>();
             var outputStream = new ByteArrayOutputStream();
             assertThrows(UnresolvedExpressionException.class, () -> stamper.stamp(template, context, outputStream));
@@ -24,7 +26,7 @@ class FailOnUnresolvedExpressionTest {
     @Test
     void doesNotFail() throws IOException {
         Name context = new Name("Homer");
-        try (InputStream template = getClass().getResourceAsStream("FailOnUnresolvedExpressionTest.docx")) {
+        try (InputStream template = getResource("FailOnUnresolvedExpressionTest.docx")) {
             var config = new DocxStamperConfiguration()
                     .setFailOnUnresolvedExpression(false);
             var stamper = new DocxStamper<Name>(config);

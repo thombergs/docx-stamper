@@ -130,7 +130,8 @@ public class Stringifier {
         if (o instanceof Drawing drawing)
             return stringify(drawing.getAnchorOrInline());
         if (o instanceof Inline inline)
-            return stringify(inline.getGraphic()) + ":" +inline.getExtent().getCx();
+            return stringify(inline.getGraphic()) + ":" + inline.getExtent()
+                    .getCx();
         if (o instanceof Graphic graphic)
             return stringify(graphic.getGraphicData());
         if (o instanceof GraphicData graphicData)
@@ -150,7 +151,9 @@ public class Stringifier {
         if (o instanceof R.CommentReference commentReference) {
             try {
                 return CommentUtil.findComment(document(),
-                                               commentReference.getId()).map(c->stringify(c.getContent())).orElseThrow();
+                                               commentReference.getId())
+                        .map(c -> stringify(c.getContent()))
+                        .orElseThrow();
             } catch (Docx4JException e) {
                 throw new RuntimeException(e);
             }
@@ -192,7 +195,8 @@ public class Stringifier {
     public String stringify(P p) {
         String runs = extractDocumentRuns(p);
         return ofNullable(p.getPPr())
-                .map(ppr -> "%s//%s".formatted(runs, stringify(ppr)))
+                .flatMap(this::stringify)
+                .map(ppr -> "❬%s❘%s❭".formatted(runs, ppr))
                 .orElse(runs);
     }
 
@@ -213,7 +217,9 @@ public class Stringifier {
                 .collect(joining());
     }
 
-    private String stringify(PPr pPr) {
+    private Optional<String> stringify(PPr pPr) {
+        if (pPr == null)
+            return Optional.empty();
         var set = new TreeSet<String>();
         if (pPr.getJc() != null) set.add("jc=" + pPr.getJc()
                 .getVal()
@@ -235,13 +241,13 @@ public class Stringifier {
                     .isVal());
         if (pPr.getPBdr() != null) set.add("pBdr=xxx");
         if (pPr.getPPrChange() != null) set.add("pPrChange=xxx");
-        if (pPr.getRPr() != null)
-            set.add("rPr={" + stringify(pPr.getRPr()) + "}");
-        if (pPr.getSectPr() != null)
-            set.add("sectPr={" + stringify(pPr.getSectPr()) + "}");
+        stringify(pPr.getRPr())
+                .ifPresent(set::add);
+        stringify(pPr.getSectPr())
+                .ifPresent(set::add);
         if (pPr.getShd() != null) set.add("shd=xxx");
-        stringify(pPr.getSpacing()).ifPresent(spacing -> set.add(
-                "spacing=" + spacing));
+        stringify(pPr.getSpacing())
+                .ifPresent(spacing -> set.add("spacing=" + spacing));
         if (pPr.getSuppressAutoHyphens() != null)
             set.add("suppressAutoHyphens=xxx");
         if (pPr.getSuppressLineNumbers() != null)
@@ -256,7 +262,9 @@ public class Stringifier {
         if (pPr.getFramePr() != null) set.add("framePr=xxx");
         if (pPr.getDivId() != null) set.add("divId=xxx");
         if (pPr.getCnfStyle() != null) set.add("cnfStyle=xxx");
-        return String.join(",", set);
+        if (set.isEmpty())
+            return Optional.empty();
+        return Optional.of(String.join(",", set));
     }
 
     /**
@@ -266,15 +274,13 @@ public class Stringifier {
      * @return a {@link java.lang.String} object
      */
     public String stringify(R run) {
-        var runPresentation = ofNullable(run.getRPr())
-                .map(this::stringify);
-
         String serialized = stringify(run.getContent());
         if (serialized.isEmpty())
             return "";
-        if (runPresentation.isEmpty())
-            return serialized;
-        return "|%s/%s|".formatted(serialized, runPresentation.get());
+        return ofNullable(run.getRPr())
+                .flatMap(this::stringify)
+                .map(rPr -> "❬%s❘%s❭".formatted(serialized, rPr))
+                .orElse(serialized);
     }
 
     /**
@@ -283,7 +289,9 @@ public class Stringifier {
      * @param rPr a {@link org.docx4j.wml.RPrAbstract} object
      * @return a {@link java.lang.String} object
      */
-    public String stringify(RPrAbstract rPr) {
+    public Optional<String> stringify(RPrAbstract rPr) {
+        if (rPr == null)
+            return Optional.empty();
         var set = new TreeSet<String>();
         if (rPr.getB() != null) set.add("b=" + rPr.getB()
                 .isVal());
@@ -350,10 +358,14 @@ public class Stringifier {
         if (rPr.getEffect() != null) set.add("effect=" + rPr.getEffect()
                 .getVal()
                 .value());
-        return String.join(",", set);
+        if (set.isEmpty())
+            return Optional.empty();
+        return Optional.of(String.join(",", set));
     }
 
-    private String stringify(SectPr sectPr) {
+    private Optional<String> stringify(SectPr sectPr) {
+        if (sectPr == null)
+            return Optional.empty();
         var set = new TreeSet<String>();
         if (sectPr.getEGHdrFtrReferences() != null)
             set.add("eGHdrFtrReferences=xxx");
@@ -370,7 +382,8 @@ public class Stringifier {
         if (sectPr.getTitlePg() != null) set.add("titlePg=xxx");
         if (sectPr.getTextDirection() != null) set.add("textDirection=xxx");
         if (sectPr.getRtlGutter() != null) set.add("rtlGutter=xxx");
-        return String.join(",", set);
+        if (set.isEmpty()) return Optional.empty();
+        return Optional.of(String.join(",", set));
     }
 
     private String stringify(SectPr.PgSz pgSz) {

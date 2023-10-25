@@ -58,18 +58,5 @@ public class ExpressionUtil {
 		return findExpressions(text, PROCESSOR_EXPRESSION_PATTERN);
 	}
 
-	/**
-	 * Strips an expression of the leading "${" or "#{" and the trailing "}".
-	 *
-	 * @param expression the expression to strip.
-	 * @return the expression without the leading "${" or "#{" and the trailing "}".
-	 */
-	public static String stripExpression(String expression) {
-		if (expression == null) {
-			throw new IllegalArgumentException("Cannot strip NULL expression!");
-		}
-		expression = expression.replaceAll("^\\$\\{", "").replaceAll("}$", "");
-		expression = expression.replaceAll("^#\\{", "").replaceAll("}$", "");
-		return expression;
-	}
+
 }
