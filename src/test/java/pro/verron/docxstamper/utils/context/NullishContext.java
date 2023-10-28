@@ -60,10 +60,11 @@ public final class NullishContext {
         if (obj == this) return true;
         if (obj == null || obj.getClass() != this.getClass()) return false;
         var that = (NullishContext) obj;
-        return Objects.equals(this.fullish_value, that.fullish_value) &&
-               Objects.equals(this.fullish, that.fullish) &&
-               Objects.equals(this.nullish_value, that.nullish_value) &&
-               Objects.equals(this.nullish, that.nullish);
+        return Objects.equals(this.fullish_value,
+                              that.fullish_value) && Objects.equals(
+                this.fullish, that.fullish) && Objects.equals(
+                this.nullish_value, that.nullish_value) && Objects.equals(
+                this.nullish, that.nullish);
     }
 
     @Override
@@ -73,11 +74,7 @@ public final class NullishContext {
 
     @Override
     public String toString() {
-        return "NullishContext[" +
-               "fullish_value=" + fullish_value + ", " +
-               "fullish=" + fullish + ", " +
-               "nullish_value=" + nullish_value + ", " +
-               "nullish=" + nullish + ']';
+        return "NullishContext[" + "fullish_value=" + fullish_value + ", " + "fullish=" + fullish + ", " + "nullish_value=" + nullish_value + ", " + "nullish=" + nullish + ']';
     }
 
 }

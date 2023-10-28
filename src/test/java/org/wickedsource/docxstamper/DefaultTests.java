@@ -11,12 +11,11 @@ import org.wickedsource.docxstamper.el.NoOpEvaluationContextConfigurer;
 import org.wickedsource.docxstamper.replace.typeresolver.image.Image;
 import pro.verron.docxstamper.Functions;
 import pro.verron.docxstamper.accessors.SimpleGetter;
-import pro.verron.docxstamper.resolver.CustomTypeResolver;
 import pro.verron.docxstamper.commentProcessors.CustomCommentProcessor;
 import pro.verron.docxstamper.commentProcessors.ICustomCommentProcessor;
+import pro.verron.docxstamper.resolver.CustomTypeResolver;
 import pro.verron.docxstamper.utils.TestDocxStamper;
 import pro.verron.docxstamper.utils.context.Contexts;
-import pro.verron.docxstamper.utils.context.Name;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +25,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.junit.jupiter.params.provider.Arguments.of;
 import static pro.verron.docxstamper.utils.context.Contexts.*;
 
@@ -169,8 +169,9 @@ public class DefaultTests {
                 Dan Castellaneta
                      
                 ❬There are ❬6❘lang=de-DE❭ characters.❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
-        return of("repeatParagraphTest", new DocxStamperConfiguration(),
-                  context, template, expected);
+
+        return arguments("repeatParagraphTest", new DocxStamperConfiguration(),
+                         context, template, expected);
     }
 
     private static Arguments repeatDocPartWithImageTestShouldImportImageDataInTheMainDocument() {
@@ -455,13 +456,13 @@ public class DefaultTests {
         config.setEvaluationContextConfigurer(
                 (ctx) -> ctx.addPropertyAccessor(new MapAccessor()));
 
-        return of(
+        return arguments(
                 "RepeatDocPartAndCommentProcessorsIsolationTest_repeatDocPartShouldNotUseSameCommentProcessorInstancesForSubtemplate",
                 config, context, template, expected);
     }
 
     private static Arguments changingPageLayoutTest_shouldKeepSectionBreakOrientationInRepeatParagraphWithoutSectionBreakInsideComment() {
-        return of(
+        return arguments(
                 "changingPageLayoutTest_shouldKeepSectionBreakOrientationInRepeatParagraphWithoutSectionBreakInsideComment",
                 new DocxStamperConfiguration().setEvaluationContextConfigurer(
                         ctx -> ctx.addPropertyAccessor(new MapAccessor())),
@@ -504,14 +505,14 @@ public class DefaultTests {
 
         var config = new DocxStamperConfiguration().setEvaluationContextConfigurer(
                 ctx -> ctx.addPropertyAccessor(new MapAccessor()));
-        return of(
+        return arguments(
                 "changingPageLayoutTest_shouldKeepSectionBreakOrientationInRepeatParagraphWithSectionBreakInsideComment",
                 config, context, template, expected);
     }
 
 
     private static Arguments changingPageLayoutTest_shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideComment() {
-        return of(
+        return arguments(
                 "changingPageLayoutTest_shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideComment",
                 new DocxStamperConfiguration().setEvaluationContextConfigurer(
                         ctx -> ctx.addPropertyAccessor(new MapAccessor())),
@@ -534,7 +535,7 @@ public class DefaultTests {
     }
 
     private static Arguments changingPageLayoutTest_shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideCommentAndTableAsLastElement() {
-        return of(
+        return arguments(
                 "changingPageLayoutTest_shouldKeepPageBreakOrientationInRepeatDocPartWithSectionBreaksInsideCommentAndTableAsLastElement",
                 new DocxStamperConfiguration().setEvaluationContextConfigurer(
                         ctx -> ctx.addPropertyAccessor(new MapAccessor())),
@@ -563,7 +564,7 @@ public class DefaultTests {
     }
 
     private static Arguments changingPageLayoutTest_shouldKeepPageBreakOrientationInRepeatDocPartWithoutSectionBreaksInsideComment() {
-        return of(
+        return arguments(
                 "changingPageLayoutTest_shouldKeepPageBreakOrientationInRepeatDocPartWithoutSectionBreaksInsideComment",
                 new DocxStamperConfiguration().setEvaluationContextConfigurer(
                         ctx -> ctx.addPropertyAccessor(new MapAccessor())),
@@ -599,7 +600,7 @@ public class DefaultTests {
                                                                                                                             
                 ❬❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
 
-        return of(
+        return arguments(
                 "conditionalDisplayOfParagraphsTest_processorExpressionsInCommentsAreResolved",
                 new DocxStamperConfiguration(), context, template, expected);
     }
@@ -619,7 +620,7 @@ public class DefaultTests {
                 This paragraph stays untouched.
                                 
                 """;
-        return of(
+        return arguments(
                 "conditionalDisplayOfParagraphsTest_inlineProcessorExpressionsAreResolved",
                 new DocxStamperConfiguration(), context, template, expected);
     }
@@ -641,7 +642,7 @@ public class DefaultTests {
                 This paragraph is only included if the name is „Bart“.
                                 
                 """;
-        return of(
+        return arguments(
                 "conditionalDisplayOfParagraphsTest_unresolvedInlineProcessorExpressionsAreRemoved",
                 new DocxStamperConfiguration(), context, template, expected);
     }
@@ -658,8 +659,9 @@ public class DefaultTests {
                 This row stays untouched.
                                                                                                                             
                 ❬❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
-        return of("conditionalDisplayOfTableRowsTest",
-                  new DocxStamperConfiguration(), context, template, expected);
+        return arguments("conditionalDisplayOfTableRowsTest",
+                         new DocxStamperConfiguration(), context, template,
+                         expected);
     }
 
     private static Arguments conditionalDisplayOfTablesBug32Test() {
@@ -678,8 +680,9 @@ public class DefaultTests {
                 ❬❘b=true,widowControl=xxx❭
                                  
                 ❬❬This paragraph stays untouched.❘lang=de-DE❭❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
-        return of("conditionalDisplayOfTablesBug32Test",
-                  new DocxStamperConfiguration(), context, template, expected);
+        return arguments("conditionalDisplayOfTablesBug32Test",
+                         new DocxStamperConfiguration(), context, template,
+                         expected);
     }
 
     private static Arguments conditionalDisplayOfTablesTest() {
@@ -698,8 +701,9 @@ public class DefaultTests {
                 ❬❘b=true❭
                                                                                                                                                                                    
                 ❬❬This paragraph stays untouched.❘lang=de-DE❭❘lang=de-DE,spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
-        return of("conditionalDisplayOfTablesTest",
-                  new DocxStamperConfiguration(), context, template, expected);
+        return arguments("conditionalDisplayOfTablesTest",
+                         new DocxStamperConfiguration(), context, template,
+                         expected);
     }
 
     private static Arguments customEvaluationContextConfigurerTest_customEvaluationContextConfigurerIsHonored() {
@@ -715,7 +719,7 @@ public class DefaultTests {
                 evalContext -> evalContext.addPropertyAccessor(
                         new SimpleGetter("foo", "bar")));
 
-        return of(
+        return arguments(
                 "customEvaluationContextConfigurerTest_customEvaluationContextConfigurerIsHonored",
                 config, context, template, expected);
     }
@@ -730,20 +734,20 @@ public class DefaultTests {
                 ❬❬To test that custom functions work together with comment expressions, we toggle visibility of this paragraph with a comment expression.❘lang=de-DE❭❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
         var config = new DocxStamperConfiguration().exposeInterfaceToExpressionLanguage(
                 Functions.UppercaseFunction.class, Functions.upperCase());
-        return of("customExpressionFunctionTest", config, context, template,
-                  expected);
+        return arguments("customExpressionFunctionTest", config, context,
+                         template, expected);
     }
 
     private static Arguments customTypeResolverTest() {
-        return of("customTypeResolverTest",
-                  new DocxStamperConfiguration().addTypeResolver(
-                          CustomType.class, new CustomTypeResolver()),
-                  new Context(new CustomType()),
-                  getResource("CustomTypeResolverTest.docx"), """
-                          ❬Custom TypeResolver Test❘spacing={after=120,afterLines=120,before=120,beforeLines=120,line=120,lineRule=120}❭
-                          ❬This paragraph is untouched.❘lang=de-DE❭
-                          ❬The name should be resolved to ❘lang=de-DE❭❬foo❘b=true,lang=de-DE❭❬.❘lang=de-DE❭
-                          ❬❬This paragraph is untouched.❘lang=de-DE❭❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""");
+        return arguments("customTypeResolverTest",
+                         new DocxStamperConfiguration().addTypeResolver(
+                                 CustomType.class, new CustomTypeResolver()),
+                         new Context(new CustomType()),
+                         getResource("CustomTypeResolverTest.docx"), """
+                                 ❬Custom TypeResolver Test❘spacing={after=120,afterLines=120,before=120,beforeLines=120,line=120,lineRule=120}❭
+                                 ❬This paragraph is untouched.❘lang=de-DE❭
+                                 ❬The name should be resolved to ❘lang=de-DE❭❬foo❘b=true,lang=de-DE❭❬.❘lang=de-DE❭
+                                 ❬❬This paragraph is untouched.❘lang=de-DE❭❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""");
     }
 
     private static Arguments dateReplacementTest() {
@@ -755,8 +759,8 @@ public class DefaultTests {
                 ❬Replacing date expressions❘spacing={after=120,afterLines=120,before=120,beforeLines=120,line=120,lineRule=120}❭
                 Today is: %s""".formatted(formattedDate);
 
-        return of("dateReplacementTest", new DocxStamperConfiguration(),
-                  context, template, expected);
+        return arguments("dateReplacementTest", new DocxStamperConfiguration(),
+                         context, template, expected);
     }
 
     private static Arguments expressionReplacementInGlobalParagraphsTest() {
@@ -770,8 +774,8 @@ public class DefaultTests {
                 ❬❬In this paragraph, the variable ❘lang=de-DE❭❬foo❘b=true,lang=de-DE❭❬ should not be resolved: ${foo}.❘lang=de-DE❭❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
         DocxStamperConfiguration config = new DocxStamperConfiguration().setFailOnUnresolvedExpression(
                 false);
-        return of("expressionReplacementInGlobalParagraphsTest", config,
-                  context, template, expected);
+        return arguments("expressionReplacementInGlobalParagraphsTest", config,
+                         context, template, expected);
     }
 
     private static Arguments expressionReplacementInTablesTest() {
@@ -793,8 +797,8 @@ public class DefaultTests {
                 ❬❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
         DocxStamperConfiguration config = new DocxStamperConfiguration().setFailOnUnresolvedExpression(
                 false);
-        return of("expressionReplacementInTablesTest", config, context,
-                  template, expected);
+        return arguments("expressionReplacementInTablesTest", config, context,
+                         template, expected);
     }
 
     private static Arguments expressionReplacementWithFormattingTest() {
@@ -819,8 +823,9 @@ public class DefaultTests {
                 It should be highlighted yellow: ❬Homer Simpson❘highlight=yellow❭
                 ❬It should be white over darkblue: ❬Homer Simpson❘color=FFFFFF,highlight=darkBlue❭❘b=true❭
                 ❬It should be with header formatting: ❬Homer Simpson❘rStyle=TitreCar❭❘b=true❭""";
-        return of("expressionReplacementWithFormattingTest",
-                  new DocxStamperConfiguration(), context, template, expected);
+        return arguments("expressionReplacementWithFormattingTest",
+                         new DocxStamperConfiguration(), context, template,
+                         expected);
     }
 
     private static Arguments expressionWithSurroundingSpacesTest() {
@@ -836,9 +841,9 @@ public class DefaultTests {
                 Before Expression After.
                 Before Expression After.
                 ❬Before Expression After.❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
-        return of("expressionWithSurroundingSpacesTest",
-                  new DocxStamperConfiguration(), spacyContext, template,
-                  expected);
+        return arguments("expressionWithSurroundingSpacesTest",
+                         new DocxStamperConfiguration(), spacyContext, template,
+                         expected);
     }
 
     private static Arguments expressionReplacementWithCommentsTest() {
@@ -852,8 +857,8 @@ public class DefaultTests {
                 ❬In this paragraph, the variable ❬foo❘b=true❭ should not be resolved: unresolvedValueWithCommentreplaceWordWith(foo).❘spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
         var config = new DocxStamperConfiguration().setFailOnUnresolvedExpression(
                 false);
-        return of("expressionReplacementWithCommentsTest", config, context,
-                  template, expected);
+        return arguments("expressionReplacementWithCommentsTest", config,
+                         context, template, expected);
     }
 
     /**
@@ -868,8 +873,9 @@ public class DefaultTests {
                 ❬❬This paragraph is untouched.❘lang=de-DE❭❘lang=de-DE❭
                 ❬In this paragraph, an image of Mona Lisa is inserted: ❬rId4:image/jpeg:8.8kB:sha1=XMpVtDbetKjZTkPhy598GdJQM/4=:cy=$d:1276350❘lang=de-DE❭.❘lang=de-DE❭
                 ❬This paragraph has the image ❬rId5:image/jpeg:8.8kB:sha1=XMpVtDbetKjZTkPhy598GdJQM/4=:cy=$d:1276350❘lang=de-DE❭ in the middle.❘lang=de-DE,spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
-        return of("imageReplacementInGlobalParagraphsTest",
-                  new DocxStamperConfiguration(), context, template, expected);
+        return arguments("imageReplacementInGlobalParagraphsTest",
+                         new DocxStamperConfiguration(), context, template,
+                         expected);
     }
 
     private static Arguments imageReplacementInGlobalParagraphsTestWithMaxWidth() {
@@ -881,8 +887,9 @@ public class DefaultTests {
                 ❬❬This paragraph is untouched.❘lang=de-DE❭❘lang=de-DE❭
                 ❬In this paragraph, an image of Mona Lisa is inserted: ❬rId4:image/jpeg:8.8kB:sha1=XMpVtDbetKjZTkPhy598GdJQM/4=:cy=$d:635000❘lang=de-DE❭.❘lang=de-DE❭
                 ❬This paragraph has the image ❬rId5:image/jpeg:8.8kB:sha1=XMpVtDbetKjZTkPhy598GdJQM/4=:cy=$d:635000❘lang=de-DE❭ in the middle.❘lang=de-DE,spacing={after=140,afterLines=140,before=140,beforeLines=140,line=140,lineRule=140}❭""";
-        return of("imageReplacementInGlobalParagraphsTestWithMaxWidth",
-                  new DocxStamperConfiguration(), context, template, expected);
+        return arguments("imageReplacementInGlobalParagraphsTestWithMaxWidth",
+                         new DocxStamperConfiguration(), context, template,
+                         expected);
     }
 
     private static Image getImage(String image, int size) {
@@ -902,11 +909,13 @@ public class DefaultTests {
         var config = new DocxStamperConfiguration().setFailOnUnresolvedExpression(
                         false)
                 .leaveEmptyOnExpressionError(true);
-        return of("leaveEmptyOnExpressionErrorTest", config, context, template,
-                  expected);
+        return arguments("leaveEmptyOnExpressionErrorTest", config, context,
+                         template, expected);
     }
 
     private static Arguments lineBreakReplacementTest() {
+        var config = new DocxStamperConfiguration();
+        config.setLineBreakPlaceholder("#");
         var context = new Contexts.Name(null);
         var template = getResource("LineBreakReplacementTest.docx");
         var expected = """
@@ -914,10 +923,8 @@ public class DefaultTests {
                 ❬❬This paragraph is untouched.❘lang=en-US❭❘lang=en-US❭
                 ❬This paragraph should be ❬|BR|❘lang=en-US❭ split in ❬|BR|❘lang=en-US❭❬ three❘lang=en-US❭❬ lines.❘lang=en-US❭❘lang=en-US❭
                 ❬❬This paragraph is untouched.❘lang=en-US❭❘lang=en-US❭""";
-        var config = new DocxStamperConfiguration();
-        config.setLineBreakPlaceholder("#");
-        return of("lineBreakReplacementTest", config, context, template,
-                  expected);
+        return arguments("lineBreakReplacementTest", config, context, template,
+                         expected);
     }
 
     private static Arguments mapAccessorAndReflectivePropertyAccessorTest_shouldResolveMapAndPropertyPlaceholders() {
@@ -954,7 +961,7 @@ public class DefaultTests {
                 .setEvaluationContextConfigurer(
                         ctx -> ctx.addPropertyAccessor(new MapAccessor()));
 
-        return of(
+        return arguments(
                 "mapAccessorAndReflectivePropertyAccessorTest_shouldResolveMapAndPropertyPlaceholders",
                 config, context, template, expected);
     }
@@ -979,8 +986,20 @@ public class DefaultTests {
         var config = new DocxStamperConfiguration().setFailOnUnresolvedExpression(
                 false);
 
-        return of("nullPointerResolutionTest_testWithDefaultSpel", config,
-                  context, template, expected);
+        return arguments("nullPointerResolutionTest_testWithDefaultSpel",
+                         config, context, template, expected);
+    }
+
+    private static Arguments customCommentProcessor() {
+        return arguments("customCommentProcessor",
+                         new DocxStamperConfiguration().addCommentProcessor(
+                                 ICustomCommentProcessor.class,
+                                 CustomCommentProcessor::new), Contexts.empty(),
+                         getResource("CustomCommentProcessorTest.docx"), """
+                                 Custom CommentProcessor Test
+                                 Visited.
+                                 This paragraph is untouched.
+                                 Visited.""");
     }
 
     private static Arguments nullPointerResolutionTest_testWithCustomSpel() {
@@ -1011,8 +1030,8 @@ public class DefaultTests {
                 .replaceNullValues(true);
 
 
-        return of("nullPointerResolutionTest_testWithCustomSpel", config,
-                  context, template, expected);
+        return arguments("nullPointerResolutionTest_testWithCustomSpel", config,
+                         context, template, expected);
     }
 
     public static Stream<Arguments> tests() {
@@ -1054,21 +1073,15 @@ public class DefaultTests {
                          customCommentProcessor());
     }
 
-    private static Arguments customCommentProcessor() {
-        return of("customCommentProcessor",
-                  new DocxStamperConfiguration().addCommentProcessor(
-                          ICustomCommentProcessor.class,
-                          CustomCommentProcessor::new), Contexts.empty(),
-                  getResource("CustomCommentProcessorTest.docx"), """
-                          Custom CommentProcessor Test
-                          Visited.
-                          This paragraph is untouched.
-                          Visited.""");
-    }
-
     @MethodSource("tests")
     @ParameterizedTest(name = "{0}")
-    void features(String ignoredName, DocxStamperConfiguration config, Object context, InputStream template, String expected) {
+    void features(
+            String ignoredName,
+            DocxStamperConfiguration config,
+            Object context,
+            InputStream template,
+            String expected
+    ) {
         var stamper = new TestDocxStamper<>(config);
         var actual = stamper.stampAndLoadAndExtract(template, context);
         assertEquals(expected, actual);

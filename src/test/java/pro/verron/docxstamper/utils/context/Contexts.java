@@ -35,13 +35,14 @@ public class Contexts {
      * @return a {@link java.lang.Object} object
      */
     public static Object name(String name) {
-        record Name(String name) {
-            public String name(){
-                return name;
-            }
-
-        }
+        record Name(String name) {}
         return new Name(name);
+    }
+
+    public static Object names(String... names) {
+        record Name(String name) {}
+        record Names(List<Name> names) {}
+        return new Names(Arrays.stream(names).map(Name::new).toList());
     }
 
     /**

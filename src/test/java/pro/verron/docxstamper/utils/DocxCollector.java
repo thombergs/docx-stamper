@@ -16,35 +16,35 @@ import java.util.stream.Stream;
  */
 public class DocxCollector<T> extends TraversalUtil.CallbackImpl {
 
-	private final Set<T> elements = new LinkedHashSet<>();
-	private final Class<T> type;
+    private final Set<T> elements = new LinkedHashSet<>();
+    private final Class<T> type;
 
-	/**
-	 * <p>Constructor for DocxCollector.</p>
-	 *
-	 * @param type a {@link java.lang.Class} object
-	 */
-	public DocxCollector(Class<T> type) {
-		super();
-		this.type = type;
-	}
+    /**
+     * <p>Constructor for DocxCollector.</p>
+     *
+     * @param type a {@link java.lang.Class} object
+     */
+    public DocxCollector(Class<T> type) {
+        super();
+        this.type = type;
+    }
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public List<Object> apply(Object o) {
-		if (type.isInstance(o)) {
-			elements.add(type.cast(o));
-		}
-		return List.of(elements);
-	}
+    /**
+     * {@inheritDoc}
+     */
+    public List<Object> apply(Object o) {
+        if (type.isInstance(o)) {
+            elements.add(type.cast(o));
+        }
+        return List.of(elements);
+    }
 
-	/**
-	 * <p>elements.</p>
-	 *
-	 * @return a {@link java.util.stream.Stream} object
-	 */
-	public Stream<T> elements() {
-		return elements.stream();
-	}
+    /**
+     * <p>elements.</p>
+     *
+     * @return a {@link java.util.stream.Stream} object
+     */
+    public Stream<T> elements() {
+        return elements.stream();
+    }
 }
